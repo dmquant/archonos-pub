@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "archon.config.v1",
+  "workspaceName": "archon-os-sovereign-workspace",
+  "defaultLanguage": "en",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8790
+  },
+  "hands": {
+    "claude": {
+      "engine": "claude",
+      "label": "Claude Code CLI",
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["-p", "{{prompt}}", "--output-format", "text"],
+      "timeoutMs": 28000,
+      "description": "Anthropic Claude Code CLI in non-interactive print mode (-p)"
+    },
+    "codex": {
+      "engine": "codex",
+      "label": "OpenAI Codex CLI",
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["exec", "--skip-git-repo-check", "{{prompt}}"],
+      "timeoutMs": 28000,
+      "description": "OpenAI Codex CLI in headless exec mode (--skip-git-repo-check)"
+    },
+    "agy": {
+      "engine": "agy",
+      "label": "Antigravity (AGY) CLI",
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["chat", "-m", "{{prompt}}"],
+      "timeoutMs": 25000,
+      "description": "Antigravity CLI in single-turn headless chat mode (chat -m)"
+    },
+    "opencode": {
+      "engine": "opencode",
+      "label": "OpenCode CLI",
+      "enabled": false,
+      "binaryPath": "auto",
+      "headlessArgs": ["run", "--format", "json", "{{prompt}}"],
+      "timeoutMs": 28000,
+      "description": "Optional OpenCode CLI in headless JSON mode"
+    }
+  },
+  "mcpServers": []
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "archon-os-worker",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "../archon-app/public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "archon-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BLOBS",
+      "bucket_name": "archon-blobs"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WORKSPACE_ORCHESTRATOR",
+        "class_name": "WorkspaceOrchestratorDO"
+      },
+      {
+        "name": "HAND_LEASE",
+        "class_name": "HandLeaseDO"
+      },
+      {
+        "name": "ARCHON_MAILBOX",
+        "class_name": "ArchonMailboxDO"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "WorkspaceOrchestratorDO",
+        "HandLeaseDO",
+        "ArchonMailboxDO"
+      ]
+    }
+  ],
+  "vars": {
+    "ARCHON_VERSION": "0.1.005",
+    "ENCRYPTION_MODE": "e2ee-local-custodian",
+    "PRICE_TABLE_VERSION": "2026-10-v1"
+  }
+}

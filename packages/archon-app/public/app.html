@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b14" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <title>ArchonOS · ἈρχωνOS · Sovereign Personal & Small-Team Intelligent OS (智枢)</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --surface: #0d1424;
+      --surface-elevated: #131d33;
+      --border: rgba(99, 130, 191, 0.25);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --primary: #2563eb;
+      --pass: #15803d;
+      --hold: #b45309;
+      --fail: #b91c1c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 52px 1fr;
+      overflow: hidden;
+    }
+    header {
+      background: rgba(10, 15, 28, 0.96);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+    .pill {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      color: #93c5fd;
+    }
+    .pill.e2ee { background: rgba(21, 128, 61, 0.22); border-color: rgba(34, 197, 94, 0.45); color: #86efac; }
+    .pill.hold { background: rgba(180, 83, 9, 0.25); border-color: rgba(245, 158, 11, 0.55); color: #fcd34d; }
+
+    /* Desktop 4-Column Split Layout: Left Rail | Archon Chat | Archon Canvas | Provenance & Hands-Up Drawer */
+    .workspace-shell {
+      display: grid;
+      grid-template-columns: 205px minmax(320px, 410px) 1fr 330px;
+      height: 100%;
+      overflow: hidden;
+    }
+    nav.left-rail {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      position: relative;
+      z-index: 30;
+      pointer-events: auto;
+      overflow-y: auto;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid transparent;
+      padding: 9px 10px;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      user-select: none;
+      pointer-events: auto;
+    }
+    .nav-btn * {
+      pointer-events: none;
+    }
+    .nav-btn:hover {
+      background: rgba(37, 99, 235, 0.16);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #fff;
+      transform: translateX(2px);
+    }
+    .nav-btn.active {
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.32), rgba(37, 99, 235, 0.14));
+      border-color: #3b82f6;
+      border-left: 3px solid #60a5fa;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(37, 99, 235, 0.28);
+    }
+    .drawer-card {
+      transition: all 0.2s ease;
+    }
+    .drawer-card.highlighted {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.32);
+      background: rgba(14, 30, 58, 0.95);
+    }
+    .module-banner {
+      background: linear-gradient(135deg, rgba(19, 29, 51, 0.95), rgba(13, 20, 36, 0.95));
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    .module-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .module-chip {
+      background: rgba(7, 11, 20, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      line-height: 1.4;
+    }
+
+    /* Pillar 3a: Archon Personal Intelligence Chat */
+    section.chat-pane {
+      background: rgba(11, 17, 30, 0.95);
+      border-right: 1px solid var(--border);
+      display: grid;
+      grid-template-rows: 42px 1fr auto;
+      overflow: hidden;
+    }
+    .pane-header {
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #93c5fd;
+    }
+    .chat-stream {
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+    .msg.user { border-color: rgba(59, 130, 246, 0.45); background: rgba(30, 58, 138, 0.25); }
+    .msg-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-family: monospace;
+    }
+    .chat-composer {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .composer-row { display: flex; gap: 6px; }
+    .composer-row input {
+      flex: 1;
+      background: #070b14;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
+    button.btn {
+      background: var(--primary);
+      color: #fff;
+      border: 1px solid #60a5fa;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.btn.secondary {
+      background: var(--surface-elevated);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    /* Pillar 3b: Archon Canvas (Living Website Portal & 3D Polis / Vortexa Globe) */
+    section.canvas-pane {
+      display: grid;
+      grid-template-rows: 42px 36px 1fr;
+      overflow: hidden;
+      background: #060911;
+    }
+    .canvas-breadcrumbs {
+      padding: 0 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--muted);
+    }
+    .canvas-stage {
+      position: relative;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .embed-frame-wrap {
+      position: relative;
+      height: 460px;
+      min-height: 380px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #050811;
+    }
+    .embed-frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .vortexa-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    table.parity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 11.5px;
+    }
+    table.parity-table th, table.parity-table td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    table.parity-table th { background: rgba(30, 41, 59, 0.8); color: #93c5fd; }
+
+    /* Right Drawer: Context, Provenance, Hash-Chained Ledger & Hands-Up Rail */
+    aside.provenance-drawer {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .drawer-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      line-height: 1.45;
+    }
+    .drawer-card h4 {
+      color: #93c5fd;
+      font-size: 11.5px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 960px) {
+      body { grid-template-rows: 48px 1fr 54px; }
+      .workspace-shell { grid-template-columns: 1fr; }
+      nav.left-rail, aside.provenance-drawer { display: none; }
+      .mobile-bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+      }
+      .mobile-bottom-nav button {
+        background: transparent;
+        border: 0;
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 600;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>🏛️ ArchonOS · ἈρχωνOS · 智枢</span>
+      <span class="pill e2ee" id="custody-badge">E2EE: _archon_commit local custodian</span>
+      <span class="pill">Revision Gate: seq=4 · rev=2</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="pill hold">DECISION PIT: ADVISORY ONLY — NO ORDERS PLACED</span>
+      <button class="btn" onclick="selectLeftNav('vortexa')" style="background:#059669;border-color:#34d399;">🚢 3D Vortexa Satellite Globe</button>
+      <button class="btn secondary" onclick="toggleParityView()">📋 HTML Parity Table</button>
+    </div>
+  </header>
+
+  <div class="workspace-shell">
+    <!-- Left Navigation Rail (All 9 Modules Interactive) -->
+    <nav class="left-rail" id="left-rail-nav" aria-label="ArchonOS Primary Navigation">
+      <button type="button" class="nav-btn active" id="nav-btn-chat" data-nav="chat" onclick="selectLeftNav('chat', this)"><span>💬 Chat &amp; Canvas</span><small>Split</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-polis" data-nav="polis" onclick="selectLeftNav('polis', this)"><span>🌐 Archon Canvas</span><small>r2</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-vortexa" data-nav="vortexa" onclick="selectLeftNav('vortexa', this)" style="border-color:rgba(52,211,153,0.35);color:#6ee7b7;"><span>🚢 Vortexa 3D Globe</span><small>3D Sat</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-tasks" data-nav="tasks" onclick="selectLeftNav('tasks', this)"><span>⚡ Tasks &amp; Alarms</span><small>5-Step</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-seats" data-nav="seats" onclick="selectLeftNav('seats', this)"><span>🪑 Multi-Seat Registry</span><small>6</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-mcp" data-nav="mcp" onclick="selectLeftNav('mcp', this)"><span>🔌 Sources &amp; MCPs</span><small>Deny*</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-skills" data-nav="skills" onclick="selectLeftNav('skills', this)"><span>🧬 Skills &amp; harness2 RSI</span><small>k=3</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-mesh" data-nav="mesh" onclick="selectLeftNav('mesh', this)"><span>🕸️ Team Archon Mesh</span><small>Ed25519</small></button>
+      <button type="button" class="nav-btn" id="nav-btn-hands" data-nav="hands" onclick="selectLeftNav('hands', this)"><span>⚙️ Hands &amp; Settings</span><small>0-Port</small></button>
+    </nav>
+
+    <!-- Pillar 3a: Archon Personal Intelligence Chat -->
+    <section class="chat-pane" id="chat-pane-section" aria-label="Archon Personal Intelligence Chat">
+      <div class="pane-header">
+        <span>Archon Chat · Resumable Stream (run-2026-10-20-01)</span>
+        <span class="pill" id="run-state-badge">COMPLETED (seq=3)</span>
+      </div>
+      <div class="chat-stream" id="chat-stream">
+        <div class="msg user">
+          <div class="msg-meta"><span>operator (interactive)</span><span>pinned: ethos-morning-brief@r2</span></div>
+          Audit today's Morning Brief 3D Polis scene, verify live Vortexa VLCC tanker flows (`MEG → China`, `Russia → India`, `USG → NWE`), and check if `vortexa-tanker-audit@v1` passed `harness2` k=3 held-out verification.
+        </div>
+        <div class="msg">
+          <div class="msg-meta"><span>@archon · WorkspaceOrchestratorDO</span><span>charged: 412 tok (metered)</span></div>
+          <p><strong>5-Step Orchestrator Summary:</strong></p>
+          <p>1. <strong>Live Vortexa MCP Linked (<code>https://mcp.vortexa.com/mcp</code>):</strong> 30-day seaborne flows (`2026-09-20 → 2026-10-20`): <strong>MEG → China VLCC at <code>4.20M b/day</code></strong> (<code>130.1M b</code> across <code>78</code> cargoes), <strong>Russia → India at <code>1.75M b/day</code></strong> (<code>73</code> cargoes), <strong>USG → NWE at <code>1.19M b/day</code></strong> (<code>57</code> cargoes), and <strong>WAF → China at <code>0.82M b/day</code></strong> (<code>28</code> cargoes). Click <strong>🚢 Vortexa 3D Globe</strong> in the left sidebar or Canvas header to inspect the 3D Satellite Globe &amp; zoom-scaling 3D chokepoint daily flow charts.</p>
+          <p>2. <strong>3D Living Polis &amp; Epistemic Tribunal:</strong> <code>000425.SZ</code> renders as Belnap <code>U (why: conflicted)</code> with security tether walked from primary listing.</p>
+          <p>3. <strong>harness2 RSI Gate:</strong> <code>vortexa-tanker-audit@v1</code> passed <code>k=3</code> held-out agreement (<code>n=12</code>, pre-existing verifier <code>v-hash-001</code>) and awaits your interactive <strong>Hands-Up</strong> approval in the right rail.</p>
+        </div>
+      </div>
+      <div class="chat-composer">
+        <div class="composer-row">
+          <input id="chat-input" type="text" placeholder="Ask Archon or hold 🎙️ Push-to-Talk (transcript reviewed before send)..." />
+          <button class="btn secondary" onclick="simulatePushToTalk()" title="Push-to-Talk Voice Transcript Preview">🎙️ PTT</button>
+          <button class="btn" onclick="sendChatTurn()">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pillar 3b: Archon Canvas (Living Website Portal + 3D Polis / Studio / Vortexa Embeds) -->
+    <section class="canvas-pane" aria-label="Archon Canvas Living Artifact Portal">
+      <div class="pane-header">
+        <span id="canvas-stage-title">Archon Canvas · 3D Living Polis &amp; Virtual Studio</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn" id="tab-btn-polis" onclick="selectLeftNav('polis')">🏛️ 3D Living Polis &amp; Studio</button>
+          <button class="btn secondary" id="tab-btn-vortexa" onclick="selectLeftNav('vortexa')">🚢 Vortexa 3D Cargo Flow &amp; Globe</button>
+          <a class="btn secondary" id="fullscreen-3d-link" href="/vortexa-globe.html" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;">↗ Open 3D Vortexa Globe</a>
+        </div>
+      </div>
+      <div class="canvas-breadcrumbs">
+        <span id="canvas-permalink">/workspaces/ws-default/artifacts/ethos-morning-brief/revisions/2</span>
+        <span>Vortexa MCP: <code>https://mcp.vortexa.com/mcp</code> (● Connected · <code>secret://vortexa-mcp-oauth</code>)</span>
+      </div>
+      <div class="canvas-stage" id="canvas-stage-scroll">
+        <!-- Dynamic Left-Sidebar Module Inspector Banner -->
+        <div class="module-banner" id="nav-module-card" style="display:none;"></div>
+
+        <div class="embed-frame-wrap" id="polis-embed-wrap">
+          <!-- First-Party 3D WebGL Living Polis / Vortexa 3D Globe -->
+          <iframe
+            id="polis-iframe"
+            src="/polis-studio.html"
+            title="ROS 3D Living Polis and Vortexa 3D Cargo Flow Globe (ros.scene.v0.1)"
+            loading="lazy"
+          ></iframe>
+          <!-- Third-party untrusted embed template strictly enforces sandbox="allow-scripts" -->
+          <template id="third-party-embed-template" data-sandbox='sandbox="allow-scripts"'></template>
+        </div>
+
+        <div class="vortexa-card" id="parity-section">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>🚢 Live Vortexa MCP (`api.vortexa.com/v5/cargo/summary`) &amp; ROS Scene Accessible HTML Parity (`2026-09-20 → 2026-10-20`)</strong>
+            <div style="display:flex;gap:6px;">
+              <button class="btn secondary" onclick="selectLeftNav('vortexa')">🌍 View on 3D Vortexa Globe</button>
+              <span class="pill">100% Screen-Reader &amp; Mobile Parity</span>
+            </div>
+          </div>
+          <table class="parity-table" aria-label="Synchronized 3D Scene and Vortexa Cargo Table">
+            <thead>
+              <tr>
+                <th>Node / Corridor ID</th>
+                <th>Kind / Vessel Class</th>
+                <th>Presence (`@rho`)</th>
+                <th>Live Daily Rate / Truth (`vortexa` / `@epistates`)</th>
+                <th>30d Volume / Cargoes / Why</th>
+                <th>Provenance / Source Ref</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>vortexa:route:meg-china</code></td>
+                <td><code>oil_vlcc (MEG → China)</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><strong><code>4.20M b/day (4,196,139 b/d)</code></strong></td>
+                <td><code>130,080,322 b · 78 VLCC cargoes</code></td>
+                <td><code>vortexa:get_cargo_summary · loading_end</code></td>
+              </tr>
+              <tr>
+                <td><code>vortexa:route:ru-india</code></td>
+                <td><code>Suezmax / Aframax (Russia → India)</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><strong><code>1.75M b/day (1,753,710 b/d)</code></strong></td>
+                <td><code>54,365,005 b · 73 cargoes</code></td>
+                <td><code>vortexa:get_cargo_summary · loading_end</code></td>
+              </tr>
+              <tr>
+                <td><code>vortexa:route:usg-nwe</code></td>
+                <td><code>VLCC / Suezmax / Aframax (USG → NWE)</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><strong><code>1.19M b/day (1,186,347 b/d)</code></strong></td>
+                <td><code>36,776,767 b · 57 cargoes</code></td>
+                <td><code>vortexa:get_cargo_summary · loading_end</code></td>
+              </tr>
+              <tr>
+                <td><code>vortexa:route:waf-china</code></td>
+                <td><code>VLCC / Suezmax (WAF → China)</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><strong><code>0.82M b/day (816,506 b/d)</code></strong></td>
+                <td><code>25,311,677 b · 28 cargoes</code></td>
+                <td><code>vortexa:get_cargo_summary · loading_end</code></td>
+              </tr>
+              <tr>
+                <td><code>vortexa:insight:ab-44925ed5</code></td>
+                <td><code>Vortexa APAC Briefing (2026-10-20)</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><code>Post-War High Non-Iranian ME Crude</code></td>
+                <td><code>China Oct arrivals surge; Africa Q4 jet shortfall</code></td>
+                <td><code>vortexa:search_insights · 2026-10-20T08:04Z</code></td>
+              </tr>
+              <tr>
+                <td><code>node-xcmg (000425.SZ)</code></td>
+                <td><code>epistate_subject</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><code>thesisTruth = U</code></td>
+                <td><code>conflicted (Belnap Both)</code></td>
+                <td>Walked from <code>000425.SZ</code> (1:1 primary listing)</td>
+              </tr>
+              <tr>
+                <td><code>trade:intent:6cbb3572</code></td>
+                <td><code>decision_pit_gate</code></td>
+                <td><code>held (inSlice: true)</code></td>
+                <td><code>HOLD (Advisory Only)</code></td>
+                <td><code>reference quote 2530ms old</code></td>
+                <td><code>SizingAdvisory: loss_budget · input_hash:ac40cd37</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Drawer: Context, Provenance, Hash-Chained Charges & Hands-Up Approval Rail -->
+    <aside class="provenance-drawer" id="right-provenance-drawer" aria-label="Provenance, Ledger, and Hands-Up Approval Rail">
+      <div class="drawer-card" id="drawer-card-mcp">
+        <h4><span>🔌 Vortexa MCP Connection</span><span class="pill e2ee">● Linked</span></h4>
+        <p>Server: <code>vortexa</code> (<code>https://mcp.vortexa.com/mcp</code>)</p>
+        <p>Auth Handle: <code>secret://vortexa-mcp-oauth</code></p>
+        <p>Grants: <code>get_cargo_summary</code>, <code>search_insights</code>, <code>get_cargo_timeseries</code></p>
+        <div style="margin-top:6px;">
+          <button class="btn" onclick="selectLeftNav('vortexa')">🚢 Open 3D Vortexa Globe &amp; Query</button>
+        </div>
+      </div>
+
+      <div class="drawer-card" id="drawer-card-handsup">
+        <h4><span>✋ Hands-Up Approval Rail</span><span class="pill hold">2 Pending</span></h4>
+        <p style="margin-bottom:6px;">Only interactive operator ack can clear authority writes (<code>author != grantee</code>).</p>
+        <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:6px;">
+          <strong>1. Activate Skill: <code>vortexa-tanker-audit@v1</code></strong>
+          <p style="color:var(--muted);">Verdict: <code>pass</code> (k=3 agreement, n=12, 0 open defeaters, pre-existing verifier <code>v-hash-001</code>)</p>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="btn" onclick="ackHandsUp(this, 'Approved via interactive human-ack')">Approve (Human-Ack)</button>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:6px;">
+          <strong>2. Mesh Seat Grant: <code>gpu-research-seat</code> → <code>@rho</code></strong>
+          <p style="color:var(--muted);">Quota: <code>500</code> micro-units · Non-transferable · Zero credentials exposed</p>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="btn" onclick="ackHandsUp(this, 'Signed seat_grant minted')">Approve Share</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-card" id="drawer-card-ledger">
+        <h4><span>⛓️ Hash-Chained Charge Ledger (`@trade`)</span><span>Verified</span></h4>
+        <p>Head Hash: <code>c4822aa4903e0848...</code></p>
+        <p>claude (metered): <code>input_uncached=2, cache_read=10096, out=4</code></p>
+        <p>codex (cache-subtracted): <code>17124 - 13312 = 3812</code></p>
+        <p>gemini (null stream): <code>charged at budget_cap (unmetered_cap)</code></p>
+      </div>
+
+      <div class="drawer-card" id="drawer-card-hands">
+        <h4><span>🖥️ Local `archon-hands` Daemon (`@local-fabric`)</span><span>0 Ports</span></h4>
+        <p>Host: <code>sg01.local</code> (Outbound WSS only)</p>
+        <p>Unix Split: <code>_archon_daemon</code> / <code>_archon_hand</code> / <code>_archon_commit</code></p>
+        <p>Slots: <code>1 / 4</code> active · Circuit: <code>CLOSED</code></p>
+      </div>
+    </aside>
+  </div>
+
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <button onclick="selectLeftNav('polis')">🏛️ Polis</button>
+    <button onclick="selectLeftNav('vortexa')">🚢 Vortexa</button>
+    <button onclick="toggleParityView()">📋 Parity</button>
+    <button onclick="selectLeftNav('skills')">✋ Hands-Up</button>
+  </nav>
+
+  <script>
+    if ('caches' in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((k) => caches.delete(k));
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.update());
+      }).catch(() => {});
+    }
+
+    function simulatePushToTalk() {
+      const input = document.getElementById('chat-input');
+      input.value = '[Voice Transcript Review — Ready to Send]: Refresh Vortexa Middle East VLCC flow globe (4.20 mbd) and compare against @epistates defeaters.';
+      input.focus();
+    }
+
+    function sendChatTurn() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const stream = document.getElementById('chat-stream');
+      const div = document.createElement('div');
+      div.className = 'msg user';
+      div.textContent = text;
+      stream.appendChild(div);
+      input.value = '';
+    }
+
+    function toggleParityView() {
+      const el = document.getElementById('parity-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function highlightDrawerCard(cardId) {
+      document.querySelectorAll('.drawer-card').forEach((c) => c.classList.remove('highlighted'));
+      if (!cardId) return;
+      const target = document.getElementById(cardId);
+      if (target) {
+        target.classList.add('highlighted');
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    const MODULE_VIEWS = {
+      tasks: {
+        title: '⚡ 5-Step Crash-Safe Orchestrator Loop & Idempotent Alarm Schedules',
+        badge: 'WorkspaceOrchestratorDO · 5-Step Verified',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>1–2. Intake &amp; Plan</strong><br/><code>intent: int-2026-10-20</code><br/>Budget non-refill guard active</div>
+            <div class="module-chip"><strong>3. Governed Dispatch</strong><br/><code>HandLeaseDO</code> slot <code>1/4</code><br/>4MB prompt cap enforced</div>
+            <div class="module-chip"><strong>4–5. Harvest &amp; Publish</strong><br/><code>unmetered_cap</code> fallback<br/>R2-first atomic rev=2 gate</div>
+            <div class="module-chip"><strong>⏰ Schedule Alarms</strong><br/><code>06:00 UTC</code> Morning Brief<br/><code>fireKey</code> PK idempotency</div>
+          </div>
+        `,
+        drawer: 'drawer-card-ledger'
+      },
+      seats: {
+        title: '🪑 Multi-Seat Registry (6 Verified ARC-141 Seats · Default-Deny Capabilities)',
+        badge: '6 Active Seats · @ai-institute',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>@archon (Orchestrator)</strong><br/><code>claude-opus-4-7</code> · 50k budget<br/><button class="btn secondary" style="margin-top:5px;padding:4px 8px;font-size:11px;" onclick="switchCanvasTab('polis')">🏛️ Inspect Agora</button></div>
+            <div class="module-chip"><strong>@vibe (Canvas &amp; 3D Studio)</strong><br/><code>ros.scene.v0.1</code> · rev=2<br/><button class="btn secondary" style="margin-top:5px;padding:4px 8px;font-size:11px;" onclick="switchCanvasTab('vortexa')">🚢 Open Vortexa 3D</button></div>
+            <div class="module-chip"><strong>@trade &amp; @epistates</strong><br/>Hash-chained ledger &amp; <code>k=3</code> RSI<br/><button class="btn secondary" style="margin-top:5px;padding:4px 8px;font-size:11px;" onclick="selectLeftNav('skills')">⚖️ View RSI Gate</button></div>
+            <div class="module-chip"><strong>@rho &amp; @local-fabric</strong><br/>Ed25519 Mesh &amp; 0-Port Hands<br/><button class="btn secondary" style="margin-top:5px;padding:4px 8px;font-size:11px;" onclick="selectLeftNav('hands')">🖥️ View Daemon</button></div>
+          </div>
+        `,
+        drawer: 'drawer-card-mcp'
+      },
+      mcp: {
+        title: '🔌 Sources & Default-Deny MCP Gateway (Vortexa Live Seaborne Telemetry)',
+        badge: 'secret://vortexa-mcp-oauth · Linked',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>Server Endpoint</strong><br/><code>https://mcp.vortexa.com/mcp</code><br/>Auth: <code>secret://</code> handle only</div>
+            <div class="module-chip"><strong>Authorized Grants</strong><br/><code>get_cargo_summary</code>, <code>get_cargo_timeseries</code>, <code>search_insights</code></div>
+            <div class="module-chip"><strong>3D Map Layers</strong><br/>🛰️ 3D Satellite · ⛰️ 3D Terrain · 🌑 Default + Zoom-Scaling 3D Charts</div>
+          </div>
+        `,
+        drawer: 'drawer-card-mcp'
+      },
+      skills: {
+        title: '🧬 Skills & harness2 RSI Promotion Gate (@epistates 3-Valued Verifier)',
+        badge: 'k=3 Agreement · n=12 Held-Out',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>Candidate Skill</strong><br/><code>vortexa-tanker-audit@v1</code><br/>Status: <code>pass</code> (awaiting Human-Ack)</div>
+            <div class="module-chip"><strong>Verification Record</strong><br/><code>k=3</code> agreement · <code>n=12</code> held-out<br/>Verifier: <code>v-hash-001</code> (pre-existing)</div>
+            <div class="module-chip"><strong>Defeater Check</strong><br/><code>defeaters_open = 0</code><br/>Fit / Held-Out sets strictly disjoint</div>
+          </div>
+        `,
+        drawer: 'drawer-card-handsup'
+      },
+      mesh: {
+        title: '🕸️ Team Archon Mesh (Ed25519 Signed Bundles & Shared-Seat Leases)',
+        badge: 'Ed25519 Verified · @rho',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>Bundle Signature Gate</strong><br/>Ed25519 canonical JSON<br/>Refuses <code>undefined</code> &amp; scope drift</div>
+            <div class="module-chip"><strong>4-Field Provenance</strong><br/><code>source_node</code>, <code>bundle_id</code>, <code>author</code>, <code>imported_at</code> preserved</div>
+            <div class="module-chip"><strong>Shared-Seat Lease</strong><br/><code>gpu-research-seat → @rho</code><br/>500 micro-units · Zero key exposure</div>
+          </div>
+        `,
+        drawer: 'drawer-card-handsup'
+      },
+      hands: {
+        title: '⚙️ Local archon-hands Daemon & E2EE Custodian Settings (@local-fabric)',
+        badge: '0 Inbound Ports · Outbound WSS',
+        html: `
+          <div class="module-grid">
+            <div class="module-chip"><strong>Zero Inbound Ports</strong><br/>Host: <code>sg01.local</code><br/>Outbound-only <code>wss://</code> lease tunnel</div>
+            <div class="module-chip"><strong>3-Way Unix Account Split</strong><br/><code>_archon_daemon</code> / <code>_archon_hand</code> / <code>_archon_commit</code></div>
+            <div class="module-chip"><strong>5-Engine Stream Parser</strong><br/><code>claude</code>, <code>codex</code>, <code>opencode</code>, <code>agy</code>, <code>gemini</code></div>
+          </div>
+        `,
+        drawer: 'drawer-card-hands'
+      }
+    };
+
+    function switchCanvasTab(tab) {
+      const iframe = document.getElementById('polis-iframe');
+      const title = document.getElementById('canvas-stage-title');
+      const permalink = document.getElementById('canvas-permalink');
+      const btnPolis = document.getElementById('tab-btn-polis');
+      const btnVortexa = document.getElementById('tab-btn-vortexa');
+      const fsLink = document.getElementById('fullscreen-3d-link');
+      if (tab === 'vortexa') {
+        iframe.src = '/vortexa-globe.html';
+        title.textContent = 'Archon Canvas · 🚢 Vortexa 3D Satellite Fleet & Chokepoint Daily Flow Globe';
+        permalink.textContent = '/workspaces/ws-default/artifacts/vortexa-global-crude-flows/revisions/1';
+        btnVortexa.className = 'btn';
+        btnPolis.className = 'btn secondary';
+        fsLink.href = '/vortexa-globe.html';
+        fsLink.textContent = '↗ Fullscreen Vortexa 3D Globe';
+      } else {
+        iframe.src = '/polis-studio.html';
+        title.textContent = 'Archon Canvas · 🏛️ 3D Living Polis & Virtual Studio';
+        permalink.textContent = '/workspaces/ws-default/artifacts/ethos-morning-brief/revisions/2';
+        btnPolis.className = 'btn';
+        btnVortexa.className = 'btn secondary';
+        fsLink.href = '/polis-studio.html';
+        fsLink.textContent = '↗ Fullscreen 3D Polis';
+      }
+    }
+
+    function selectLeftNav(sectionId, btnEl) {
+      document.querySelectorAll('#left-rail-nav .nav-btn').forEach((b) => b.classList.remove('active'));
+      const activeBtn = btnEl || document.getElementById('nav-btn-' + sectionId);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const banner = document.getElementById('nav-module-card');
+
+      if (sectionId === 'chat') {
+        if (banner) banner.style.display = 'none';
+        switchCanvasTab('polis');
+        highlightDrawerCard(null);
+        const input = document.getElementById('chat-input');
+        if (input) input.focus();
+        return;
+      }
+
+      if (sectionId === 'polis') {
+        if (banner) banner.style.display = 'none';
+        switchCanvasTab('polis');
+        highlightDrawerCard(null);
+        document.getElementById('polis-embed-wrap').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      if (sectionId === 'vortexa') {
+        if (banner) banner.style.display = 'none';
+        switchCanvasTab('vortexa');
+        highlightDrawerCard('drawer-card-mcp');
+        document.getElementById('polis-embed-wrap').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      if (sectionId === 'mcp') {
+        switchCanvasTab('vortexa');
+      }
+
+      const mod = MODULE_VIEWS[sectionId];
+      if (mod && banner) {
+        banner.style.display = 'flex';
+        banner.innerHTML = `
+          <div class="module-banner-header">
+            <strong style="color:#93c5fd;font-size:13px;">${mod.title}</strong>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="pill e2ee">${mod.badge}</span>
+              <button class="btn secondary" style="padding:3px 8px;font-size:11px;" onclick="document.getElementById('nav-module-card').style.display='none'">✕ Hide</button>
+            </div>
+          </div>
+          ${mod.html}
+        `;
+        highlightDrawerCard(mod.drawer);
+        document.getElementById('canvas-stage-scroll').scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function ackHandsUp(btn, label) {
+      btn.textContent = '✔ ' + label;
+      btn.disabled = true;
+    }
+
+    if (window.location.hash === '#vortexa' || new URLSearchParams(window.location.search).get('view') === 'vortexa') {
+      selectLeftNav('vortexa');
+    }
+  </script>
+</body>
+</html>

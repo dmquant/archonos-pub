@@ -1,0 +1,17 @@
+{
+  "name": "ArchonOS — Personal & Small-Team Intelligent OS",
+  "short_name": "ArchonOS",
+  "description": "Sovereign Cloudflare + Local-Hand Intelligent Operating System with Archon Chat, Archon Canvas, 3D Living Polis, and Archon Mesh.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><text y='.9em' x='12' font-size='72'>🏛️</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

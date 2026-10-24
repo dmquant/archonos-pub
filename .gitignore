@@ -1,0 +1,19 @@
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+.archon/
+.wrangler/
+.env
+.env.*
+dist/
+outputs/
+packages/archon-app/public/artifacts/
+packages/archon-app/public/uploads/
+*.log
+
+# Operator-owned Canvas pages retained locally, never shipped in fresh clones.
+packages/archon-app/public/vortexa*.html
+packages/archon-app/public/polis-studio.html
+packages/archon-canvas/polis-studio-prototype.html
+packages/archon-canvas/models/

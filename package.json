@@ -1,0 +1,36 @@
+{
+  "name": "archon-os",
+  "version": "0.1.004",
+  "license": "MIT",
+  "type": "module",
+  "description": "ArchonOS — Open-Source Sovereign Personal & Small-Team Intelligent Operating System (Headless Local CLI Federation + R2-First Archon Canvas + Harness2 RSI Skills + Default-Deny MCP Gate)",
+  "bin": {
+    "archon": "./packages/archon-cli/bin/archon.mjs"
+  },
+  "scripts": {
+    "init": "node scripts/archon-init.mjs",
+    "setup": "node scripts/archon-init.mjs && npm test",
+    "postinstall": "node scripts/archon-init.mjs --quiet",
+    "start": "node packages/archon-worker/src/dev-server.mjs",
+    "test": "npm run test:hands && npm run test:ledger && npm run test:registry && npm run test:mesh && npm run test:canvas && npm run test:skills-rsi && npm run test:worker && npm run test:app && npm run test:cli",
+    "test:hands": "python3 -m unittest discover -s packages/archon-hands -p 'test_*.py'",
+    "test:ledger": "python3 -m unittest discover -s packages/archon-ledger -p 'test_*.py'",
+    "test:registry": "node --test packages/archon-registry/registry.test.mjs",
+    "test:mesh": "node --test packages/archon-mesh/mesh-bundle.test.mjs",
+    "test:canvas": "node --test packages/archon-canvas/revision-gate.test.mjs",
+    "test:skills-rsi": "bun test packages/archon-skills-rsi/skill-eligibility.test.ts",
+    "test:worker": "node --test packages/archon-worker/test/*.test.mjs",
+    "test:app": "node --test packages/archon-app/test/app.test.mjs",
+    "test:cli": "node --test packages/archon-cli/test/cli.test.mjs",
+    "safe:status": "node scripts/archon-safe-recover.mjs status",
+    "safe:lock": "node scripts/archon-safe-recover.mjs lock",
+    "safe:unlock": "node scripts/archon-safe-recover.mjs unlock",
+    "safe:snapshot": "node scripts/archon-safe-recover.mjs snapshot",
+    "safe:commit": "node scripts/archon-safe-recover.mjs commit",
+    "safe:recover": "node scripts/archon-safe-recover.mjs recover",
+    "deploy:local": "node packages/archon-cli/bin/archon.mjs deploy --local",
+    "deploy:cloudflare": "node packages/archon-cli/bin/archon.mjs deploy --remote",
+    "deploy:worker": "npx wrangler deploy --config packages/archon-worker/wrangler.jsonc",
+    "deploy:pages": "npx wrangler pages deploy packages/archon-app/public --project-name archon-os-app"
+  }
+}
