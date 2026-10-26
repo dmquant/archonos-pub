@@ -3,7 +3,7 @@ import { createSelectEnhancer } from './ui-select.mjs';
 
 // Enhance the application chrome only. Never rewrite authored messages, file
 // contents, editable values, identifiers or embedded artifact documents.
-const excluded = 'script,style,svg,pre,code,textarea,input,[contenteditable="true"],[data-user-content],[data-select-copy],.file-preview-rendered,.file-preview-source';
+const excluded = 'script,style,svg,pre,code,textarea,input,[contenteditable="true"],[data-user-content],[data-select-copy],.file-preview-rendered,.file-preview-source,.brand-logo';
 const icons = {
   '💬':'message-square','🪑':'armchair','📦':'package','🧬':'dna','⏰':'clock','🔗':'link','🔌':'plug','⚙':'settings',
   '👥':'users','🏛':'layers','👑':'shield-check','📜':'history','📰':'newspaper','🗂':'folder-open','🧠':'brain','🎨':'palette',
