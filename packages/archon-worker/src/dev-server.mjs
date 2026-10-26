@@ -27,6 +27,8 @@ import {
   loadWorkspaceConfig,
   saveWorkspaceConfig,
   maskHomePath,
+  withDefaultChiefHand,
+  selectFirstAvailableHand,
 } from './local-hands-runner.mjs';
 import { runAutonomousInit, discoverLocalMcpServers } from '../../../scripts/archon-init.mjs';
 import {
@@ -75,7 +77,7 @@ export const CHAT_HISTORY_SYNC_STATE = {
 export function getLocalHandExecutionReadiness() {
   try {
     const hands = probeAllHands();
-    const installedEngines = hands.filter((h) => h.installed).map((h) => h.engine);
+    const installedEngines = Object.entries(hands).filter(([, h]) => h.installed && h.enabled !== false).map(([engine]) => engine);
     return {
       ready: installedEngines.length > 0,
       mode: 'local-cli-custodian',
@@ -88,11 +90,11 @@ export function getLocalHandExecutionReadiness() {
     };
   } catch {
     return {
-      ready: true,
+      ready: false,
       mode: 'local-cli-custodian',
-      installedEngines: ['claude', 'codex', 'agy'],
+      installedEngines: [],
       activeJobs: ACTIVE_HAND_JOBS.size,
-      message: 'Local CLI custodian active',
+      message: 'Local CLI discovery unavailable',
     };
   }
 }
@@ -1158,7 +1160,7 @@ const assetsBinding = {
   },
 };
 
-export function seedDefaultArchonWorkspace(runtime) {
+export function seedDefaultArchonWorkspace(runtime, { hands = probeAllHands() } = {}) {
   // 1. Seed Mandatory ArchonOS-native Chief of Staff entry seat
   const defaultSeats = [
     {
@@ -1195,7 +1197,9 @@ export function seedDefaultArchonWorkspace(runtime) {
   ];
 
   for (const s of defaultSeats) {
-    runtime.orchestrator.upsertSeat(s);
+    const seat = s.id === 'chief-of-staff' ? withDefaultChiefHand(s, hands) : s;
+    runtime.orchestrator.upsertSeat(seat);
+    if (s.id === 'chief-of-staff') runtime.sharedStore.seats.set(s.id, seat);
   }
 
   // 2. Load configured MCP servers dynamically from .archon/config.json if available
@@ -4752,12 +4756,13 @@ export function deduplicateSkillsInStore(runtime) {
 }
 
 export async function runLiveSeatHandWithFailover({
-  preferredEngine = 'claude',
+  preferredEngine = selectFirstAvailableHand() || 'claude',
   prompt,
   systemPersona = '',
   timeoutMs = 18000,
 } = {}) {
-  const candidates = Array.from(new Set([preferredEngine, 'claude', 'codex', 'agy']));
+  const available = Object.entries(probeAllHands()).filter(([, hand]) => hand.installed && hand.enabled !== false).map(([engine]) => engine);
+  const candidates = Array.from(new Set([preferredEngine, ...available]));
   let totalLatencyMs = 0;
   let lastError = null;
   for (let i = 0; i < candidates.length; i++) {
@@ -5675,8 +5680,9 @@ export function buildCrossSeatHandoffContext(sess, currentSeatId = 'chief-of-sta
 export async function executeChiefOfStaffExecutiveCommand(
   runtime,
   workspaceState,
-  { action = '', userPrompt = '', seat, engine = 'claude', lang = 'en', crossSeatHandoff = null } = {}
+  { action = '', userPrompt = '', seat, engine = null, lang = 'en', crossSeatHandoff = null } = {}
 ) {
+  engine ||= seat?.hand || selectFirstAvailableHand() || 'claude';
   const nowIso = new Date().toISOString();
   const snap = buildChiefOfStaffOmniscientSnapshot(runtime, workspaceState);
   const p = String(userPrompt || '').trim();
@@ -6952,6 +6958,8 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
 
   seedDefaultArchonWorkspace(runtime);
   const workspaceState = loadPersistedWorkspaceState(runtime);
+  runtime.sharedStore.seats.set('chief-of-staff', withDefaultChiefHand(runtime.sharedStore.seats.get('chief-of-staff')));
+  savePersistedWorkspaceState(runtime, workspaceState);
 
   const getSession = (sessionId) => {
     const targetId = sessionId || workspaceState.activeSessionId || 'session-main';
@@ -7017,6 +7025,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       // 1-Click Autonomous Initialization & Environment Re-Scan (`POST /api/system/init`)
       if (req.method === 'POST' && parsedUrl.pathname === '/api/system/init') {
         const initSummary = runAutonomousInit({ quiet: true });
+        runtime.sharedStore.seats.set('chief-of-staff', withDefaultChiefHand(runtime.sharedStore.seats.get('chief-of-staff')));
         savePersistedWorkspaceState(runtime, workspaceState);
         return sendJson(res, 200, {
           ...initSummary,
@@ -7125,6 +7134,8 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       if (req.method === 'PUT' && parsedUrl.pathname === '/api/system/config') {
         const payload = bodyBuf.length > 0 ? JSON.parse(bodyBuf.toString('utf8')) : {};
         const saved = saveWorkspaceConfig(payload.config || payload);
+        runtime.sharedStore.seats.set('chief-of-staff', withDefaultChiefHand(runtime.sharedStore.seats.get('chief-of-staff')));
+        savePersistedWorkspaceState(runtime, workspaceState);
         return sendJson(res, 200, {
           ok: true,
           configPath: '.archon/config.json',
@@ -7160,6 +7171,8 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           },
         };
         const saved = saveWorkspaceConfig({ hands: updatedHands });
+        runtime.sharedStore.seats.set('chief-of-staff', withDefaultChiefHand(runtime.sharedStore.seats.get('chief-of-staff')));
+        savePersistedWorkspaceState(runtime, workspaceState);
         return sendJson(res, 200, {
           ok: true,
           engine,
@@ -8117,7 +8130,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         const sopRes = executeStockDeepResearchSop(runtime, {
           tickerOrTopic,
           seatId,
-          engine: payload.engine || 'claude',
+          engine: payload.engine || runtime.sharedStore.seats.get(seatId)?.hand || selectFirstAvailableHand() || 'claude',
           lang,
         });
 
@@ -8210,7 +8223,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
             action: 'executive-summary',
             userPrompt: sched.title || 'Scheduled Chief of Staff Omniscient Executive Briefing',
             seat: runtime.sharedStore.seats.get('chief-of-staff'),
-            engine: 'claude',
+            engine: runtime.sharedStore.seats.get('chief-of-staff')?.hand || selectFirstAvailableHand() || 'claude',
             lang,
           });
           execSummary = cosRes.reply;
@@ -11099,6 +11112,10 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
 
       // Enrich team skill/artifact share requests with local SKILL.md or artifact data when shared from local instance
       let effectiveBodyBuf = bodyBuf;
+      if (req.method === 'POST' && parsedUrl.pathname === '/api/seats' && bodyBuf.length) {
+        const seat = JSON.parse(bodyBuf.toString('utf8'));
+        if (seat.id === 'chief-of-staff') effectiveBodyBuf = Buffer.from(JSON.stringify(withDefaultChiefHand(seat)));
+      }
       if (req.method === 'POST' && (parsedUrl.pathname === '/api/mesh/teams/skills' || parsedUrl.pathname === '/mesh/teams/skills')) {
         const payload = bodyBuf.length > 0 ? JSON.parse(bodyBuf.toString('utf8')) : {};
         const rawKey = String(payload.skillId || payload.name || '').trim();

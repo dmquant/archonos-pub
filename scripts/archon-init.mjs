@@ -20,6 +20,7 @@ import {
   loadWorkspaceConfig,
   saveWorkspaceConfig,
   maskHomePath,
+  withDefaultChiefHand,
 } from '../packages/archon-worker/src/local-hands-runner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -142,7 +143,7 @@ export function runAutonomousInit({ quiet = false } = {}) {
       ...(updatedHandsCfg[engine] || {}),
       engine,
       label: status.label || engine,
-      enabled: status.installed ? true : Boolean(updatedHandsCfg[engine]?.enabled),
+      enabled: status.enabled !== false,
       binaryPath: 'auto',
       detectedBinary: status.binaryPath || null,
       headlessArgs: status.headlessArgs,
@@ -170,13 +171,12 @@ export function runAutonomousInit({ quiet = false } = {}) {
   // 5. Enforce Mandatory Chief of Staff Seat Initialization for new users
   // Ensure .archon/workspace-state.json seeds seat:chief-of-staff as the immutable, mandate entry seat
   const statePath = join(archonDir, 'workspace-state.json');
-  const mandateCosSeat = {
+  const mandateCosSeat = withDefaultChiefHand({
     id: 'chief-of-staff',
     name_en: 'Chief of Staff',
     name_zh: '智枢幕僚长',
     role_en: 'Executive Synthesis & Cross-MCP Orchestration (Claude Code / Local CLI)',
     role_zh: '全局综合研判与跨 MCP 协同调度 (Claude Code / 本地 CLI)',
-    hand: updatedHandsCfg.claude?.installed ? 'claude' : updatedHandsCfg.codex?.installed ? 'codex' : updatedHandsCfg.agy?.installed ? 'agy' : 'claude',
     model: 'cli-default',
     budget: 1000000000,
     enabled: true,
@@ -185,7 +185,7 @@ export function runAutonomousInit({ quiet = false } = {}) {
     persona: 'You are the Chief of Staff of ArchonOS, a Sovereign Personal & Small-Team Intelligent OS running locally on this MacBook. Answer concisely and analytically in the language requested by the user. You may use GitHub-Flavored Markdown (tables, code blocks) and ```mermaid diagrams whenever helpful.',
     capabilities: { chat: true, canvas: true, mcp: true },
     capabilities_set_by: 'hand-operator',
-  };
+  }, probedHands);
 
   if (!existsSync(statePath)) {
     const initialState = {
@@ -209,8 +209,9 @@ export function runAutonomousInit({ quiet = false } = {}) {
       if (Array.isArray(stateObj.seats)) {
         if (!stateObj.seats.some((s) => s.id === 'chief-of-staff')) {
           stateObj.seats.unshift(mandateCosSeat);
-          writeFileSync(statePath, JSON.stringify(stateObj, null, 2) + '\n', 'utf8');
         }
+        stateObj.seats = stateObj.seats.map((seat) => seat.id === 'chief-of-staff' ? withDefaultChiefHand(seat, probedHands) : seat);
+        writeFileSync(statePath, JSON.stringify(stateObj, null, 2) + '\n', 'utf8');
       }
     } catch {}
   }
@@ -237,6 +238,7 @@ export function runAutonomousInit({ quiet = false } = {}) {
     defaultEntrySeat: 'chief-of-staff',
     routerMode: 'warroom-archon-party',
     configPath: '.archon/config.json',
+    defaultHand: mandateCosSeat.handAvailable ? mandateCosSeat.hand : null,
     skillsDir: '.archon/skills/',
     artifactsDir: '.archon/artifacts/',
     runtimes: { node: nodeVersion, python: pythonVersion },

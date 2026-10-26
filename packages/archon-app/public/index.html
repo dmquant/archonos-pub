@@ -1335,36 +1335,6 @@
       opacity: 0;
       pointer-events: none;
     }
-    .wb-collapsed-edge-tab {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 25;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      border-right: none;
-      border-radius: 8px 0 0 8px;
-      padding: 10px 5px;
-      color: var(--cyan);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      letter-spacing: 0.04em;
-      box-shadow: -3px 0 12px rgba(0, 0, 0, 0.35);
-      display: none;
-      align-items: center;
-      gap: 6px;
-    }
-    .wb-collapsed-edge-tab:hover {
-      background: var(--cyan-dim);
-      border-color: var(--cyan);
-    }
-    .workspace-browser-panel.collapsed + .wb-collapsed-edge-tab {
-      display: inline-flex;
-    }
     .wb-header {
       padding: 8px 10px;
       border-bottom: 1px solid var(--border);
@@ -2029,9 +1999,9 @@
       display: none;
     }
     body[data-ui-style="minimal"] .os-shell.rail-collapsed .nav-spine {
-      width: 56px;
-      min-width: 56px;
-      background: var(--bg-void);
+      width: auto;
+      min-width: 0;
+      background: var(--bg-panel);
       border-right: 1px solid var(--border);
     }
     body[data-ui-style="minimal"] .workbench-grid {
@@ -2508,6 +2478,7 @@
       .grid-2 { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="/ui-shell.css" />
 </head>
 <body data-ui-style="minimal" data-theme="dark">
   <!-- Mandatory Advisory Banner & Security Template for Verification Suite -->
@@ -2535,11 +2506,11 @@
       <div class="status-chip" title="Switch Simplism UI Style (Hybrid / Style A Zen / Style B IDE / Style C Glass)">
         <span>✨ Style:</span>
         <select id="ui-style-select" onchange="setSimplismStyle(this.value)" style="background:transparent; color:var(--cyan); border:none; font-family:var(--font-mono); font-size:11px; font-weight:600; cursor:pointer; outline:none;">
-          <option value="minimal" style="background:#0E1118;">✨ Obsidian Minimal (Stitch MCP)</option>
-          <option value="hybrid" style="background:#0E1118;">Hybrid Simplism (Best of 3)</option>
-          <option value="zen" style="background:#0E1118;">Style A: Executive Zen (claude)</option>
-          <option value="ide" style="background:#0E1118;">Style B: Antigravity IDE (codex)</option>
-          <option value="glass" style="background:#0E1118;">Style C: Ambient Glass (agy)</option>
+          <option value="minimal" style="background:#0E1118;">Minimal</option>
+          <option value="hybrid" style="background:#0E1118;">Hybrid</option>
+          <option value="zen" style="background:#0E1118;">Executive Zen</option>
+          <option value="ide" style="background:#0E1118;">Antigravity IDE</option>
+          <option value="glass" style="background:#0E1118;">Ambient Glass</option>
         </select>
       </div>
       <button type="button" class="status-chip" id="theme-toggle-btn" onclick="toggleThemeMode()" style="cursor:pointer; font-weight:600; color:var(--cyan);" title="Switch between Dark Mode and Light Mode">
@@ -2548,7 +2519,7 @@
       </button>
       <div class="status-chip">
         <span class="status-dot"></span>
-        <span id="hands-online-summary">Hands: 3/3 Ready</span>
+        <span id="hands-online-summary">Checking CLI…</span>
       </div>
       <div class="status-chip">
         <span data-i18n="active_seats_label">Seats:</span>
@@ -2570,48 +2541,48 @@
           <button type="button" class="btn" style="padding:2px 7px; font-size:11px;" onclick="toggleLeftSidebarRail()" id="rail-toggle-btn" title="Expand or collapse sidebar labels">»</button>
         </div>
         <button class="nav-btn active" id="nav-workbench" onclick="switchView('workbench')" title="Chat &amp; Canvas Split Workbench">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#message-square"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_chat_canvas">Chat &amp; Canvas</span>
           <span class="nav-badge">Split</span>
         </button>
         <button class="nav-btn" id="nav-seats" onclick="switchView('seats')" title="Seat Management (CRUD)">
-          <span class="nav-icon">🪑</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#armchair"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_seats_crud">Seat Management</span>
           <span class="nav-badge" id="nav-seat-badge">1</span>
         </button>
         <button class="nav-btn" id="nav-artifacts" onclick="switchView('artifacts')" title="Artifacts &amp; Data Registry">
-          <span class="nav-icon">📦</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#package"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_artifacts_mgr">Artifacts &amp; Data</span>
           <span class="nav-badge" id="nav-artifact-badge" style="color:var(--emerald);">1</span>
         </button>
         <button class="nav-btn" id="nav-skills" onclick="switchView('skills')" title="Canonical Skills &amp; Harness2 RSI">
-          <span class="nav-icon">🧬</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#dna"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_skills_rsi">Skills &amp; RSI</span>
           <span class="nav-badge" id="nav-skill-badge" style="color:var(--cyan);">1</span>
         </button>
         <button class="nav-btn" id="nav-schedules" onclick="switchView('schedules')" title="Scheduled Work &amp; Daily Summaries Portal">
-          <span class="nav-icon">⏰</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#clock"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_schedules_mgr">Scheduled Work</span>
           <span class="nav-badge" id="nav-schedule-badge" style="color:var(--amber);">1</span>
         </button>
         <button class="nav-btn" id="nav-architect" onclick="switchView('architect')" title="Antigravity (Codebase Session) ⇄ ArchonOS Seats Closed-Loop Bridge">
-          <span class="nav-icon">🔗</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#git-branch"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_architect_loop">Architect Loop</span>
           <span class="nav-badge" id="nav-architect-badge" style="color:#6EE7B7;">Loop</span>
         </button>
         <button class="nav-btn" id="nav-mcps" onclick="switchView('mcps')" title="External MCP Servers &amp; Grants">
-          <span class="nav-icon">🔌</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#plug"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_mcp_hub">External MCPs</span>
           <span class="nav-badge">0</span>
         </button>
         <button class="nav-btn" id="nav-hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy)">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#settings"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_local_hands">Local Hands &amp; Settings</span>
           <span class="nav-badge">local</span>
         </button>
         <button class="nav-btn" id="nav-mesh" onclick="switchView('mesh')" title="Agora-Style Team Shared Workspaces, Topic Rooms, Colleague Access Keys &amp; Cloudflare Remote Deployment">
-          <span class="nav-icon">👥</span>
-          <span class="nav-label-text">Team &amp; Mesh</span>
+          <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#users"></use></svg></span>
+          <span class="nav-label-text" data-i18n="nav_team_mesh">Team &amp; Mesh</span>
           <span class="nav-badge" id="nav-mesh-badge" style="color:var(--cyan);">1</span>
         </button>
 
@@ -2641,7 +2612,7 @@
               <select id="chat-session-select" class="topbar-session-select" onchange="switchChatSession(this.value)" title="Switch Active Chat Session"></select>
               <span id="chat-history-sync-status" role="status" style="font-size:11px;color:var(--text-muted)"></span>
               <button type="button" class="cos-metric-pill" onclick="createNewChatSession()" title="Start a new session">+ New</button>
-              <span class="hand-tag" id="chat-active-hand-badge">hand:claude</span>
+              <span class="hand-tag" id="chat-active-hand-badge">hand:auto</span>
               <span class="sticky-session-pill" id="sticky-hand-session-pill" style="display:none;" title="Sticky CLI Hand Session">
                 <span id="sticky-hand-session-text">Turn #1</span>
               </span>
@@ -2655,7 +2626,7 @@
               <span class="cos-metric-pill" onclick="toggleCosVaultDrawer()" title="Inspect Organized Artifact Vault &amp; Canonical Skills">🗂️ Vault (<span id="cos-art-count">1</span>)</span>
               <span class="cos-metric-pill" onclick="openSkillStudioMode('improve')" title="Guide Skill Self-Improvement &amp; Add Directions">🧬 Skills (<span id="cos-skill-count">1</span>)</span>
               <span class="cos-metric-pill" onclick="toggleMemoryDrawer()" id="btn-toggle-memory" title="Global &amp; Seat-Level Persistent Memory">🧠 Memory (<span id="cos-mem-count">4</span><span id="memory-count-badge" style="display:none;">4</span>)</span>
-              <span class="cos-metric-pill" onclick="toggleSchedulesDrawer()" id="btn-toggle-schedules" title="Scheduled Executive Summary (07:00 &amp; 21:00 Local) &amp; Cron Jobs">⏰ 07:00/21:00 (<span id="schedules-count-badge">1</span>)</span>
+              <span class="cos-metric-pill" onclick="toggleSchedulesDrawer()" id="btn-toggle-schedules" title="Scheduled Executive Summary (07:00 &amp; 21:00 Local) &amp; Cron Jobs">⏰ Scheduled Work (<span id="schedules-count-badge">1</span>)</span>
               <button type="button" class="cos-metric-pill" onclick="compactChatSessionContext()" title="Compact session context">🗜️</button>
               <button type="button" class="cos-metric-pill" onclick="clearChatHistory()" title="Clear current session messages">🗑️</button>
             </div>
@@ -2665,20 +2636,19 @@
 
           <!-- Collapsible Drawer -2: Autonomous Git Self-Evolution & Immutable Safe-Mode Recovery Kernel -->
           <div class="chat-drawer" id="chat-safe-mode-drawer">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
-              <div>
-                <strong style="color:var(--emerald); font-size:11.5px;" id="safe-mode-drawer-title">🛡️ Autonomous Git Self-Ops &amp; Immutable Safe-Mode Recovery Kernel</strong>
-                <div class="mono" style="font-size:10px; color:var(--text-secondary); margin-top:2px;" id="safe-mode-drawer-subtitle">Loading Git &amp; Safe-Mode state...</div>
-              </div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button type="button" class="mini-btn" id="btn-safe-mode-lock-toggle" onclick="toggleImmutableSafeModeState()" style="font-weight:700;">🔒 Lock Safe Mode</button>
-                <button type="button" class="mini-btn" onclick="triggerGoldenCheckpointSnapshot()" title="Verify unit tests and tag a Golden Checkpoint">📸 Snapshot</button>
-                <button type="button" class="mini-btn" onclick="triggerAutonomousGitCommit(false)" title="Run pre-commit test gate, stage source files, and git commit">🚀 Self-Commit</button>
-                <button type="button" class="mini-btn" onclick="triggerAutonomousGitCommit(true)" title="Run pre-commit test gate, git commit, and git push">⬆️ Commit &amp; Push</button>
-                <button type="button" class="mini-btn" onclick="triggerFleetSafeModeRecovery()" style="border-color:rgba(245,158,11,0.5); color:var(--amber);" title="Restore codebase to last Golden Checkpoint and engage Immutable Safe Mode">🛡️ Fleet Recover</button>
+            <div>
+              <strong id="safe-mode-drawer-title">Code maintenance</strong>
+              <div id="safe-mode-drawer-subtitle" role="status">Loading Git &amp; Safe-Mode state...</div>
+              <div data-ui-explanation>Commits run the project verification gate. Recovery restores protected code to the last checkpoint.</div>
+              <div class="ui-action-row">
+                <button type="button" class="btn" id="btn-safe-mode-lock-toggle" onclick="toggleImmutableSafeModeState()">🔒 Lock Safe Mode</button>
+                <button type="button" class="btn" onclick="triggerGoldenCheckpointSnapshot()" title="Verify unit tests and tag a Golden Checkpoint">📸 Snapshot</button>
+                <button type="button" class="btn" onclick="triggerAutonomousGitCommit(false)" title="Run pre-commit test gate, stage source files, and git commit">🚀 Self-Commit</button>
+                <button type="button" class="btn" onclick="triggerAutonomousGitCommit(true)" title="Run pre-commit test gate, git commit, and git push">⬆️ Commit &amp; Push</button>
+                <button type="button" class="btn ui-danger" onclick="triggerFleetSafeModeRecovery()" title="Restore codebase to last Golden Checkpoint and engage Immutable Safe Mode">🛡️ Fleet Recover</button>
               </div>
             </div>
-            <div id="safe-mode-drawer-body" style="font-size:11px; color:var(--text-secondary); display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+            <div id="safe-mode-drawer-body"></div>
           </div>
 
           <!-- Collapsible Drawer -1: Historical User Prompts Navigator -->
@@ -3106,9 +3076,6 @@
               </div>
               <div class="wb-tree-scroll" id="wb-tree-container"></div>
             </aside>
-            <button type="button" class="wb-collapsed-edge-tab" id="wb-collapsed-edge-tab" onclick="toggleWorkspaceBrowser(true)" title="Expand Categorized Workspace Browser">
-              ◂ 🗂️ Workspace
-            </button>
           </div>
         </section>
       </div>
@@ -3526,10 +3493,10 @@
                 <option value="002368.SZ">002368.SZ — Sample Systems Corp (Grade B)</option>
                 <option value="META">META — Meta Platforms (US • Grade A-)</option>
               </select>
-              <button class="btn btn-emerald" id="run-stock-sop-btn" onclick="runStockDeepResearchWorkflow()">▶ Execute 5-Stage Stock SOP &amp; Publish Artifact</button>
+              <button class="btn btn-emerald" id="run-stock-sop-btn" onclick="runStockDeepResearchWorkflow()">▶ Run workflow</button>
             </div>
           </div>
-          <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-top:6px;">
+          <div data-ui-disclosure="Workflow stages" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-top:6px;">
             <div style="background:var(--bg-void); border:1px solid var(--border-strong); border-radius:6px; padding:7px 9px;">
               <div class="mono" style="font-size:10px; color:var(--cyan);">STAGE 1 • @RHO JOIN</div>
               <div style="font-size:11px; font-weight:600; margin-top:2px;">Venue Suffix &amp; Canonical Entity</div>
@@ -3570,8 +3537,8 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <span class="mono" style="padding:3px 9px; border-radius:999px; background:rgba(16,185,129,0.16); border:1px solid rgba(16,185,129,0.45); color:#6EE7B7; font-size:11px; font-weight:700;" id="rsi-10round-status-badge">10/10 ROUNDS VERIFIED (9 PACKAGES • k=3 PASS)</span>
-              <button class="btn btn-emerald" id="run-rsi-loop-btn" onclick="runTenRoundRsiLoop()">🚀 Run 10-Round ArchonOS Project RSI Loop</button>
-              <button class="btn" onclick="selectCanvasArtifact('art-rsi-10round-benchmark'); switchView('workbench');">🖼️ View 9-Package RSI Benchmark in Canvas</button>
+              <button class="btn btn-emerald" id="run-rsi-loop-btn" onclick="runTenRoundRsiLoop()">🔄 Run audit</button>
+              <button class="btn" onclick="selectCanvasArtifact('art-rsi-10round-benchmark'); switchView('workbench');">📊 View benchmark</button>
             </div>
           </div>
 
@@ -3602,7 +3569,7 @@
             <button class="btn" onclick="loadSkillsRegistry()">↻ Refresh Skills</button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:6px;">
+          <div data-ui-disclosure="Verification rules" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:6px;">
             <div style="background:var(--bg-void); border:1px solid var(--border-strong); border-radius:6px; padding:8px 10px;">
               <div class="mono" style="font-size:10px; color:var(--text-secondary);">3-VALUED VERDICT LADDER</div>
               <div class="mono" style="font-size:12px; font-weight:700; margin-top:3px;">
@@ -3657,6 +3624,7 @@
                 <div class="form-field">
                   <label>Local CLI Synthesizer Hand</label>
                   <select id="synth-skill-engine">
+                    <option value="">Auto (Seat default)</option>
                     <option value="claude">claude (Claude Code CLI)</option>
                     <option value="codex">codex (OpenAI Codex CLI)</option>
                     <option value="agy">agy (Antigravity CLI)</option>
@@ -3776,7 +3744,7 @@
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top:6px;">
+          <div data-ui-disclosure="Storage & publishing" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top:6px;">
             <div style="background:var(--bg-void); border:1px solid var(--border-strong); border-radius:6px; padding:8px 10px;">
               <div class="mono" style="font-size:10px; color:var(--text-secondary);">WORKSPACE ARTIFACT DATA STORE</div>
               <div class="mono" style="font-size:11px; font-weight:700; color:var(--emerald); margin-top:3px; word-break:break-all;">.archon/artifacts/</div>
@@ -4196,10 +4164,8 @@
         <div class="card-panel">
           <div class="card-header">
             <div>
-              <div class="card-title" style="font-size:15px;">👥 Team &amp; Mesh Federation Portal (<code>@mcp:archon-mesh</code> · <code>@skill:archon-mesh-collaboration-sop</code>)</div>
-              <div class="card-sub">
-                Agora-style hierarchy: <strong>Team (`team:&lt;id&gt;`) ➔ Team Shared Workspace (Skills, Canvas Artifacts, Resources) ➔ Topic Rooms (`room:&lt;team_id&gt;:&lt;topic&gt;`)</strong>. Mint scoped <code>ARCHON-KEY-...</code> keys for colleagues to collaborate from their own sovereign Archon instances.
-              </div>
+              <div class="card-title">Team &amp; Mesh</div>
+              <div data-ui-explanation>Teams contain shared resources and topic rooms. Invite colleagues with a scoped key; remote collaboration requires your own Worker and sync credentials.</div>
             </div>
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="promptCreateTeamOrGroup('team')">+ 👥 Create Team</button>
@@ -4885,13 +4851,13 @@
         app_subtitle: 'Independent Multi-Seat Control Plane • Local MacBook CLI Hands (claude / codex / agy) • MCP Artifact Canvas',
         active_seats_label: 'Archon Seats:',
         nav_workbenches: 'OS Workbenches',
-        nav_chat_canvas: '💬 Chat & Canvas',
-        nav_seats_crud: '🪑 Seat Management',
-        nav_artifacts_mgr: '📦 Artifacts & Data',
-        nav_skills_rsi: '🧬 Skills & RSI',
-        nav_schedules_mgr: '⏰ Scheduled Work',
-        nav_mcp_hub: '🔌 External MCPs',
-        nav_local_hands: '⚙️ Local Hands CLI',
+        nav_chat_canvas: 'Chat & Canvas',
+        nav_seats_crud: 'Seat Management',
+        nav_artifacts_mgr: 'Artifacts & Data',
+        nav_skills_rsi: 'Skills & RSI',
+        nav_schedules_mgr: 'Scheduled Work',
+        nav_mcp_hub: 'External MCPs',
+        nav_local_hands: 'Local Hands CLI',
         nav_archon_seats: 'ArchonOS Seats (Click to Route)',
         arch_indep_title: 'Sovereign Architecture',
         arch_indep_desc: 'Seats belong to your ArchonOS workspace. Vortexa, Agora, and ROS are connected as external default-deny MCP servers.',
@@ -4965,13 +4931,13 @@
         app_subtitle: '独立多席位控制平面 • 本机 CLI 执行手 (claude / codex / agy) • MCP 制品画布',
         active_seats_label: '智枢席位:',
         nav_workbenches: '系统工作台',
-        nav_chat_canvas: '💬 对话与智枢画布',
-        nav_seats_crud: '🪑 席位管理 (CRUD)',
-        nav_artifacts_mgr: '📦 画布工件与数据',
-        nav_skills_rsi: '🧬 技能与递归自改进 (RSI)',
-        nav_schedules_mgr: '⏰ 定时任务与简报',
-        nav_mcp_hub: '🔌 外部 MCP 连接器',
-        nav_local_hands: '⚙️ 本机 CLI 执行手',
+        nav_chat_canvas: '对话与智枢画布',
+        nav_seats_crud: '席位管理 (CRUD)',
+        nav_artifacts_mgr: '画布工件与数据',
+        nav_skills_rsi: '技能与递归自改进 (RSI)',
+        nav_schedules_mgr: '定时任务与简报',
+        nav_mcp_hub: '外部 MCP 连接器',
+        nav_local_hands: '本机 CLI 执行手',
         nav_archon_seats: 'ArchonOS 专属席位 (点击切换)',
         arch_indep_title: '独立主权架构',
         arch_indep_desc: '所有席位均归属于您的 ArchonOS 系统；Vortexa、Agora 与 ROS 均作为默认拒绝（Default-Deny）的外部 MCP 服务受控接入。',
@@ -5041,6 +5007,7 @@
       },
     };
 
+    window.ArchonLegacyCopy = I18N;
     let currentLang = 'en';
     let seatsState = [];
     let selectedSeatId = 'chief-of-staff';
@@ -5075,6 +5042,10 @@
       }
 
       renderSeatsEverywhere();
+      const welcome = document.getElementById('welcome-msg-body');
+      if (welcome) welcome.textContent = currentLang === 'zh' ? '幕僚长负责协调工作区。描述任务、添加文件或选择技能，即可开始。' : 'The Chief of Staff coordinates your workspace. Describe a task, attach a file, or choose a skill to begin.';
+      window.dispatchEvent(new CustomEvent('archon:language', { detail: currentLang }));
+      if (document.getElementById('view-skills')?.classList.contains('active')) window.loadRsiRounds?.();
     };
 
     window.switchView = function (viewName) {
@@ -5399,9 +5370,9 @@
       const btn = document.getElementById('rail-toggle-btn');
       if (!shell) return;
       const isCollapsed = shell.classList.toggle('rail-collapsed');
+      window.ArchonUI?.syncSidebar();
       if (btn) {
-        btn.textContent = isCollapsed ? '»' : '«';
-        btn.title = isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar to Icon Rail';
+        btn.title = isCollapsed ? 'Expand Sidebar Labels' : 'Collapse Sidebar to Icon Rail';
       }
     };
 
@@ -5411,14 +5382,12 @@
       document.body.classList.remove('style-minimal', 'style-hybrid', 'style-zen', 'style-ide', 'style-glass');
       document.body.classList.add('style-' + normalized);
       const shell = document.querySelector('.os-shell');
-      const btn = document.getElementById('rail-toggle-btn');
       if (shell && (normalized === 'minimal' || normalized === 'glass' || normalized === 'hybrid')) {
         shell.classList.add('rail-collapsed');
-        if (btn) btn.textContent = '»';
       } else if (shell && (normalized === 'zen' || normalized === 'ide')) {
         shell.classList.remove('rail-collapsed');
-        if (btn) btn.textContent = '«';
       }
+      window.ArchonUI?.syncSidebar();
       try { localStorage.setItem('archon_ui_style', normalized); } catch (_) {}
     };
 
@@ -5493,7 +5462,7 @@
                 <div style="font-size:10.5px; color:var(--text-secondary); margin-top:3px;">${escapeHtml(role)}</div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-muted); margin-top:4px;">
                   <span>CLI Default</span>
-                  <span style="color:${s.enabled ? 'var(--emerald)' : 'var(--crimson)'};">${s.enabled ? 'READY' : 'OFF'}</span>
+                  <span style="color:${s.enabled ? 'var(--emerald)' : 'var(--crimson)'};">${s.handAvailable === false ? 'NO CLI' : s.enabled ? 'READY' : 'OFF'}</span>
                 </div>
               </div>
             `;
@@ -5567,7 +5536,7 @@
                 <td>${escapeHtml(title)}</td>
                 <td><span class="hand-tag">${escapeHtml(s.hand)}</span></td>
                 <td class="mono" style="font-size:10.5px; color:#A5F3FC;">${escapeHtml((s.grants || []).join(', ') || 'none')}</td>
-                <td><span style="color:${s.enabled ? 'var(--emerald)' : 'var(--crimson)'}; font-weight:600;">${s.enabled ? 'READY' : 'DISABLED'}</span></td>
+                <td><span style="color:${s.enabled ? 'var(--emerald)' : 'var(--crimson)'}; font-weight:600;">${s.handAvailable === false ? 'NO CLI' : s.enabled ? 'READY' : 'DISABLED'}</span></td>
               </tr>
             `;
           })
@@ -5583,9 +5552,9 @@
             return `
               <tr>
                 <td class="mono"><strong>${escapeHtml(s.id)}</strong></td>
-                <td>${escapeHtml(s.name_en || s.id)} / ${escapeHtml(s.name_zh || '')}</td>
+                <td data-user-content>${escapeHtml(s.name_en || s.id)} / ${escapeHtml(s.name_zh || '')}</td>
                 <td><span class="hand-tag">${escapeHtml(s.hand)}</span></td>
-                <td style="color:var(--text-secondary); max-width:340px;">${escapeHtml(personaPreview)}</td>
+                <td><details class="ui-role-details"><summary>Role instructions</summary><p data-user-content>${escapeHtml(personaPreview)}</p></details></td>
                 <td><span style="color:${s.enabled ? 'var(--emerald)' : 'var(--crimson)'}; font-weight:600;">${s.enabled ? 'ENABLED' : 'DISABLED'}</span></td>
                 <td style="display:flex; gap:6px;">
                   <button class="btn" style="padding:3px 7px; font-size:10.5px;" onclick="populateSeatForm('${escapeHtml(s.id)}')">Edit</button>
@@ -6171,6 +6140,7 @@
       document.getElementById('crud-seat-name-en').value = '';
       document.getElementById('crud-seat-name-zh').value = '';
       document.getElementById('crud-seat-hand').value = 'claude';
+      document.getElementById('crud-seat-hand').disabled = false;
       document.getElementById('crud-seat-persona').value = '';
       document.getElementById('crud-seat-enabled').checked = true;
     };
@@ -6182,6 +6152,8 @@
       document.getElementById('crud-seat-name-en').value = s.name_en || s.id;
       document.getElementById('crud-seat-name-zh').value = s.name_zh || '';
       document.getElementById('crud-seat-hand').value = s.hand || 'claude';
+      document.getElementById('crud-seat-hand').disabled = s.id === 'chief-of-staff';
+      document.getElementById('crud-seat-hand').title = s.id === 'chief-of-staff' ? 'Use the first installed, enabled CLI on this machine.' : '';
       document.getElementById('crud-seat-persona').value = s.persona || '';
       document.getElementById('crud-seat-enabled').checked = Boolean(s.enabled);
     };
@@ -6509,9 +6481,10 @@
       const data = await fetch('/api/hands/status').then((r) => r.json());
       if (!data.ok) return;
       const entries = Object.values(data.hands || {});
-      const readyCount = entries.filter((h) => h.installed).length;
+      const readyCount = entries.filter((h) => h.installed && h.enabled !== false).length;
       const hostLabel = data.host || 'Local Host';
-      document.getElementById('hands-online-summary').textContent = `Hands: ${readyCount}/${entries.length} Ready (${hostLabel})`;
+      document.getElementById('hands-online-summary').textContent = `Hands: ${readyCount}/${entries.length} Ready`;
+      document.getElementById('hands-online-summary').title = hostLabel;
       const thPath = document.getElementById('th-local-binary-path');
       if (thPath) thPath.textContent = `Verified Binary Path (${hostLabel})`;
 
@@ -6594,7 +6567,7 @@
         agy: { binaryPath: 'auto', headlessArgs: ['chat', '--mode', 'agent', '--print', '{{prompt}}'], timeoutMs: 22000 },
         opencode: { binaryPath: 'auto', headlessArgs: ['run', '{{prompt}}'], timeoutMs: 28000 },
       };
-      const cfg = workspaceConfigCache?.hands?.engines?.[engine] || defaults[engine] || defaults.claude;
+      const cfg = workspaceConfigCache?.hands?.[engine] || workspaceConfigCache?.hands?.engines?.[engine] || defaults[engine] || defaults.claude;
       const binEl = document.getElementById('cfg-hand-binary');
       const timeEl = document.getElementById('cfg-hand-timeout');
       const argsEl = document.getElementById('cfg-hand-args');
@@ -6699,7 +6672,7 @@
         const rounds = data.rounds || [];
         const badge = document.getElementById('rsi-10round-status-badge');
         if (badge) {
-          badge.textContent = `${data.completedRounds || rounds.length}/${data.totalRounds || 10} Rounds Verified • Score ${data.overallScore || '99.4/100'}`;
+          badge.textContent = currentLang === 'zh' ? `预设记录 ${rounds.length} rounds · ${data.projectAudit?.totalPackages || 9} 个模块` : `Configured ledger · ${rounds.length} rounds · ${data.projectAudit?.totalPackages || 9} packages`;
         }
         const tbody = document.getElementById('rsi-rounds-tbody');
         if (tbody) {
@@ -6709,7 +6682,7 @@
               <tr>
                 <td class="mono" style="font-weight:700; color:var(--cyan);">R${Number(r.round)}</td>
                 <td>
-                  <div style="font-weight:700; color:var(--text-primary);">${escapeHtml(r.id)}: ${escapeHtml(r.title)}</div>
+                  <div style="font-weight:700; color:var(--text-primary);">${escapeHtml(r.id)}: ${escapeHtml(currentLang === 'zh' ? r.title_zh || r.title : r.title_en || r.title)}</div>
                   <div class="mono" style="font-size:10px; color:var(--text-muted);">Owner: ${escapeHtml(r.seat)}</div>
                 </td>
                 <td class="mono" style="font-size:10.5px; color:#A5F3FC;">${escapeHtml(r.target)}</td>
@@ -7642,7 +7615,7 @@
                 <tr>
                   <td>
                     <div class="mono" style="font-weight:700; color:var(--cyan);">${escapeHtml(a.artifactId)}</div>
-                    <div style="font-size:11px; color:var(--text-primary); margin-top:2px;">${escapeHtml(a.title)}</div>
+                    <div data-user-content style="font-size:11px; color:var(--text-primary); margin-top:2px;">${escapeHtml(a.title)}</div>
                     <div class="mono" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Owner: seat:${escapeHtml(a.publishedBySeat || 'chief-of-staff')}</div>
                   </td>
                   <td>
@@ -7726,9 +7699,9 @@
           )
           .join('\n  ');
         box.textContent = [
-          `Artifact: ${res.artifactId} • Lineage: r${res.previousRevision} → r${res.currentRevision} (${res.totalRevisions} revisions)`,
-          `Window: ${res.dataWindow} • Updated: ${res.updatedAt || 'live'}`,
-          deltas ? `Corridor Deltas:\n  ${deltas}` : `Corridor Deltas: atomic manifest verified`,
+          currentLang === 'zh' ? `工件：${res.artifactId} · 版本 r${res.previousRevision} → r${res.currentRevision}（共 ${res.totalRevisions} 个）` : `Artifact: ${res.artifactId} · r${res.previousRevision} → r${res.currentRevision} (${res.totalRevisions} revisions)`,
+          currentLang === 'zh' ? `数据范围：${res.dataWindow} · 更新时间：${res.updatedAt || '—'}` : `Window: ${res.dataWindow} · Updated: ${res.updatedAt || '—'}`,
+          deltas ? `${currentLang === 'zh' ? '指标变化' : 'Metric changes'}:\n  ${deltas}` : (currentLang === 'zh' ? '内容摘要已校验' : 'Manifest verified'),
         ].join('\n');
       } catch (err) {
         box.textContent = `Diff error: ${err.message}`;
@@ -8009,7 +7982,7 @@
           .map(
             (m) => `
             <div style="padding:4px 7px; background:var(--bg-void); border:1px solid var(--border); border-radius:4px; display:flex; justify-content:space-between; gap:6px; align-items:flex-start;">
-              <span style="font-size:10.5px; color:var(--text-primary); line-height:1.35;">${escapeHtml(m.content)}</span>
+              <span data-user-content style="font-size:10.5px; color:var(--text-primary); line-height:1.35;">${escapeHtml(m.content)}</span>
               <button type="button" class="btn btn-danger" style="padding:0 5px; font-size:9.5px;" onclick="deleteMemoryFact('global', '${escapeHtml(m.id)}')">✕</button>
             </div>
           `
@@ -8025,7 +7998,7 @@
                 .map(
                   (m) => `
                   <div style="padding:4px 7px; background:var(--bg-void); border:1px solid var(--border); border-radius:4px; display:flex; justify-content:space-between; gap:6px; align-items:flex-start;">
-                    <span style="font-size:10.5px; color:#A5F3FC; line-height:1.35;">${escapeHtml(m.content)}</span>
+                    <span data-user-content style="font-size:10.5px; color:#A5F3FC; line-height:1.35;">${escapeHtml(m.content)}</span>
                     <button type="button" class="btn btn-danger" style="padding:0 5px; font-size:9.5px;" onclick="deleteMemoryFact('seat', '${escapeHtml(m.id)}')">✕</button>
                   </div>
                 `
@@ -9512,7 +9485,7 @@
                     ${execBadgeHtml}
                     ${processBtnHtml}
                   </div>
-                  <div style="color:var(--text-primary); line-height:1.5;">${window.renderMeshSafeMarkdown(m.content || '')}</div>
+                  <div data-user-content style="color:var(--text-primary); line-height:1.5;">${window.renderMeshSafeMarkdown(m.content || '')}</div>
                 </div>
               `;
             })
@@ -9532,7 +9505,7 @@
         <!-- Top Banner: Dual-Target Deployment (Local Workstation vs Cloudflare Remote) -->
         <div style="padding:12px 14px; border-radius:8px; background:var(--bg-panel); border:1px solid var(--border-strong);">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
-            <div style="font-weight:700; color:var(--text-primary); font-size:12.5px;">☁️ 1. Dual-Target Deployment (Local Workstation vs Cloudflare Remote)</div>
+            <div style="font-weight:700; color:var(--text-primary); font-size:12.5px;">☁️ Dual-Target Deployment (Local Workstation vs Cloudflare Remote)</div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
               <button type="button" class="mini-btn" onclick="switchArchonDeployMode('local')" style="${dep.mode !== 'cloudflare-remote' ? 'border-color:var(--emerald); color:var(--emerald); font-weight:700;' : ''}">💻 Local Workstation</button>
               <button type="button" class="mini-btn" onclick="switchArchonDeployMode('cloudflare-remote')" style="${dep.mode === 'cloudflare-remote' ? 'border-color:var(--cyan); color:var(--cyan); font-weight:700;' : ''}">🌐 Cloudflare Remote</button>
@@ -9540,7 +9513,7 @@
               <button type="button" class="mini-btn" onclick="triggerManualChatHistorySync()">↻ Sync History Now</button>
             </div>
           </div>
-          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">• <strong>Mode</strong>: <code>${escapeHtml(dep.mode || 'local')}</code> (${dep.mode === 'cloudflare-remote' ? '🌐 Remote Worker + Frontend Page' : '💻 Local Workstation 127.0.0.1:8790'}) · <strong>History Sync</strong>: <code style="color:${syncInfo.lastError ? 'var(--rose)' : 'var(--emerald)'};">${escapeHtml(syncConn)}</code> (${escapeHtml(syncTime)}) · <strong>Local Hands</strong>: <code style="color:var(--emerald);">${handExec.ready ? 'READY' : 'CUSTODIAN'}</code></div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">• <strong>Mode</strong>: <code>${escapeHtml(dep.mode || 'local')}</code> (${dep.mode === 'cloudflare-remote' ? (currentLang === 'zh' ? '远程 Worker 与前端' : 'Remote Worker & frontend') : (currentLang === 'zh' ? '本机 127.0.0.1:8790' : 'Local 127.0.0.1:8790')}) · <strong>History Sync</strong>: <code style="color:${syncInfo.lastError ? 'var(--rose)' : 'var(--emerald)'};">${escapeHtml(currentLang === 'zh' ? ({'local-only':'仅本地','connected':'已连接','syncing':'同步中','error':'同步失败'}[syncConn] || syncConn) : syncConn)}</code> (${escapeHtml(currentLang === 'zh' && syncTime === 'Not yet synced' ? '尚未同步' : syncTime)}) · <strong>Local Hands</strong>: <code style="color:var(--emerald);">${currentLang === 'zh' ? (handExec.ready ? '可用' : '未就绪') : (handExec.ready ? 'READY' : 'UNAVAILABLE')}</code></div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div>
               <label class="mono" style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:3px;">Cloudflare Worker URL</label>
@@ -9695,7 +9668,7 @@
                 </div>
               </div>
 
-              <div style="display:flex; gap:6px;">
+              <div class="ui-mesh-composer">
                 <select id="select-portal-target-seat" onchange="window.latestCloudMeshState.selectedTargetSeat = this.value; if(this.value.startsWith('member:')){window.insertMeshMemberMention(this.value.slice(7));}" style="width:215px; font-size:11px; padding:6px 8px; border-radius:6px; border:1px solid var(--border-strong); background:var(--bg-void); color:var(--text-primary);">
                   <option value="" ${!prevTargetSeat ? 'selected' : ''}>💬 Team Chat (#${escapeHtml(activeTopicRoom?.topic || 'general')})</option>
                   <optgroup label="👤 @Member (Notify Colleague)">
@@ -9726,7 +9699,7 @@
                   <div style="padding:12px 14px; border-radius:8px; background:var(--bg-panel); border:1px solid var(--border-strong);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
                       <span class="mono" style="font-size:11px; color:var(--cyan); font-weight:700;">🔑 Colleague Access Keys (<code>ARCHON-KEY-...</code> for <code>@mcp:archon-mesh</code>)</span>
-                      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                      <div class="ui-key-form">
                         <input id="input-portal-colleague-handle" type="text" placeholder="peer:alice" value="peer:colleague" style="width:145px; font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid var(--border-strong); background:var(--bg-void); color:var(--text-primary);" />
                         <select id="select-portal-colleague-role" style="font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid var(--border-strong); background:var(--bg-void); color:var(--text-primary);">
                           <option value="member">member (read/post/share)</option>
@@ -10334,7 +10307,7 @@
             topBtn.style.borderColor = 'rgba(245, 158, 11, 0.65)';
             topBtn.style.color = 'var(--amber)';
           } else {
-            topBtn.innerHTML = `🟢 Self-Evolve (${escapeHtml(git.headShort || 'HEAD')})`;
+            topBtn.innerHTML = `🟢 Self-Evolve`;
             topBtn.style.borderColor = '';
             topBtn.style.color = '';
           }
@@ -10343,22 +10316,19 @@
           lockBtn.textContent = sm.enabled ? '🟢 Unlock Safe Mode' : '🔒 Lock Safe Mode';
         }
         if (subEl) {
-          subEl.textContent = `Branch: ${git.branch || 'main'} @ ${git.headShort || 'HEAD'} • Golden Checkpoint: ${sm.lastGoldenTag || sm.lastGoldenCommit || 'HEAD'} • Dirty Files: ${git.dirtyCount || 0} • Mode: ${sm.enabled ? 'LOCKED (Read-Only 0o444)' : 'UNLOCKED (Test-Gated)'}`;
+          subEl.textContent = `${git.branch || 'main'} · ${git.headShort || 'HEAD'} · ${sm.enabled ? (currentLang === 'zh' ? '已锁定' : 'Locked') : (currentLang === 'zh' ? '提交前验证' : 'Test-gated')}`;
         }
         if (bodyEl) {
-          const kernelList = (sm.immutableKernelPaths || []).map((p) => `<code>${escapeHtml(p)}</code>`).join(', ');
-          const recentCommits = (git.recentCommits || []).slice(0, 3).map((c) => `<div class="mono" style="font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">• ${escapeHtml(c)}</div>`).join('');
+          const kernelList = (sm.immutableKernelPaths || []).map((p) => `<li><code>${escapeHtml(p)}</code></li>`).join('');
+          const recentCommits = (git.recentCommits || []).slice(0, 3).map((c) => `<div data-user-content>${escapeHtml(c)}</div>`).join('');
           bodyEl.innerHTML = `
-            <div style="padding:6px 8px; border-radius:6px; background:rgba(15,23,42,0.45); border:1px solid var(--border-subtle);">
-              <div style="font-weight:700; color:var(--text-primary); margin-bottom:3px;">🔒 Two-Tier Immutability &amp; Recovery</div>
-              <div style="font-size:10.5px;">• <strong>Always-Immutable Kernel</strong>: ${kernelList}</div>
-              <div style="font-size:10.5px; margin-top:2px;">• <strong>Golden Ref</strong>: <code>${escapeHtml(sm.lastGoldenTag || sm.lastGoldenCommit || 'HEAD')}</code></div>
-              <div style="font-size:10.5px; margin-top:2px;">• <strong>Chat Slash Commands</strong>: <code>/safemode</code> · <code>/commit</code> · <code>/push</code> · <code>/recover</code></div>
+            <div class="ui-repo-stats">
+              <div><small>Branch</small><strong>${escapeHtml(git.branch || 'main')}</strong></div>
+              <div><small>Checkpoint</small><strong>${escapeHtml(sm.lastGoldenTag || sm.lastGoldenCommit || 'HEAD')}</strong></div>
+              <div><small>Changed files</small><strong>${git.dirtyCount || 0}</strong></div>
             </div>
-            <div style="padding:6px 8px; border-radius:6px; background:rgba(15,23,42,0.45); border:1px solid var(--border-subtle);">
-              <div style="font-weight:700; color:var(--text-primary); margin-bottom:3px;">📜 Recent Verified Commits (${git.dirtyCount || 0} dirty)</div>
-              ${recentCommits || '<div class="mono" style="font-size:10px;">No commits yet</div>'}
-            </div>
+            <details class="ui-disclosure ui-advanced"><summary>📜 Recent commits</summary><div class="ui-commit-list">${recentCommits || 'No commits yet'}</div></details>
+            <details class="ui-disclosure ui-advanced"><summary>🔒 Protected files</summary><ul class="ui-help-body">${kernelList}</ul></details>
           `;
         }
       } catch (_) {}
@@ -11116,8 +11086,7 @@
 
     // Boot initialization
     const initialWelcomeMd = [
-      '**👑 Chief of Staff (`seat:chief-of-staff`) is your default Warroom `@archon` Router.**',
-      'Order Chief of Staff directly to manage **Seats**, **Shared Context**, **Workspace & Files**, and **Scheduled Tasks**, or create specialist seats in **Seats & Memory** as your workflow grows. Click **💬 Comment** on any section heading to quote and comment directly into chat.',
+      'The Chief of Staff coordinates your workspace. Describe a task, attach a file, or choose a skill to begin.',
     ].join('\n\n');
     const welcomeEl = document.getElementById('welcome-msg-body');
     if (welcomeEl) renderMarkdownAndMermaid(welcomeEl, initialWelcomeMd);
@@ -11178,5 +11147,6 @@
       });
     }
   </script>
+  <script type="module" src="/ui-shell.mjs"></script>
 </body>
 </html>

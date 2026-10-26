@@ -256,6 +256,26 @@ export function probeAllHands() {
   return out;
 }
 
+// Object order follows the configured CLI discovery order. Disabled engines are
+// not candidates, even when their executable is present on the deployment host.
+export function selectFirstAvailableHand(hands = probeAllHands()) {
+  return Object.entries(hands).find(([, hand]) => hand.installed && hand.enabled !== false)?.[0] ?? null;
+}
+
+export function withDefaultChiefHand(seat, hands = probeAllHands()) {
+  const engine = selectFirstAvailableHand(hands);
+  return {
+    ...seat,
+    // Keep a schema-valid binding when no CLI is installed, but never report it
+    // as available or put it in the dispatch engine list.
+    hand: engine || seat.hand || 'claude',
+    engines: engine ? [engine] : [],
+    handSelection: 'auto',
+    handAvailable: Boolean(engine),
+    handCustomizedByOperator: false,
+  };
+}
+
 export function buildCleanHandEnv(baseEnv = process.env) {
   const env = {};
   for (const [k, v] of Object.entries(baseEnv)) {
