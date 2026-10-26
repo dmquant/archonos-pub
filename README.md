@@ -12,7 +12,7 @@
 
 **ArchonOS** is an open-source, standalone **Personal RSI Intelligent Operating System** running locally on your workstation (macOS / Linux). It seamlessly unifies **Chief of Staff Auto-Routing**, **Multi-Line Fluid Chat & Input Ergonomics**, **Local Headless Model Hands** (`claude`, `codex`, `agy`, `opencode`), **Default-Deny MCP Tool Federation**, **Interactive Canvas Artifact Quoting & Modification**, and **Harness2 Recursive Self-Improvement (RSI) Skills** into a single bilingual (`EN / 中文`) intelligent control console.
 
-ArchonOS is designed as an autonomous, self-contained personal intelligent operating system. It operates completely independently without requiring or mandating external Warroom orchestrators, while retaining optional modular integration with external MCP networks, codebases, and Antigravity architect bridges whenever requested.
+ArchonOS is designed as an autonomous, self-contained personal intelligent operating system. It operates completely independently with optional modular integration with external MCP networks, codebases, and Antigravity architect bridges whenever requested.
 
 ---
 
