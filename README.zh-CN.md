@@ -12,7 +12,7 @@
 
 **ArchonOS（智枢）** 是一套开源、在本地工作站（macOS / Linux）独立运行的**个人自进化智能操作系统（Personal RSI Intelligent OS）**。系统将 **幕僚长（Chief of Staff）自主路由**、**多行自由输入对话框**、**本机无头 CLI 模型执行手**（`claude`、`codex`、`agy`、`opencode`）、**默认拒绝（Default-Deny）的 MCP 工具联邦**、**工件引用对话即时修改（Quote-to-Modify）** 以及 **Harness2 递归自改进技能体系（RSI）** 深度整合为统一的双语（`中文 / EN`）智能控制台。
 
-ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行，完全解耦外部 Warroom 作战室强依赖，不需要亦不强制运行 Warroom；同时无缝支持按需接入外部 MCP 网络、本地代码库以及 Antigravity 架构师闭环。
+ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行；同时无缝支持按需接入外部 MCP 网络、本地代码库以及 Antigravity 架构师闭环。
 
 ---
 
