@@ -41,6 +41,27 @@ import {
 } from '../../../scripts/archon-safe-recover.mjs';
 import { buildChatSnapshot } from './chat-history.mjs';
 import { maritimeWindow, validateMaritimeSnapshot } from './vortexa-freshness.mjs';
+import {
+  SEAT_MEMORY_ROLE_SCHEMAS,
+  MEMORY_PRIOR_TO_SKILLS_SOP_ENTRY,
+  OFF_LAN_AGORA_ONLY_SOP_ENTRY,
+  sanitizeGlobalMemoryForUniversalSop,
+  invalidateMemoryPointersByRetraction,
+  evaluateTurnSalienceForMemory,
+  extractClosedLoopLearningRule,
+  dreamConsolidateCrossSeatMemory,
+  buildCrossSeatDomainWiki,
+  upsertSeatVerbatimShard,
+  synthesizeCampaignShards,
+  exportDreamedAgoraPlaybook,
+  getSeatMemoryRoleSchema,
+  loadOrInitMemoryIndex,
+  saveMemoryIndex,
+  bootstrapMemoryIndexFromHistory,
+  recordExecutionMemoryPointer,
+  querySeatMemoryIndex,
+  formatSeatMemoryIndexEnvelopeForPrompt,
+} from './seat-memory-index.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -6958,8 +6979,14 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
 
   seedDefaultArchonWorkspace(runtime);
   const workspaceState = loadPersistedWorkspaceState(runtime);
+  workspaceState.globalMemory = sanitizeGlobalMemoryForUniversalSop(workspaceState.globalMemory || []);
   runtime.sharedStore.seats.set('chief-of-staff', withDefaultChiefHand(runtime.sharedStore.seats.get('chief-of-staff')));
   savePersistedWorkspaceState(runtime, workspaceState);
+
+  const MEMORY_INDEX_FILE = join(STATE_DIR, 'memory-index.json');
+  const memoryIndexState = loadOrInitMemoryIndex(MEMORY_INDEX_FILE);
+  bootstrapMemoryIndexFromHistory(memoryIndexState, { runtime, workspaceState });
+  saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
 
   const getSession = (sessionId) => {
     const targetId = sessionId || workspaceState.activeSessionId || 'session-main';
@@ -7691,13 +7718,157 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       }
 
       // =========================================================================
-      // Global Memory & Seat-Level Memory Management (`/api/memory`)
+      // Global Memory, Seat-Level Memory & Seat Memory v5.0 (`Memory-as-Index`)
       // =========================================================================
-      if (req.method === 'GET' && parsedUrl.pathname === '/api/memory') {
+      if (
+        req.method === 'GET' &&
+        (parsedUrl.pathname === '/api/memory/index' || parsedUrl.pathname === '/api/memory/search')
+      ) {
+        const rawWs = parsedUrl.searchParams.get('workspaceId') || 'ws-default';
+        const reqWsId = rawWs === 'ws1' ? 'ws-default' : rawWs;
+        const reqSeatId = String(parsedUrl.searchParams.get('seatId') || 'chief-of-staff').replace(/^seat:/, '');
+        const q = String(parsedUrl.searchParams.get('q') || '').trim();
+        const limit = Math.max(1, Math.min(30, parseInt(parsedUrl.searchParams.get('limit') || '10', 10)));
+        bootstrapMemoryIndexFromHistory(memoryIndexState, { runtime, workspaceState });
+        workspaceState.globalMemory = sanitizeGlobalMemoryForUniversalSop(workspaceState.globalMemory);
+        const queryRes = querySeatMemoryIndex(memoryIndexState, {
+          query: q,
+          seatId: reqSeatId,
+          workspaceId: reqWsId,
+          limit,
+          runtime,
+          workspaceState,
+        });
         return sendJson(res, 200, {
           ok: true,
+          version: memoryIndexState.version,
+          updatedAt: memoryIndexState.updatedAt,
+          roleSchemas: SEAT_MEMORY_ROLE_SCHEMAS,
+          ...queryRes,
+          promptEnvelope: formatSeatMemoryIndexEnvelopeForPrompt(queryRes),
+        });
+      }
+
+      if (req.method === 'GET' && parsedUrl.pathname === '/api/memory') {
+        const rawWs = parsedUrl.searchParams.get('workspaceId') || 'ws-default';
+        const reqWsId = rawWs === 'ws1' ? 'ws-default' : rawWs;
+        const reqSeatId = String(parsedUrl.searchParams.get('seatId') || 'chief-of-staff').replace(/^seat:/, '');
+        const q = String(parsedUrl.searchParams.get('q') || '').trim();
+        workspaceState.globalMemory = sanitizeGlobalMemoryForUniversalSop(workspaceState.globalMemory);
+        const indexPreview = querySeatMemoryIndex(memoryIndexState, {
+          query: q,
+          seatId: reqSeatId,
+          workspaceId: reqWsId,
+          limit: 8,
+          runtime,
+          workspaceState,
+        });
+        return sendJson(res, 200, {
+          ok: true,
+          workspaceId: reqWsId,
+          memoryAuthority: 'retrieval_pointer_only',
           globalMemory: workspaceState.globalMemory,
           seatMemory: workspaceState.seatMemory,
+          memoryIndex: {
+            version: memoryIndexState.version,
+            executionPriority: 'memory-prior-to-skills',
+            memoryAuthority: 'retrieval_pointer_only',
+            totalIndexedPointers: indexPreview.totalIndexedPointers,
+            totalAlignmentRules: (memoryIndexState.alignmentLedger || []).length,
+            activeSeatSchema: getSeatMemoryRoleSchema(reqSeatId),
+            recommendedSkills: indexPreview.recommendedSkills || [],
+            topPointerHits: indexPreview.hits,
+            alignmentHits: indexPreview.alignmentHits,
+            wikiHits: indexPreview.wikiHits || [],
+            shardHits: indexPreview.shardHits || [],
+            cosAssetOverview: indexPreview.cosAssetOverview,
+            domainWiki: indexPreview.domainWiki || null,
+            lastDreamReport: indexPreview.lastDreamReport || null,
+            agoraDreamPlaybook: indexPreview.agoraDreamPlaybook || null,
+          },
+        });
+      }
+
+      if (req.method === 'POST' && parsedUrl.pathname === '/api/memory/dream') {
+        const payload = bodyBuf.length > 0 ? JSON.parse(bodyBuf.toString('utf8')) : {};
+        bootstrapMemoryIndexFromHistory(memoryIndexState, { runtime, workspaceState });
+        const dreamReport = dreamConsolidateCrossSeatMemory(memoryIndexState, {
+          runtime,
+          workspaceState,
+          repoRoot: REPO_ROOT,
+          writeWikiToDisk: payload.writeWikiToDisk !== false,
+        });
+        saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
+        return sendJson(res, 200, {
+          ok: true,
+          memoryAuthority: 'retrieval_pointer_only',
+          dreamReport,
+          domainWiki: memoryIndexState.domainWiki || null,
+          agoraDreamPlaybook: memoryIndexState.agoraDreamPlaybook || null,
+        });
+      }
+
+      if (req.method === 'POST' && parsedUrl.pathname === '/api/memory/shard') {
+        const payload = bodyBuf.length > 0 ? JSON.parse(bodyBuf.toString('utf8')) : {};
+        const rawWs = payload.workspaceId || 'ws-default';
+        const reqWsId = rawWs === 'ws1' ? 'ws-default' : rawWs;
+        const shard = upsertSeatVerbatimShard(memoryIndexState, {
+          workspaceId: reqWsId,
+          campaignId: payload.campaignId || 'default-campaign',
+          seatId: payload.seatId || 'deep-research',
+          engine: payload.engine || 'codex',
+          entityId: payload.entityId || 'general',
+          title: payload.title || '',
+          verbatimQuotes: payload.verbatimQuotes || [],
+          verifiedFacts: payload.verifiedFacts || [],
+          trapWarnings: payload.trapWarnings || [],
+          primaryFilingHash: payload.primaryFilingHash || null,
+          targetUris: payload.targetUris || [],
+          repoRoot: REPO_ROOT,
+          writeToDisk: payload.writeToDisk !== false,
+        });
+        saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
+        return sendJson(res, 200, {
+          ok: true,
+          memoryAuthority: 'retrieval_pointer_only',
+          shard,
+        });
+      }
+
+      if (req.method === 'GET' && parsedUrl.pathname === '/api/memory/shards') {
+        const rawWs = parsedUrl.searchParams.get('workspaceId') || 'ws-default';
+        const reqWsId = rawWs === 'ws1' ? 'ws-default' : rawWs;
+        const campaignId = parsedUrl.searchParams.get('campaignId') || null;
+        const seatId = parsedUrl.searchParams.get('seatId') || null;
+        const synthesis = synthesizeCampaignShards(memoryIndexState, {
+          workspaceId: reqWsId,
+          campaignId,
+          seatId,
+        });
+        return sendJson(res, 200, {
+          ok: true,
+          memoryAuthority: 'retrieval_pointer_only',
+          ...synthesis,
+        });
+      }
+
+      if (req.method === 'POST' && parsedUrl.pathname === '/api/memory/retract') {
+        const payload = bodyBuf.length > 0 ? JSON.parse(bodyBuf.toString('utf8')) : {};
+        const rawWs = payload.workspaceId || 'ws-default';
+        const reqWsId = rawWs === 'ws1' ? 'ws-default' : rawWs;
+        const result = invalidateMemoryPointersByRetraction(memoryIndexState, workspaceState, {
+          symbol: payload.symbol || null,
+          artifactId: payload.artifactId || null,
+          reportDigest: payload.reportDigest || null,
+          reason: payload.reason || 'editor_downgrade_or_retraction',
+        });
+        saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
+        savePersistedWorkspaceState(runtime, workspaceState);
+        return sendJson(res, 200, {
+          ok: true,
+          workspaceId: reqWsId,
+          memoryAuthority: 'retrieval_pointer_only',
+          ...result,
         });
       }
 
@@ -9793,22 +9964,39 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         }
         const recentTurns = crossSeatCtx.recentTurnsBlock;
 
+        // STEP 1 OF EXECUTION (PRIOR TO SKILLS): Search Seat Memory Index first
+        workspaceState.globalMemory = sanitizeGlobalMemoryForUniversalSop(workspaceState.globalMemory || []);
+        const memoryIndexQueryResult = querySeatMemoryIndex(memoryIndexState, {
+          query: userPrompt,
+          seatId: seat.id,
+          workspaceId: 'ws-default',
+          limit: 5,
+          runtime,
+          workspaceState,
+        });
+        const memoryIndexEnvelopeNote = formatSeatMemoryIndexEnvelopeForPrompt(memoryIndexQueryResult);
+
         const globalMemSnapshot = (workspaceState.globalMemory || [])
           .map((m) => `  • [${m.key}]: ${m.content}`)
           .join('\n');
         const seatMemList = workspaceState.seatMemory?.[seat.id] || [];
         const seatMemSnapshot = seatMemList.map((m) => `  • [${m.key}]: ${m.content}`).join('\n');
 
-        const pinnedSkillsDocs = selectedSkills
+        // STEP 2 OF EXECUTION: Memory-Guided & Explicitly Pinned Skills (@skill)
+        const effectiveTurnSkills = Array.from(
+          new Set([...selectedSkills, ...(memoryIndexQueryResult.recommendedSkills || [])])
+        );
+        const pinnedSkillsDocs = effectiveTurnSkills
           .map((sName) => {
             const found = [...runtime.sharedStore.skills.values()].find((sk) => sk.name === sName);
             if (!found) return '';
+            const isFromMemory = !selectedSkills.includes(sName);
             const dirs = Array.isArray(found.config?.improvementDirections) ? found.config.improvementDirections : [];
             const dirsText = dirs.length
               ? `\n    Active Improving Directions (${dirs.length}):\n` +
                 dirs.map((d, idx) => `      ${idx + 1}. ${typeof d === 'object' ? d.direction : d}`).join('\n')
               : '';
-            return `  • @skill:${found.name}: ${found.description}${dirsText}\n    ${found.skillMd || ''}`;
+            return `  • @skill:${found.name}${isFromMemory ? ' [Recommended by Step-1 Memory Index]' : ''}: ${found.description}${dirsText}\n    ${found.skillMd || ''}`;
           })
           .filter(Boolean)
           .join('\n');
@@ -10007,6 +10195,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           crossSeatCtx.handoffBlock || '',
           formatInstruction,
           architectLoopProtocol,
+          memoryIndexEnvelopeNote || '',
           liveMcpPayload || '',
           globalMemSnapshot ? `ArchonOS Global Memory:\n${globalMemSnapshot}` : '',
           seatMemSnapshot ? `Seat-Level Memory (seat:${seat.id}):\n${seatMemSnapshot}` : '',
@@ -10329,6 +10518,35 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           sess.updatedAt = new Date().toISOString();
           savePersistedWorkspaceState(runtime, workspaceState);
 
+          try {
+            recordExecutionMemoryPointer(memoryIndexState, {
+              pointerId: `ptr-${assistantMsgId}`,
+              workspaceId: 'ws-default',
+              sessionId: sess.id,
+              messageId: assistantMsgId,
+              seatId: seat.id,
+              delegatedFromSeat,
+              routedByCos,
+              routingReason,
+              engine: execResult.engine || engine,
+              kind: artifactUpdated
+                ? 'artifact-evolution'
+                : harvestOut.files.length > 0
+                  ? 'deliverable-generation'
+                  : 'chat-turn-execution',
+              userPrompt,
+              replyText: finalReply,
+              artifactUpdated,
+              generatedFiles: harvestOut.files,
+              selectedSkills,
+              selectedMcps,
+              outcome: execResult.ok ? 'completed' : 'failed',
+              latencyMs: execResult.latencyMs,
+              createdAt: sess.updatedAt,
+            });
+            saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
+          } catch (_) {}
+
           return {
             finalReply,
             harvest,
@@ -10629,10 +10847,26 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           runtime.sharedStore.schedules.set('sched-infinite-rsi-architect-loop', schedObj);
         }
 
+        let dreamReport = { ok: false };
+        try {
+          bootstrapMemoryIndexFromHistory(memoryIndexState, { runtime, workspaceState });
+          dreamReport = dreamConsolidateCrossSeatMemory(memoryIndexState, {
+            runtime,
+            workspaceState,
+            repoRoot: REPO_ROOT,
+            writeWikiToDisk: true,
+            nowIso,
+          });
+          saveMemoryIndex(MEMORY_INDEX_FILE, memoryIndexState);
+        } catch (dreamErr) {
+          dreamReport = { ok: false, error: dreamErr?.message || String(dreamErr) };
+        }
+
         const summaryMd = [
           `### ♾️ Infinite Self-Improvement (RSI) Cron Tick #${tickNum} — \`Antigravity ⇄ seat:${selectedSeatId}\``,
           `- **Coordinated Seat**: \`seat:${selectedSeatId}\` (${seat?.name_en || selectedSeatId} • CLI Hand: \`${engine}\`)`,
           `- **Canonical Skill Evolved In-Place**: \`@skill:${evolvedSkillName || 'archon-project-10round-rsi'}\` (\`Harness2 k=3 PASS\`)`,
+          `- **Seat Memory v5.0 Dreaming**: \`${dreamReport.ok ? `PASS (${dreamReport.turnsReplayed} turns • ${dreamReport.wikiPagesBuilt} wiki pages • ${dreamReport.agoraRulesExported || 0} Agora rules)` : 'SKIPPED'}\``,
           `- **Antigravity Bridge Inbox**: **${openTickets.length} open item(s)** / ${(bridge.feedbackInbox || []).length} total`,
           `- **Next Seat in Rotation**: \`seat:${seatRotation[tickNum % seatRotation.length]}\` (Cron: \`0 */2 * * *\`)`,
           ``,

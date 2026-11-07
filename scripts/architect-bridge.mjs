@@ -187,7 +187,18 @@ async function main() {
     return;
   }
 
-  console.error(`Unknown command: ${cmd}. Use: inbox | rsi-tick | guide | feedback | reply`);
+  if (cmd === 'dream' || cmd === 'memory-dream') {
+    const data = await fetchBridgeApi('/api/memory/dream', {
+      method: 'POST',
+      body: JSON.stringify({
+        writeWikiToDisk: true,
+      }),
+    });
+    console.log(JSON.stringify(data, null, 2));
+    return;
+  }
+
+  console.error(`Unknown command: ${cmd}. Use: inbox | rsi-tick | dream | guide | feedback | reply`);
   process.exit(1);
 }
 

@@ -2673,12 +2673,21 @@
             <div id="cos-vault-folders-box" style="display:flex; flex-direction:column; gap:6px;"></div>
           </div>
 
-          <!-- Collapsible Drawer 1: Global Memory & Seat-Level Memory -->
+          <!-- Collapsible Drawer 1: Global Memory, Seat-Level Memory & Seat Memory v5.0 (Memory-as-Index + Dreaming + Anti-Borges Wiki) -->
           <div class="chat-drawer" id="chat-memory-drawer">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <strong style="color:var(--cyan); font-size:11.5px;">🧠 Global &amp; Seat-Level Memory (Auto-Injected Delta Context)</strong>
-              <span class="mono" style="font-size:10px; color:var(--text-secondary);">Tip: Type <code>Remember: ...</code> or <code>/memory</code> in chat</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+              <strong style="color:var(--cyan); font-size:11.5px;">🧠 Seat Memory v5.0 · Cross-Seat Dreaming, Anti-Borges Wiki &amp; Epistemic Pointers</strong>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-emerald" id="btn-drawer-dream-now" style="padding:2px 8px; font-size:10px;" onclick="window.triggerCrossSeatDreamNow()">🌙 Dream Now</button>
+                <span class="mono" style="font-size:10px; color:var(--text-secondary);">Tip: Type <code>Remember: ...</code> or <code>/memory</code> in chat</span>
+              </div>
             </div>
+            <div id="memory-role-archetype-bar" style="padding:5px 8px; margin-bottom:7px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); border-radius:5px; font-size:10.5px; color:var(--text-primary);"></div>
+            <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center;">
+              <input type="text" id="memory-index-search-input" oninput="window.searchSeatMemoryIndex(this.value)" placeholder="🔍 Fast-search execution history pointers (turn://, artifact://, file://, ticker, topic)..." style="flex:1; background:var(--bg-void); border:1px solid rgba(56,189,248,0.4); color:var(--text-primary); padding:4px 8px; border-radius:4px; font-size:10.5px; font-family:var(--font-mono);" />
+              <button type="button" class="btn" style="padding:3px 8px; font-size:10px;" onclick="window.searchSeatMemoryIndex('')">Reset</button>
+            </div>
+            <div id="memory-index-pointer-hits" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px; max-height:150px; overflow-y:auto;"></div>
             <form onsubmit="addMemoryFact(event)" style="display:flex; gap:6px; margin-bottom:8px;">
               <select id="memory-scope-select" style="background:var(--bg-void); color:var(--cyan); border:1px solid var(--border-strong); border-radius:4px; padding:3px 6px; font-size:10.5px; font-family:var(--font-mono);">
                 <option value="global">🌐 Global Memory</option>
@@ -3146,6 +3155,26 @@
             </thead>
             <tbody id="seats-crud-tbody"></tbody>
           </table>
+        </div>
+
+        <!-- Seat Memory v5.0 Architecture Panel (Role-Differentiated Memory + Offline Dreaming + Anti-Borges Wiki + Verbatim Shards) -->
+        <div class="card-panel" style="margin-top:16px; border-color:rgba(16,185,129,0.45);">
+          <div class="card-header">
+            <div>
+              <div class="card-title" style="font-size:14px; color:var(--emerald);">
+                🧠 Seat Memory v5.0 — Cross-Seat Dreaming (`agy / claude / codex`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
+              </div>
+              <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                Every seat turn passes the Fable-5 Salience Gate, extracts Closed-Loop <code>Rule + Trap Warning</code> metadata, consolidates via 2-Hour Offline Dreaming against raw transcripts, and fuses <code>wiki://</code> maps with <code>turn://</code> / <code>artifact://</code> / <code>file://</code> pointers.
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="seats-page-memory-search" oninput="window.searchSeatMemoryIndex(this.value)" placeholder="🔍 Filter pointer &amp; wiki index..." style="background:var(--bg-void); border:1px solid var(--border-strong); color:var(--text-primary); padding:4px 8px; border-radius:4px; font-size:11px; font-family:var(--font-mono); width:220px;" />
+              <button class="btn btn-emerald" id="btn-seats-dream-now" onclick="window.triggerCrossSeatDreamNow()">🌙 Dream &amp; Consolidate Now</button>
+              <button class="btn" onclick="window.loadMemories()">↻ Refresh Index</button>
+            </div>
+          </div>
+          <div id="seats-page-memory-v3-panel" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
       </div>
     </main>
@@ -7940,8 +7969,11 @@
     };
 
     // =========================================================================
-    // Global Memory & Seat-Level Memory Management
+    // Global Memory, Seat-Level Memory & Seat Memory v5.0 (`Memory-as-Index`)
     // =========================================================================
+    window.memoryIndexQuery = '';
+    let memorySearchDebounceTimer = null;
+
     window.toggleMemoryDrawer = function () {
       const dr = document.getElementById('chat-memory-drawer');
       const sc = document.getElementById('chat-schedules-drawer');
@@ -7952,12 +7984,81 @@
       }
     };
 
+    window.searchSeatMemoryIndex = function (q) {
+      window.memoryIndexQuery = String(q || '');
+      const inp1 = document.getElementById('memory-index-search-input');
+      if (inp1 && inp1.value !== window.memoryIndexQuery) inp1.value = window.memoryIndexQuery;
+      const inp2 = document.getElementById('seats-page-memory-search');
+      if (inp2 && inp2.value !== window.memoryIndexQuery) inp2.value = window.memoryIndexQuery;
+      clearTimeout(memorySearchDebounceTimer);
+      memorySearchDebounceTimer = setTimeout(() => {
+        window.loadMemories();
+      }, 150);
+    };
+
+    window.openMemoryPointerUri = function (uri) {
+      const raw = String(uri || '').trim();
+      if (!raw) return;
+      if (raw.startsWith('artifact://')) {
+        const artId = raw.slice('artifact://'.length).split('@')[0];
+        if (typeof window.selectCanvasArtifact === 'function') {
+          window.selectCanvasArtifact(artId);
+          window.switchView('workbench');
+        }
+      } else if (raw.startsWith('file://')) {
+        const fPath = raw.slice('file://'.length);
+        if (typeof window.previewFileOnRight === 'function') {
+          window.previewFileOnRight(fPath, 'rendered', '');
+          window.switchView('workbench');
+        }
+      } else if (raw.startsWith('skill://')) {
+        const skName = raw.slice('skill://'.length);
+        if (typeof window.previewFileOnRight === 'function') {
+          window.previewFileOnRight(`.archon/skills/${skName}/SKILL.md`, 'rendered', '');
+          window.switchView('workbench');
+        }
+      } else if (raw.startsWith('wiki://')) {
+        const wikiFile = raw.slice('wiki://'.length);
+        if (typeof window.previewFileOnRight === 'function') {
+          window.previewFileOnRight(`.archon/memory-wiki/${wikiFile}`, 'rendered', '');
+          window.switchView('workbench');
+        }
+      } else if (raw.startsWith('turn://')) {
+        window.switchView('workbench');
+      }
+    };
+
+    window.triggerCrossSeatDreamNow = async function () {
+      const btn1 = document.getElementById('btn-drawer-dream-now');
+      const btn2 = document.getElementById('btn-seats-dream-now');
+      if (btn1) btn1.textContent = '🌙 Dreaming...';
+      if (btn2) btn2.textContent = '🌙 Dreaming...';
+      try {
+        await fetch('/api/memory/dream', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ writeWikiToDisk: true }),
+        });
+        await window.loadMemories();
+      } catch (err) {
+        console.warn('triggerCrossSeatDreamNow error:', err);
+      } finally {
+        if (btn1) btn1.textContent = '🌙 Dream Now';
+        if (btn2) btn2.textContent = '🌙 Dream & Consolidate Now';
+      }
+    };
+
     window.loadMemories = async function () {
       try {
-        const res = await fetch('/api/memory').then((r) => r.json());
+        const activeSeat = selectedSeatId || 'chief-of-staff';
+        const q = encodeURIComponent(window.memoryIndexQuery || '');
+        const res = await fetch(
+          `/api/memory?workspaceId=ws1&seatId=${encodeURIComponent(activeSeat)}&q=${q}`
+        ).then((r) => r.json());
         if (res && res.ok) {
           globalMemoryCache = res.globalMemory || [];
           seatMemoryCache = res.seatMemory || {};
+          window.memoryIndexCache = res.memoryIndex || null;
           window.renderMemoriesUI();
         }
       } catch (err) {
@@ -7966,8 +8067,14 @@
     };
 
     window.renderMemoriesUI = function () {
-      const seatList = seatMemoryCache[selectedSeatId] || [];
-      const totalCount = globalMemoryCache.length + Object.values(seatMemoryCache).reduce((a, b) => a + (Array.isArray(b) ? b.length : 0), 0);
+      const activeSeat = selectedSeatId || 'chief-of-staff';
+      const seatList = seatMemoryCache[activeSeat] || [];
+      const idx = window.memoryIndexCache || {};
+      const ptrCount = Number(idx.totalIndexedPointers || 0);
+      const totalCount =
+        globalMemoryCache.length +
+        Object.values(seatMemoryCache).reduce((a, b) => a + (Array.isArray(b) ? b.length : 0), 0) +
+        ptrCount;
       const badge = document.getElementById('memory-count-badge');
       if (badge) badge.textContent = String(totalCount);
 
@@ -7975,6 +8082,217 @@
       if (gCount) gCount.textContent = String(globalMemoryCache.length);
       const sCount = document.getElementById('seat-mem-count');
       if (sCount) sCount.textContent = String(seatList.length);
+
+      // 1. Render Active Seat Role-Differentiated Memory Schema Bar
+      const roleBar = document.getElementById('memory-role-archetype-bar');
+      const roleSchema = idx.activeSeatSchema || null;
+      const cosAssets = idx.cosAssetOverview || null;
+      const recSkills = Array.isArray(idx.recommendedSkills) ? idx.recommendedSkills : [];
+      if (roleBar && roleSchema) {
+        const facetsStr = (roleSchema.facets || []).map((f) => `<code>${escapeHtml(f)}</code>`).join(' · ');
+        const recSkillsBadge =
+          recSkills.length > 0
+            ? `<div class="mono" style="font-size:9.5px; color:#C7D2FE; margin-top:2px;">🧬 Step 1 Memory → Step 2 Recommended Skills: ${recSkills.map((sk) => `<code>skill://${escapeHtml(sk)}</code>`).join(' · ')}</div>`
+            : '';
+        const cosMetaBadge =
+          activeSeat === 'chief-of-staff' && cosAssets
+            ? `<div class="mono" style="font-size:9.5px; color:var(--emerald); margin-top:3px;">👑 CoS Omniscient Asset Map: <strong>${cosAssets.totalSeats}</strong> Seats · <strong>${cosAssets.totalArtifacts}</strong> Canvas Artifacts · <strong>${cosAssets.totalSkills}</strong> Skills · <strong>${cosAssets.totalMcps}</strong> MCPs · <strong>${cosAssets.totalIndexedPointers}</strong> Execution Pointers · <strong>${cosAssets.totalAlignmentRules}</strong> Alignment Rules · <strong>${cosAssets.totalVerbatimShards ?? 0}</strong> Single-Writer Shards</div>`
+            : '';
+        const dreamRep = idx.lastDreamReport || null;
+        const wikiObj = idx.domainWiki || null;
+        const dreamBadge = dreamRep
+          ? `<div class="mono" style="font-size:9.5px; color:#A7F3D0; margin-top:3px;">🌙 Offline Dreaming (<code>agy / claude / codex</code>): <strong>${Number(dreamRep.transcriptsReplayed || 0)}</strong> turns replayed · <strong>${Number(dreamRep.brokenLinksRepaired || 0)}</strong> links repaired · <strong>${Number(dreamRep.wikiTopicsBuilt || wikiObj?.topics?.length || 0)}</strong> wiki pages · compression <code>${Number(dreamRep.wikiCompressionRatio || wikiObj?.compressionRatio || 0)} &lt;= 0.15</code> (${dreamRep.antiBorgesGuardPassed !== false ? 'Anti-Borges PASS' : 'WARN'})</div>`
+          : '';
+        roleBar.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span><strong>seat:${escapeHtml(activeSeat)}</strong> → <span style="color:var(--cyan); font-weight:700;">${escapeHtml(roleSchema.label || roleSchema.archetype)}</span> <span class="badge badge-emerald" style="font-size:8.5px; padding:1px 5px; margin-left:4px;">Step 1: Memory Prior to Skills (v5.0)</span></span>
+            <span class="mono" style="font-size:9.5px; color:var(--text-secondary);">Indexed Pointers: <strong>${ptrCount}</strong></span>
+          </div>
+          <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Facets: ${facetsStr}</div>
+          ${recSkillsBadge}
+          ${cosMetaBadge}
+          ${dreamBadge}
+        `;
+      }
+
+      // 2. Render Execution History Pointer Hits (`turn://`, `artifact://`, `file://`, `wiki://`) in Chat Drawer
+      const ptrBox = document.getElementById('memory-index-pointer-hits');
+      const hits = Array.isArray(idx.topPointerHits) ? idx.topPointerHits : [];
+      const alignHits = Array.isArray(idx.alignmentHits) ? idx.alignmentHits : [];
+      const wikiHits = Array.isArray(idx.wikiHits) ? idx.wikiHits : [];
+      const renderUriPills = (uris) =>
+        (uris || [])
+          .slice(0, 4)
+          .map(
+            (u) =>
+              `<button type="button" class="btn" style="padding:1px 6px; font-size:9px; font-family:var(--font-mono); border-color:rgba(56,189,248,0.4); color:var(--cyan);" onclick="window.openMemoryPointerUri('${escapeHtml(u)}')" title="Dereference pointer ${escapeHtml(u)}">${u.startsWith('artifact://') ? '🎨 ' : u.startsWith('file://') ? '📄 ' : u.startsWith('skill://') ? '🧬 ' : u.startsWith('wiki://') ? '📚 ' : '💬 '}${escapeHtml(u.length > 42 ? u.slice(0, 40) + '…' : u)}</button>`
+          )
+          .join(' ');
+      const renderLearningRuleBadge = (h) => {
+        const lr = h?.learningRule;
+        const ep = h?.epistemicProvenance?.verificationStatus;
+        if (ep === 'retracted_or_challenged' || lr?.ruleStatus === 'retracted_or_challenged') {
+          return `<span class="badge" style="font-size:8.5px; padding:1px 5px; background:rgba(239,68,68,0.18); color:#FCA5A5; border:1px solid rgba(239,68,68,0.4);">🚫 Retracted / Quarantined</span>`;
+        }
+        if (h?.outcome === 'corrected_by_dreaming') {
+          return `<span class="badge" style="font-size:8.5px; padding:1px 5px; background:rgba(16,185,129,0.2); color:#6EE7B7; border:1px solid rgba(16,185,129,0.45);">🌙 Dreaming Corrected</span>`;
+        }
+        if (lr?.trapWarning) {
+          return `<span class="badge" style="font-size:8.5px; padding:1px 5px; background:rgba(245,158,11,0.18); color:#FCD34D; border:1px solid rgba(245,158,11,0.45);" title="${escapeHtml(lr.trapWarning)}">⚠️ Trap Warning</span>`;
+        }
+        if (lr?.ruleStatus === 'confirmed_rule') {
+          return `<span class="badge badge-emerald" style="font-size:8.5px; padding:1px 5px;" title="${escapeHtml(lr.howVerified || '')}">✅ Confirmed Rule</span>`;
+        }
+        return `<span class="badge" style="font-size:8.5px; padding:1px 5px; background:rgba(148,163,184,0.14); color:var(--text-secondary);">🧪 Pointer Hint</span>`;
+      };
+
+      if (ptrBox) {
+        const wikiHtml = wikiHits
+          .slice(0, 2)
+          .map(
+            (w) => `
+            <div style="padding:4px 7px; background:rgba(99,102,241,0.09); border:1px solid rgba(99,102,241,0.38); border-radius:4px; font-size:10px;">
+              <div style="display:flex; justify-content:space-between; gap:6px;">
+                <span class="mono" style="color:#C7D2FE; font-weight:700;">📚 Fused Domain Wiki → seat:${escapeHtml(w.seatId)} (${escapeHtml((w.engines || []).join('/') || 'multi-hand')})</span>
+                <span class="mono" style="color:var(--text-muted);">score:${Number(w.matchScore || 0)}</span>
+              </div>
+              <div style="color:var(--text-secondary); margin:2px 0;">${escapeHtml(w.title || w.slug)} · ${Number(w.artifactCount || 0)} artifacts · ${Number(w.fileCount || 0)} files</div>
+              <div style="display:flex; gap:4px; flex-wrap:wrap;">${renderUriPills([w.wikiUri || `wiki://${w.slug}.md`, ...(w.artifacts || []).slice(0, 2)])}</div>
+            </div>`
+          )
+          .join('');
+        const alignHtml = alignHits
+          .slice(0, 2)
+          .map(
+            (r) => `
+            <div style="padding:4px 7px; background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.35); border-radius:4px; font-size:10px;">
+              <div style="display:flex; justify-content:space-between; gap:6px;">
+                <span class="mono" style="color:var(--emerald); font-weight:700;">🧭 CoS Alignment Rule → seat:${escapeHtml(r.targetSeatId)} (${escapeHtml(r.preferredEngine || 'cli')})</span>
+                <span class="mono" style="color:var(--text-muted);">hits:${Number(r.hitCount || 1)}</span>
+              </div>
+              <div style="color:var(--text-secondary); margin:2px 0;">${escapeHtml(r.rationale || r.pattern || '')}</div>
+              <div style="display:flex; gap:4px; flex-wrap:wrap;">${renderUriPills(r.targetUris)}</div>
+            </div>`
+          )
+          .join('');
+        const ptrHtml = hits
+          .slice(0, 5)
+          .map(
+            (h) => `
+            <div style="padding:4px 7px; background:var(--bg-void); border:1px solid var(--border); border-radius:4px; font-size:10px;">
+              <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; flex-wrap:wrap;">
+                <span class="mono" style="color:#C7D2FE; font-weight:600;">⚡ [seat:${escapeHtml(h.seatId)}/${escapeHtml(h.engine || 'cli')} · ${escapeHtml(h.kind)}] ${renderLearningRuleBadge(h)}</span>
+                <span class="mono" style="color:var(--text-muted);">score:${Number(h.hitScore || 0)}</span>
+              </div>
+              <div style="color:var(--text-primary); margin:2px 0; line-height:1.35;">${escapeHtml(h.summary || h.promptExcerpt || '')}</div>
+              ${h.learningRule?.trapWarning ? `<div class="mono" style="font-size:9.5px; color:#FCD34D; margin:2px 0;">⚠️ Trap: ${escapeHtml(h.learningRule.trapWarning)}</div>` : ''}
+              <div style="display:flex; gap:4px; flex-wrap:wrap;">${renderUriPills(h.targets)}</div>
+            </div>`
+          )
+          .join('');
+        ptrBox.innerHTML =
+          wikiHtml + alignHtml + ptrHtml ||
+          `<div class="mono" style="font-size:10px; color:var(--text-muted); padding:4px;">No matching execution pointers found.</div>`;
+      }
+
+      // 3. Render Full Seat Memory v5.0 Panel on `#view-seats`
+      const pagePanel = document.getElementById('seats-page-memory-v3-panel');
+      if (pagePanel && roleSchema) {
+        const wikiTopicsAll = Array.isArray(idx.domainWiki?.topics) ? idx.domainWiki.topics : [];
+        const dreamRep = idx.lastDreamReport || null;
+        const agoraPlaybook = idx.agoraDreamPlaybook || null;
+        pagePanel.innerHTML = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="padding:10px; background:var(--bg-void); border:1px solid rgba(56,189,248,0.35); border-radius:6px;">
+              <div class="mono" style="font-size:11.5px; font-weight:700; color:var(--cyan); margin-bottom:4px;">
+                🪑 Active Seat Memory Mechanism: <code>seat:${escapeHtml(activeSeat)}</code>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-primary); font-weight:600; margin-bottom:4px;">${escapeHtml(roleSchema.label || roleSchema.archetype)}</div>
+              <div style="font-size:11px; color:var(--text-secondary); line-height:1.45; margin-bottom:6px;">${escapeHtml(roleSchema.description || '')}</div>
+              <div class="mono" style="font-size:10px; color:#A5F3FC;">Preferred URI Schemes: ${(roleSchema.preferredUriSchemes || []).map((s) => `<code>${escapeHtml(s)}</code>`).join(', ')}</div>
+            </div>
+            <div style="padding:10px; background:var(--bg-void); border:1px solid rgba(16,185,129,0.35); border-radius:6px;">
+              <div class="mono" style="font-size:11.5px; font-weight:700; color:var(--emerald); margin-bottom:4px;">
+                🌙 Cross-Seat Dreaming &amp; L4 Agora Playbook (<code>ws1</code>)
+              </div>
+              <div style="font-size:11px; color:var(--text-secondary); line-height:1.5;">
+                • <strong>Workspace Asset Map</strong>: <code>${cosAssets?.totalSeats ?? 0}</code> Seats · <code>${cosAssets?.totalArtifacts ?? 0}</code> Artifacts · <code>${cosAssets?.totalSkills ?? 0}</code> Skills · <code>${cosAssets?.totalVerbatimShards ?? 0}</code> Verbatim Shards<br/>
+                • <strong>Latest Offline Dream Pass</strong>: <code>${Number(dreamRep?.transcriptsReplayed || 0)}</code> turns replayed · <code>${Number(dreamRep?.brokenLinksRepaired || 0)}</code> links repaired · <code>${Number(dreamRep?.contradictedNotesRewritten || 0)}</code> contradictions rewritten<br/>
+                • <strong>Anti-Borges Wiki &amp; Agora Promotion</strong>: <code>${wikiTopicsAll.length}</code> Wiki Pages (compression <code>${Number(idx.domainWiki?.compressionRatio || 0)} &lt;= 0.15</code>) · <code>${Number(agoraPlaybook?.totalRules || dreamRep?.agoraRulesExported || 0)}</code> rules in <code>${escapeHtml(agoraPlaybook?.libraryDocId || 'archonos-dreamed-seat-rules-v5.json')}</code>
+              </div>
+            </div>
+          </div>
+          <div style="padding:10px; background:var(--bg-void); border:1px solid rgba(99,102,241,0.35); border-radius:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+              <span class="mono" style="font-size:10.5px; color:#C7D2FE; font-weight:700;">📚 L3.5 Cross-Seat &amp; Multi-Hand Domain Wiki Index (<code>.archon/memory-wiki/_index.md</code> · ${wikiTopicsAll.length} Pages)</span>
+              <button type="button" class="btn" style="padding:2px 8px; font-size:9.5px; color:#C7D2FE; border-color:rgba(99,102,241,0.45);" onclick="window.openMemoryPointerUri('wiki://_index.md')">📖 Open _index.md</button>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:6px;">
+              ${
+                wikiTopicsAll
+                  .slice(0, 8)
+                  .map(
+                    (wt) => `
+                    <div style="padding:6px 8px; background:rgba(15,23,42,0.55); border:1px solid var(--border); border-radius:5px; font-size:10px; display:flex; flex-direction:column; justify-content:space-between; gap:4px;">
+                      <div>
+                        <div class="mono" style="color:var(--cyan); font-weight:700;">seat:${escapeHtml(wt.seatId)} (${escapeHtml((wt.engines || []).join('/') || 'cli')})</div>
+                        <div style="color:var(--text-secondary); margin-top:2px;">${escapeHtml(wt.title || wt.slug)}</div>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                        <span class="mono" style="font-size:9px; color:var(--text-muted);">${Number(wt.artifactCount || 0)} art · ${Number(wt.fileCount || 0)} files</span>
+                        <button type="button" class="btn" style="padding:1px 6px; font-size:9px;" onclick="window.openMemoryPointerUri('wiki://${escapeHtml(wt.slug)}.md')">📚 View Wiki</button>
+                      </div>
+                    </div>`
+                  )
+                  .join('') || '<div class="mono" style="font-size:10px; color:var(--text-muted);">Run Dream &amp; Consolidate Now to build cross-seat wiki pages.</div>'
+              }
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <div class="mono" style="font-size:10.5px; color:var(--emerald); font-weight:700; margin-bottom:4px;">🧭 CoS Learned Alignment &amp; Delegation Playbook (${alignHits.length})</div>
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                ${
+                  alignHits
+                    .map(
+                      (r) => `
+                      <div style="padding:6px 8px; background:var(--bg-void); border:1px solid var(--border); border-radius:5px; font-size:10.5px;">
+                        <div style="display:flex; justify-content:space-between;">
+                          <span class="mono" style="color:var(--emerald); font-weight:700;">seat:${escapeHtml(r.targetSeatId)} (${escapeHtml(r.preferredEngine || 'cli')})</span>
+                          <span class="mono" style="color:var(--text-muted);">hits: ${Number(r.hitCount || 1)} · conf: ${Number(r.confidence || 0.95)}</span>
+                        </div>
+                        <div style="color:var(--text-secondary); margin:3px 0;">${escapeHtml(r.rationale || r.pattern || '')}</div>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${renderUriPills(r.targetUris)}</div>
+                      </div>`
+                    )
+                    .join('') || '<div class="mono" style="font-size:10.5px; color:var(--text-muted);">No alignment rules matched.</div>'
+                }
+              </div>
+            </div>
+            <div>
+              <div class="mono" style="font-size:10.5px; color:var(--cyan); font-weight:700; margin-bottom:4px;">⚡ Memory-as-Index Execution Pointers (${hits.length} / ${ptrCount})</div>
+              <div style="display:flex; flex-direction:column; gap:5px; max-height:240px; overflow-y:auto;">
+                ${
+                  hits
+                    .map(
+                      (h) => `
+                      <div style="padding:6px 8px; background:var(--bg-void); border:1px solid var(--border); border-radius:5px; font-size:10.5px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                          <span class="mono" style="color:#C7D2FE; font-weight:700;">seat:${escapeHtml(h.seatId)}/${escapeHtml(h.engine || 'cli')} · ${escapeHtml(h.kind)} ${renderLearningRuleBadge(h)}</span>
+                          <span class="mono" style="color:var(--text-muted);">score:${Number(h.hitScore || 0)}</span>
+                        </div>
+                        <div style="color:var(--text-primary); margin:3px 0;">${escapeHtml(h.summary || '')}</div>
+                        ${h.learningRule?.trapWarning ? `<div class="mono" style="font-size:9.5px; color:#FCD34D; margin:2px 0;">⚠️ Trap: ${escapeHtml(h.learningRule.trapWarning)}</div>` : ''}
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${renderUriPills(h.targets)}</div>
+                      </div>`
+                    )
+                    .join('') || '<div class="mono" style="font-size:10.5px; color:var(--text-muted);">No execution pointers matched.</div>'
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
       const gBox = document.getElementById('global-memory-list');
       if (gBox) {
@@ -7993,7 +8311,7 @@
       if (sBox) {
         sBox.innerHTML =
           seatList.length === 0
-            ? `<div style="color:var(--text-muted); font-size:10.5px;">No seat-specific memories for seat:${escapeHtml(selectedSeatId)} yet.</div>`
+            ? `<div style="color:var(--text-muted); font-size:10.5px;">No seat-specific memories for seat:${escapeHtml(activeSeat)} yet.</div>`
             : seatList
                 .map(
                   (m) => `
