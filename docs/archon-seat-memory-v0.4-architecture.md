@@ -1,5 +1,7 @@
 # ArchonOS Seat Memory v0.3 → v0.4 Architecture: Memory-Prior-to-Skills & Epistemic Pointer Governance
 
+**[English](./archon-seat-memory-v0.4-architecture.md)** | **[简体中文](./archon-seat-memory-v0.4-architecture.zh-CN.md)**
+
 > [!NOTE]
 > **Historical Lineage (`v0.3 → v0.4 → v0.4.5 → v0.5`)**
 > - **Seat Memory v0.3**: Introduced the 4-Layer Hierarchical Memory Stack (`L1–L4`), Asymmetric Role-Differentiated Seat Memory (`seat:chief-of-staff` vs. operator-defined specialist seats `seat:<custom-id>`), and the `Step 1: Memory Prior to Skills` execution invariant.

@@ -1,5 +1,7 @@
 # ArchonOS Seat Memory v0.5 Architecture & Comparative Analysis with Anthropic’s *"The Components of Agent Memory"*
 
+**[English](./archon-seat-memory-v0.5-architecture.md)** | **[简体中文](./archon-seat-memory-v0.5-architecture.zh-CN.md)**
+
 > [!NOTE]
 > **Reference Sources**
 > - **Anthropic Research**: [*"The components of agent memory"*](https://www.anthropic.com/research/components-of-agent-memory) (Published Nov 6, 2026 · Engineering Team, written by Lance Martin)

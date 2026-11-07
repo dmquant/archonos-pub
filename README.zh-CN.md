@@ -4,7 +4,7 @@
 
 **[English (英文)](./README.md) | [简体中文](./README.zh-CN.md)**
 
-**[快速入门指南](./docs/zh-CN/QUICKSTART.md)** • **[系统架构文档](./docs/zh-CN/ARCHITECTURE.md)** • **[Seat Memory v0.5 架构](./docs/archon-seat-memory-v0.5-architecture.md)** • **[配置与治理指南](./docs/zh-CN/CONFIGURATION.md)** • **[战略路线图](./ROADMAP.zh-CN.md)** • **[更新日志](./CHANGELOG.zh-CN.md)**
+**[快速入门指南](./docs/zh-CN/QUICKSTART.md)** • **[系统架构文档](./docs/zh-CN/ARCHITECTURE.md)** • **[Seat Memory v0.5 架构](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md)** • **[Seat Memory v0.4 架构](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md)** • **[配置与治理指南](./docs/zh-CN/CONFIGURATION.md)** • **[战略路线图](./ROADMAP.zh-CN.md)** • **[更新日志](./CHANGELOG.zh-CN.md)**
 
 </div>
 
@@ -58,7 +58,7 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
 
 ## 🧠 Seat Memory v0.5 认知记忆架构（覆盖全席位与 `agy / claude / codex`）
 
-ArchonOS v0.5 在默认预置的**智枢幕僚长（`seat:chief-of-staff`）**、**操作者按需创建的任意专职席位（`seat:<custom-id>`）**与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** 与 **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)**（`v0.3 → v0.4` 认知指针与撤稿隔离规范）。
+ArchonOS v0.5 在默认预置的**智枢幕僚长（`seat:chief-of-staff`）**、**操作者按需创建的任意专职席位（`seat:<custom-id>`）**与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v0.5-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md)** 与 **[`docs/archon-seat-memory-v0.4-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md)**（`v0.3 → v0.4` 认知指针与撤稿隔离规范）。
 
 | 层级 | 作用域与存储路径 | 核心机制 | 认知权威与安全守卫 |
 | :--- | :--- | :--- | :--- |
@@ -179,8 +179,8 @@ npm start
 | **README 项目总览** | [README.md](./README.md) | [README.zh-CN.md](./README.zh-CN.md) |
 | **快速入门指南** | [docs/en/QUICKSTART.md](./docs/en/QUICKSTART.md) | [docs/zh-CN/QUICKSTART.md](./docs/zh-CN/QUICKSTART.md) |
 | **系统架构文档** | [docs/en/ARCHITECTURE.md](./docs/en/ARCHITECTURE.md) | [docs/zh-CN/ARCHITECTURE.md](./docs/zh-CN/ARCHITECTURE.md) |
-| **Seat Memory v0.5 架构规范** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) |
-| **Seat Memory v0.3 → v0.4 历史架构规范** | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) |
+| **Seat Memory v0.5 架构规范** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.zh-CN.md](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md) |
+| **Seat Memory v0.3 → v0.4 历史架构规范** | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) | [docs/archon-seat-memory-v0.4-architecture.zh-CN.md](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md) |
 | **配置与治理指南** | [docs/en/CONFIGURATION.md](./docs/en/CONFIGURATION.md) | [docs/zh-CN/CONFIGURATION.md](./docs/zh-CN/CONFIGURATION.md) |
 | **更新日志与版本记录** | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md) |
 

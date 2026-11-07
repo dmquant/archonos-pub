@@ -179,8 +179,8 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 | **README Overview** | [README.md](./README.md) | [README.zh-CN.md](./README.zh-CN.md) |
 | **Quickstart Guide** | [docs/en/QUICKSTART.md](./docs/en/QUICKSTART.md) | [docs/zh-CN/QUICKSTART.md](./docs/zh-CN/QUICKSTART.md) |
 | **System Architecture** | [docs/en/ARCHITECTURE.md](./docs/en/ARCHITECTURE.md) | [docs/zh-CN/ARCHITECTURE.md](./docs/zh-CN/ARCHITECTURE.md) |
-| **Seat Memory v0.5 Spec** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) |
-| **Seat Memory v0.3 → v0.4 Spec** | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) |
+| **Seat Memory v0.5 Spec** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.zh-CN.md](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md) |
+| **Seat Memory v0.3 → v0.4 Spec** | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) | [docs/archon-seat-memory-v0.4-architecture.zh-CN.md](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md) |
 | **Configuration & Governance** | [docs/en/CONFIGURATION.md](./docs/en/CONFIGURATION.md) | [docs/zh-CN/CONFIGURATION.md](./docs/zh-CN/CONFIGURATION.md) |
 | **Changelog & Versions** | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md) |
 
