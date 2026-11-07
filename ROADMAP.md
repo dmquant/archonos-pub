@@ -83,7 +83,7 @@ Personal & Team RSI OS GA"]
    - Group-level default-deny MCP policy enforcement and access-control lists (ACL) preserving privacy of personal operator seats.
 3. **Federated Provenance & Scoped Capability Leasing (`@archon-os/mesh`)**:
    - 4-provenance bundle exchange (author, issuing station, signature, verification hash) for sharing sanitized skills and canvas views.
-   - Time-bound, scoped seat capability leases: temporary delegation of specialist tasks (e.g. loaning `seat:maritime-quant` analysis capabilities to an allied team member).
+   - Time-bound, scoped seat capability leases: temporary delegation of specialist tasks (e.g. loaning a specialist seat's analysis capabilities to an allied team member).
 
 ---
 
@@ -91,7 +91,7 @@ Personal & Team RSI OS GA"]
 
 ### Phase 4 (`v0.4.x`) — Parallel Multi-Seat DAG & Bidirectional Canvas Bridge
 1. **Chief of Staff Parallel DAG Fan-Out & Subtask Telemetry**:
-   - Upgrade `routeTaskViaChiefOfStaff` from sequential delegation to concurrent multi-seat DAG execution (`seat:deep-research` + `seat:maritime-quant` + `seat:code-architect` running simultaneously).
+   - Upgrade `routeTaskViaChiefOfStaff` from sequential delegation to concurrent multi-seat DAG execution (multiple operator-defined specialist seats running simultaneously).
 2. **Belnap 4-Valued Contradiction Gate (`T / F / Both / Neither`)**:
    - Automated epistemic conflict detection across quantitative feeds and specialist outputs prior to CoS synthesis.
 3. **Two-Way Canvas-to-Chat State Bridge (`window.archonCanvasBridge`) & Visual Diff Studio (`rX ↔ rY`)**:

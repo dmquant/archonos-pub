@@ -2673,10 +2673,10 @@
             <div id="cos-vault-folders-box" style="display:flex; flex-direction:column; gap:6px;"></div>
           </div>
 
-          <!-- Collapsible Drawer 1: Global Memory, Seat-Level Memory & Seat Memory v5.0 (Memory-as-Index + Dreaming + Anti-Borges Wiki) -->
+          <!-- Collapsible Drawer 1: Global Memory, Seat-Level Memory & Seat Memory v0.5 (Memory-as-Index + Dreaming + Anti-Borges Wiki) -->
           <div class="chat-drawer" id="chat-memory-drawer">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
-              <strong style="color:var(--cyan); font-size:11.5px;">🧠 Seat Memory v5.0 · Cross-Seat Dreaming, Anti-Borges Wiki &amp; Epistemic Pointers</strong>
+              <strong style="color:var(--cyan); font-size:11.5px;">🧠 Seat Memory v0.5 · Cross-Seat Dreaming, Anti-Borges Wiki &amp; Epistemic Pointers</strong>
               <div style="display:flex; align-items:center; gap:6px;">
                 <button type="button" class="btn btn-emerald" id="btn-drawer-dream-now" style="padding:2px 8px; font-size:10px;" onclick="window.triggerCrossSeatDreamNow()">🌙 Dream Now</button>
                 <span class="mono" style="font-size:10px; color:var(--text-secondary);">Tip: Type <code>Remember: ...</code> or <code>/memory</code> in chat</span>
@@ -3157,12 +3157,12 @@
           </table>
         </div>
 
-        <!-- Seat Memory v5.0 Architecture Panel (Role-Differentiated Memory + Offline Dreaming + Anti-Borges Wiki + Verbatim Shards) -->
+        <!-- Seat Memory v0.5 Architecture Panel (Role-Differentiated Memory + Offline Dreaming + Anti-Borges Wiki + Verbatim Shards) -->
         <div class="card-panel" style="margin-top:16px; border-color:rgba(16,185,129,0.45);">
           <div class="card-header">
             <div>
               <div class="card-title" style="font-size:14px; color:var(--emerald);">
-                🧠 Seat Memory v5.0 — Cross-Seat Dreaming (`agy / claude / codex`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
+                🧠 Seat Memory v0.5 — Cross-Seat Dreaming (`agy / claude / codex`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
               </div>
               <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
                 Every seat turn passes the Fable-5 Salience Gate, extracts Closed-Loop <code>Rule + Trap Warning</code> metadata, consolidates via 2-Hour Offline Dreaming against raw transcripts, and fuses <code>wiki://</code> maps with <code>turn://</code> / <code>artifact://</code> / <code>file://</code> pointers.
@@ -7969,7 +7969,7 @@
     };
 
     // =========================================================================
-    // Global Memory, Seat-Level Memory & Seat Memory v5.0 (`Memory-as-Index`)
+    // Global Memory, Seat-Level Memory & Seat Memory v0.5 (`Memory-as-Index`)
     // =========================================================================
     window.memoryIndexQuery = '';
     let memorySearchDebounceTimer = null;
@@ -8105,7 +8105,7 @@
           : '';
         roleBar.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span><strong>seat:${escapeHtml(activeSeat)}</strong> → <span style="color:var(--cyan); font-weight:700;">${escapeHtml(roleSchema.label || roleSchema.archetype)}</span> <span class="badge badge-emerald" style="font-size:8.5px; padding:1px 5px; margin-left:4px;">Step 1: Memory Prior to Skills (v5.0)</span></span>
+            <span><strong>seat:${escapeHtml(activeSeat)}</strong> → <span style="color:var(--cyan); font-weight:700;">${escapeHtml(roleSchema.label || roleSchema.archetype)}</span> <span class="badge badge-emerald" style="font-size:8.5px; padding:1px 5px; margin-left:4px;">Step 1: Memory Prior to Skills (v0.5)</span></span>
             <span class="mono" style="font-size:9.5px; color:var(--text-secondary);">Indexed Pointers: <strong>${ptrCount}</strong></span>
           </div>
           <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Facets: ${facetsStr}</div>
@@ -8195,7 +8195,7 @@
           `<div class="mono" style="font-size:10px; color:var(--text-muted); padding:4px;">No matching execution pointers found.</div>`;
       }
 
-      // 3. Render Full Seat Memory v5.0 Panel on `#view-seats`
+      // 3. Render Full Seat Memory v0.5 Panel on `#view-seats`
       const pagePanel = document.getElementById('seats-page-memory-v3-panel');
       if (pagePanel && roleSchema) {
         const wikiTopicsAll = Array.isArray(idx.domainWiki?.topics) ? idx.domainWiki.topics : [];
@@ -8218,7 +8218,7 @@
               <div style="font-size:11px; color:var(--text-secondary); line-height:1.5;">
                 • <strong>Workspace Asset Map</strong>: <code>${cosAssets?.totalSeats ?? 0}</code> Seats · <code>${cosAssets?.totalArtifacts ?? 0}</code> Artifacts · <code>${cosAssets?.totalSkills ?? 0}</code> Skills · <code>${cosAssets?.totalVerbatimShards ?? 0}</code> Verbatim Shards<br/>
                 • <strong>Latest Offline Dream Pass</strong>: <code>${Number(dreamRep?.transcriptsReplayed || 0)}</code> turns replayed · <code>${Number(dreamRep?.brokenLinksRepaired || 0)}</code> links repaired · <code>${Number(dreamRep?.contradictedNotesRewritten || 0)}</code> contradictions rewritten<br/>
-                • <strong>Anti-Borges Wiki &amp; Agora Promotion</strong>: <code>${wikiTopicsAll.length}</code> Wiki Pages (compression <code>${Number(idx.domainWiki?.compressionRatio || 0)} &lt;= 0.15</code>) · <code>${Number(agoraPlaybook?.totalRules || dreamRep?.agoraRulesExported || 0)}</code> rules in <code>${escapeHtml(agoraPlaybook?.libraryDocId || 'archonos-dreamed-seat-rules-v5.json')}</code>
+                • <strong>Anti-Borges Wiki &amp; Agora Promotion</strong>: <code>${wikiTopicsAll.length}</code> Wiki Pages (compression <code>${Number(idx.domainWiki?.compressionRatio || 0)} &lt;= 0.15</code>) · <code>${Number(agoraPlaybook?.totalRules || dreamRep?.agoraRulesExported || 0)}</code> rules in <code>${escapeHtml(agoraPlaybook?.libraryDocId || 'archonos-dreamed-seat-rules-v0.5.json')}</code>
               </div>
             </div>
           </div>

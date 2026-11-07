@@ -7718,7 +7718,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       }
 
       // =========================================================================
-      // Global Memory, Seat-Level Memory & Seat Memory v5.0 (`Memory-as-Index`)
+      // Global Memory, Seat-Level Memory & Seat Memory v0.5 (`Memory-as-Index`)
       // =========================================================================
       if (
         req.method === 'GET' &&
@@ -10866,7 +10866,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           `### ♾️ Infinite Self-Improvement (RSI) Cron Tick #${tickNum} — \`Antigravity ⇄ seat:${selectedSeatId}\``,
           `- **Coordinated Seat**: \`seat:${selectedSeatId}\` (${seat?.name_en || selectedSeatId} • CLI Hand: \`${engine}\`)`,
           `- **Canonical Skill Evolved In-Place**: \`@skill:${evolvedSkillName || 'archon-project-10round-rsi'}\` (\`Harness2 k=3 PASS\`)`,
-          `- **Seat Memory v5.0 Dreaming**: \`${dreamReport.ok ? `PASS (${dreamReport.turnsReplayed} turns • ${dreamReport.wikiPagesBuilt} wiki pages • ${dreamReport.agoraRulesExported || 0} Agora rules)` : 'SKIPPED'}\``,
+          `- **Seat Memory v0.5 Dreaming**: \`${dreamReport.ok ? `PASS (${dreamReport.turnsReplayed} turns • ${dreamReport.wikiPagesBuilt} wiki pages • ${dreamReport.agoraRulesExported || 0} Agora rules)` : 'SKIPPED'}\``,
           `- **Antigravity Bridge Inbox**: **${openTickets.length} open item(s)** / ${(bridge.feedbackInbox || []).length} total`,
           `- **Next Seat in Rotation**: \`seat:${seatRotation[tickNum % seatRotation.length]}\` (Cron: \`0 */2 * * *\`)`,
           ``,

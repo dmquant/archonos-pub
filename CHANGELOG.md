@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.5.0] - 2026-11-07
+
+### Added
+- **ArchonOS Seat Memory v0.5 (`L1–L4` Multi-Seat & Multi-Hand Epistemic Memory)**:
+  - **Single-Writer Verbatim Shards (`100% Fact Survival`)**: Deterministic `shard://<seatId>/<entityId>` append-only verbatim logs preserving exact numbers, ports, endpoints, and dates without LLM summarization loss.
+  - **Query-Time Wiki + Shard + Pointer Fusion**: Single-pass retrieval fusing L3.5 Domain Wiki pages, Single-Writer Verbatim Shards, and L3 Execution Pointers (`turn://`, `artifact://`, `file://`, `skill://`, `mcp://`) before every execution across `seat:chief-of-staff`, any operator-defined specialist seat (`seat:<custom-id>`), and all local CLI hands (`agy`, `claude`, `codex`).
+  - **Anti-Borges Domain Wiki (`Compression <= 0.15`)**: Enforces a strict `< 15%` token compression ratio relative to raw verbatim turns, automatically demoting verbose summaries to 1-line pointer tables.
+  - **Closed-Loop `Rule + Verification + TrapWarning` & L4 Agora Playbook Promotion**: Extracts structured procedural rules and trap warnings (filtered by the Fable-5 Salience Gate) and promotes confirmed rules (`confidence >= 0.90`) to `.archon/agora-library/archonos-dreamed-seat-rules-v0.5.json`.
+
+---
+
 ## [0.1.004] - 2026-10-23
 
 ### Security & Privacy
@@ -27,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.1.002] - 2026-10-22
 
 ### Added
-- **Seat, MCP & Custom Skill Privacy Invariant**: Documented and reinforced isolation boundaries in `README.md` and `README.zh-CN.md`. Except for the Chief of Staff serving as the unified conversational entrance, specialist seats (`code-architect`, `deep-research`, `maritime-quant`, `ops-guardian`), external MCP server handles, and private skills remain invisible and inaccessible to standard/external users.
+- **Seat, MCP & Custom Skill Privacy Invariant**: Documented and reinforced isolation boundaries in `README.md` and `README.zh-CN.md`. Except for the Chief of Staff serving as the unified conversational entrance, specialist seats (`seat:<custom-id>`), external MCP server handles, and private skills remain invisible and inaccessible to standard/external users.
 
 ---
 

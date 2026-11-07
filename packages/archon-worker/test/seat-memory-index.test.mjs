@@ -18,7 +18,7 @@ import {
 } from '../src/seat-memory-index.mjs';
 import { startLocalEdgeServer } from '../src/dev-server.mjs';
 
-test('Seat Memory v3: asymmetric memory role schemas differentiate Chief of Staff Meta-Memory from operator-defined specialist seats', () => {
+test('Seat Memory v0.3: asymmetric memory role schemas differentiate Chief of Staff Meta-Memory from operator-defined specialist seats', () => {
   const cosSchema = getSeatMemoryRoleSchema('chief-of-staff');
   const engSchema = getSeatMemoryRoleSchema('specialist-eng');
   const rschSchema = getSeatMemoryRoleSchema('specialist-research');
@@ -38,7 +38,7 @@ test('Seat Memory v3: asymmetric memory role schemas differentiate Chief of Staf
   assert.ok(Object.keys(SEAT_MEMORY_ROLE_SCHEMAS).length >= 5);
 });
 
-test('Seat Memory v3: Memory-as-Index records ExecutionIndexPointers and fast-directs queries to turn://, artifact://, and file:// URIs', () => {
+test('Seat Memory v0.3: Memory-as-Index records ExecutionIndexPointers and fast-directs queries to turn://, artifact://, and file:// URIs', () => {
   const idx = loadOrInitMemoryIndex(null);
   const ptr = recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',
@@ -80,7 +80,7 @@ test('Seat Memory v3: Memory-as-Index records ExecutionIndexPointers and fast-di
   assert.ok(envelope.includes('artifact://art-telemetry-matrix@r25'));
 });
 
-test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v3 pointers and CoS alignment ledger', async () => {
+test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v0.3 pointers and CoS alignment ledger', async () => {
   const server = startLocalEdgeServer({ port: 0, host: '127.0.0.1' });
   await new Promise((r) => server.once('listening', r));
   const port = server.address().port;
@@ -163,7 +163,7 @@ test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic r
   assert.equal(wsState.seatMemory['specialist-research'][0].verificationStatus, 'retracted_or_challenged');
 });
 
-test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience Gate, Closed-Loop Rule+Trap Extraction, Offline Dreaming & Anti-Borges Wiki', () => {
+test('Seat Memory v0.4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience Gate, Closed-Loop Rule+Trap Extraction, Offline Dreaming & Anti-Borges Wiki', () => {
   const idx = loadOrInitMemoryIndex(null);
 
   // 1. Salience Gate filters out transient status pings that can be read live from /api/health
@@ -290,7 +290,7 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
   assert.ok(updatedBuggyPtr.targets.includes('artifact://art-telemetry-matrix@r17'));
 });
 
-test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Query-Time Wiki+Shard+Pointer Fusion, and L4 Agora Playbook Promotion across all seats & hands', () => {
+test('Seat Memory v0.5: Single-Writer Verbatim Shards (100% fact survival), Query-Time Wiki+Shard+Pointer Fusion, and L4 Agora Playbook Promotion across all seats & hands', () => {
   const idx = loadOrInitMemoryIndex(null);
 
   // 1. Multi-seat & multi-hand Single-Writer Verbatim Shards (no shared-table overwrite contention)
@@ -378,12 +378,12 @@ test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Quer
     writeWikiToDisk: false,
   });
   assert.equal(dreamRes.ok, true);
-  assert.equal(dreamRes.agoraLibraryDocId, 'archonos-dreamed-seat-rules-v5.json');
+  assert.equal(dreamRes.agoraLibraryDocId, 'archonos-dreamed-seat-rules-v0.5.json');
   assert.ok(dreamRes.agoraRulesExported >= 2);
 
   const playbookDirect = exportDreamedAgoraPlaybook(idx, { writeToDisk: false });
-  assert.equal(playbookDirect.libraryDocId, 'archonos-dreamed-seat-rules-v5.json');
-  assert.equal(playbookDirect.version, 'seat-memory.v5.0');
+  assert.equal(playbookDirect.libraryDocId, 'archonos-dreamed-seat-rules-v0.5.json');
+  assert.equal(playbookDirect.version, 'seat-memory.v0.5');
   assert.ok(playbookDirect.rules.some((r) => r.seatId === 'chief-of-staff' && r.engine === 'agy'));
 
   // 3. Query-Time Wiki + Verbatim Shard + Pointer Fusion

@@ -1,4 +1,4 @@
-# ArchonOS Seat Memory v5.0 Architecture & Comparative Analysis with Anthropic’s *"The Components of Agent Memory"*
+# ArchonOS Seat Memory v0.5 Architecture & Comparative Analysis with Anthropic’s *"The Components of Agent Memory"*
 
 > [!NOTE]
 > **Reference Sources**
@@ -27,18 +27,18 @@ Anthropic’s research post starts from Kierkegaard’s observation—*"life can
 
 ---
 
-## 2. ArchonOS Seat Memory v5.0: Cross-Seat & Multi-Hand Architecture
+## 2. ArchonOS Seat Memory v0.5: Cross-Seat & Multi-Hand Architecture
 
-ArchonOS implements **Seat Memory v5.0** at the OS kernel level so the mandatory pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats** (`seat:<custom-id>` registered dynamically via the Workbench or Chief of Staff), and **all local CLI model hands** (`agy`, `claude`, `codex`) inherit the same hippocampal-to-neocortical memory stack:
+ArchonOS implements **Seat Memory v0.5** at the OS kernel level so the mandatory pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats** (`seat:<custom-id>` registered dynamically via the Workbench or Chief of Staff), and **all local CLI model hands** (`agy`, `claude`, `codex`) inherit the same hippocampal-to-neocortical memory stack:
 
 ```mermaid
 flowchart LR
-    subgraph ArchonOS_v5["🏛️ ArchonOS Seat Memory v5.0 (All Seats & CLI Hands: agy / claude / codex)"]
+    subgraph ArchonOS_v0_5["🏛️ ArchonOS Seat Memory v0.5 (All Seats & CLI Hands: agy / claude / codex)"]
         L1["Layer 1 (Top): Sanitized Global SOPs + Step-1 Envelope<br/>Universal methodology + ~1.5 KB URI pointer header"]
         L2["Layer 2: Asymmetric Role-Differentiated Seat Memory<br/>Confirmed Rules + HowVerified + TrapWarnings"]
         L3["Layer 3: Salience-Gated Hippocampal Pointer Graph<br/>turn://, artifact://, file://, skill:// + Epistemic Provenance"]
         L35["Layer 3.5: Anti-Borges Domain Wiki + Single-Writer Verbatim Shards<br/>wiki:// pages (<=15% source bytes) + 100%-Fact-Survival Shards"]
-        L4["Layer 4: Agora Federated Collective Memory<br/>archonos-dreamed-seat-rules-v5.json + Formal Contracts"]
+        L4["Layer 4: Agora Federated Collective Memory<br/>archonos-dreamed-seat-rules-v0.5.json + Formal Contracts"]
         DREAM["🌙 Cross-Seat Dreaming Engine (2-Hour RSI Tick & POST /api/memory/dream)<br/>Replays transcripts → rewrites contradicted notes → repairs links → builds Wiki & L4 Playbook"]
         L3 --> DREAM
         DREAM --> L2
@@ -48,7 +48,7 @@ flowchart LR
     end
 ```
 
-### Core Components of Seat Memory v5.0 (`packages/archon-worker/src/seat-memory-index.mjs`)
+### Core Components of Seat Memory v0.5 (`packages/archon-worker/src/seat-memory-index.mjs`)
 
 1. **Cross-Seat & Multi-Hand Salience Gate (`evaluateTurnSalienceForMemory()`)**
    - Filters out transient status/health pings readable from live APIs across `agy`, `claude`, and `codex`, indexing only turns with artifacts/files, verified rules, failure traps, or explicit operator/CoS routing decisions.
@@ -62,4 +62,4 @@ flowchart LR
 5. **Single-Writer Verbatim Shard Broker (`upsertSeatVerbatimShard()` & `synthesizeCampaignShards()`)**
    - Enforces Harvey LAB’s `72% → 100%` fact-survival rule: each seat/hand writes exclusively to its own partitioned shard (`shard-<workspaceId>-<campaignId>-<seatId>-<entityId>`) with verbatim quotes (`verbatimQuotes[]` + `primaryFilingHash`) before executive synthesis (`POST /api/memory/shard`, `GET /api/memory/shards`).
 6. **Query-Time `Wiki + Verbatim Shard + Pointer` Fusion & L4 Agora Playbook Promotion (`exportDreamedAgoraPlaybook()`)**
-   - Fuses L3.5 Domain Wiki pages (`wikiHits[]`), Single-Writer Verbatim Shards (`shardHits[]`), and L3 Execution Pointers (`hits[]`) in a single sub-millisecond pass before every seat/hand execution, and promotes entity-sanitized confirmed rules to `.archon/agora-library/archonos-dreamed-seat-rules-v5.json`.
+   - Fuses L3.5 Domain Wiki pages (`wikiHits[]`), Single-Writer Verbatim Shards (`shardHits[]`), and L3 Execution Pointers (`hits[]`) in a single sub-millisecond pass before every seat/hand execution, and promotes entity-sanitized confirmed rules to `.archon/agora-library/archonos-dreamed-seat-rules-v0.5.json`.

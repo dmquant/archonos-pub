@@ -1,6 +1,6 @@
 {
   "name": "archon-os",
-  "version": "0.1.004",
+  "version": "0.5.0",
   "license": "MIT",
   "type": "module",
   "description": "ArchonOS — Open-Source Sovereign Personal & Small-Team Intelligent Operating System (Headless Local CLI Federation + R2-First Archon Canvas + Harness2 RSI Skills + Default-Deny MCP Gate)",

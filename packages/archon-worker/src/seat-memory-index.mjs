@@ -1,4 +1,4 @@
-// ArchonOS Seat Memory v5.0: Asymmetric Meta-Memory, Single-Writer Shards & Memory-as-Index Engine
+// ArchonOS Seat Memory v0.5: Asymmetric Meta-Memory, Single-Writer Shards & Memory-as-Index Engine
 //
 // Core Architectural Principles:
 // 1. Asymmetric Memory Mechanisms per Seat Role:
@@ -211,7 +211,7 @@ export const MEMORY_PRIOR_TO_SKILLS_SOP_ENTRY = {
   key: 'memory-prior-to-skills-execution-sop',
   category: 'execution-sop',
   content:
-    'Memory-Prior-to-Skills Execution SOP (Memory v5.0 Epistemic Pointer Spec): The Memory System is prior to Skills for retrieval, but Memory is a Pointer to Evidence, NOT Proof of Truth (memoryAuthority="retrieval_pointer_only"). Cached PASS/Grade-A verdicts in memory are untrusted retrieval hints and can NEVER skip primary-source verification. Unreviewed or synthetic drafts are tagged "unverified_hypothesis" or "retracted_or_challenged" and quarantined from canonical exemplars. Global Memory holds only universal cross-seat SOPs.',
+    'Memory-Prior-to-Skills Execution SOP (Memory v0.5 Epistemic Pointer Spec): The Memory System is prior to Skills for retrieval, but Memory is a Pointer to Evidence, NOT Proof of Truth (memoryAuthority="retrieval_pointer_only"). Cached PASS/Grade-A verdicts in memory are untrusted retrieval hints and can NEVER skip primary-source verification. Unreviewed or synthetic drafts are tagged "unverified_hypothesis" or "retracted_or_challenged" and quarantined from canonical exemplars. Global Memory holds only universal cross-seat SOPs.',
   updatedAt: '2026-11-04T06:30:00.000Z',
 };
 
@@ -281,7 +281,7 @@ export function evaluatePointerEpistemicProvenance({
 }
 
 // =========================================================================
-// ArchonOS Cross-Seat & Multi-Hand Memory v4.5 Enhancements
+// ArchonOS Cross-Seat & Multi-Hand Memory v0.4.5 Enhancements
 // (Universal across ALL seats and ALL CLI Hands: agy, claude, codex)
 // =========================================================================
 
@@ -611,7 +611,7 @@ export function dreamConsolidateCrossSeatMemory(
     nowIso,
   });
 
-  // 5. Promote Confirmed Rules & Failure Traps to L4 Agora Federated Playbook (`archonos-dreamed-seat-rules-v5.json`)
+  // 5. Promote Confirmed Rules & Failure Traps to L4 Agora Federated Playbook (`archonos-dreamed-seat-rules-v0.5.json`)
   const agoraPlaybook = exportDreamedAgoraPlaybook(indexState, {
     repoRoot,
     writeToDisk: writeWikiToDisk,
@@ -920,7 +920,7 @@ export function synthesizeCampaignShards(
 /**
  * Dreaming -> L4 Federated Playbook Promotion (`exportDreamedAgoraPlaybook`):
  * Packages entity-sanitized, cross-seat confirmed rules & failure trap warnings into a structured
- * Federated Library playbook (`archonos-dreamed-seat-rules-v5.json`) for knowledge transfer across
+ * Federated Library playbook (`archonos-dreamed-seat-rules-v0.5.json`) for knowledge transfer across
  * workspaces and remote peer instances.
  */
 export function exportDreamedAgoraPlaybook(
@@ -957,8 +957,8 @@ export function exportDreamedAgoraPlaybook(
   }
 
   const playbook = {
-    libraryDocId: 'archonos-dreamed-seat-rules-v5.json',
-    version: 'seat-memory.v5.0',
+    libraryDocId: 'archonos-dreamed-seat-rules-v0.5.json',
+    version: 'seat-memory.v0.5',
     topologyMode: 'off_lan_agora_only',
     memoryAuthority: 'retrieval_pointer_only',
     exportedAt: nowIso,

@@ -4,7 +4,7 @@
 
 **[English](./README.md) | [简体中文 (Simplified Chinese)](./README.zh-CN.md)**
 
-**[Quickstart Guide](./docs/en/QUICKSTART.md)** • **[System Architecture](./docs/en/ARCHITECTURE.md)** • **[Seat Memory v5.0](./docs/archon-seat-memory-v5-architecture.md)** • **[Configuration & Governance](./docs/en/CONFIGURATION.md)** • **[Strategic Roadmap](./ROADMAP.md)** • **[Changelog](./CHANGELOG.md)**
+**[Quickstart Guide](./docs/en/QUICKSTART.md)** • **[System Architecture](./docs/en/ARCHITECTURE.md)** • **[Seat Memory v0.5](./docs/archon-seat-memory-v0.5-architecture.md)** • **[Configuration & Governance](./docs/en/CONFIGURATION.md)** • **[Strategic Roadmap](./ROADMAP.md)** • **[Changelog](./CHANGELOG.md)**
 
 </div>
 
@@ -47,18 +47,18 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
    - **Local Workstation OR Cloudflare Remote**: Choose between 100% offline local workstation deployment (`127.0.0.1:8790`) or Cloudflare Edge Worker + Remote PWA console.
    - **Remote Sovereign Chat Bridge**: Submit chat turns directly from your mobile/remote PWA (`https://<worker>.workers.dev`), queued securely into Cloudflare R2 and claimed exclusively by your local MacBook daemon (`archon-sync-edge.mjs`). Local CLI hands (`agy`, `claude`, `codex`) execute with private data/tools/MCPs on-device, and reply back to the remote UI with live status updates (`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`).
    - **Live Chat History Synchronization**: Two-way encrypted sync between local `workspace-state.json` and Cloudflare R2, with automatic 30s background sync watcher, manual 1-click sync badge, and separate local-hand execution readiness monitoring.
-9. **ArchonOS Seat Memory v5.0 (`L1–L4` Multi-Seat & Multi-Hand Epistemic Memory)**:
+9. **ArchonOS Seat Memory v0.5 (`L1–L4` Multi-Seat & Multi-Hand Epistemic Memory)**:
    - **Step-1 Memory-Prior-to-Skills Pipeline**: Every chat turn across all seats and CLI hands (`agy`, `claude`, `codex`) executes Step-1 memory retrieval *before* loading `@skill` or `@mcp` specifications, enforcing strict `memoryAuthority: "retrieval_pointer_only"` provenance.
    - **Single-Writer Verbatim Shards (`100% Fact Survival`)**: Eliminates multi-agent "telephone game" summarization loss. Specialist seats write structured verbatim quotes, verified metrics, and trap warnings to dedicated per-seat shards (`.archon/memory-shards/<workspace>/<campaign>/seat-<id>.json`), synthesized deterministically at campaign boundaries (`POST /api/memory/shard`, `GET /api/memory/shards`).
    - **Query-Time `Wiki + Verbatim Shard + Pointer` Fusion**: Fuses high-level **L3.5 Domain Wiki** maps (`wiki://<slug>.md`) with **Single-Writer Verbatim Shards** (`shard://<campaign>/<seat>`) and **L3 Epistemic Pointers** (`turn://`, `artifact://`, `file://`, `skill://`) in a single Step-1 prompt envelope.
    - **Offline Cross-Seat "Dreaming" & Anti-Borges Guard (`<= 0.15`)**: Runs automatically on the 2-hour RSI tick (or on demand via `node scripts/architect-bridge.mjs dream` / `POST /api/memory/dream`) to replay raw transcripts, rewrite contradicted turns, repair stale `artifact://@rN` links, and compile `.archon/memory-wiki/` under a strict `<= 0.15` compression ratio cap.
-   - **Closed-Loop `Rule + Verification + TrapWarning` & L4 Agora Playbook Promotion**: Extracts structured procedural rules and trap warnings from every salient turn (filtered by the Fable-5 Salience Gate) and promotes confirmed rules (`confidence >= 0.90`) to `.archon/agora-library/archonos-dreamed-seat-rules-v5.json`.
+   - **Closed-Loop `Rule + Verification + TrapWarning` & L4 Agora Playbook Promotion**: Extracts structured procedural rules and trap warnings from every salient turn (filtered by the Fable-5 Salience Gate) and promotes confirmed rules (`confidence >= 0.90`) to `.archon/agora-library/archonos-dreamed-seat-rules-v0.5.json`.
 
 ---
 
-## 🧠 Seat Memory v5.0 Architecture (`L1–L4` Across All Seats & CLI Hands)
+## 🧠 Seat Memory v0.5 Architecture (`L1–L4` Across All Seats & CLI Hands)
 
-ArchonOS v5.0 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specification: **[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**.
+ArchonOS v0.5 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specification: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)**.
 
 | Tier | Scope & Storage | Core Mechanism | Authority & Safeguard |
 | :--- | :--- | :--- | :--- |
@@ -66,7 +66,7 @@ ArchonOS v5.0 implements a 4-tier epistemic memory hierarchy across the pre-seed
 | **L2 · Role-Scoped Rules** | `.archon/workspace-state.json` (`globalMemory` + `seatMemory`) | Asymmetric role schemas (`omniscient-meta-memory` for CoS vs. domain indexes for specialists) | Sanitized for universal SOPs only; zero entity/ticker leakage |
 | **L3 · Epistemic Pointers & Shards** | `.archon/memory-index.json` + `.archon/memory-shards/` | Fable-5 Salience Gate + Closed-Loop `Rule + Verification + TrapWarning` + Single-Writer Verbatim Shards | `retrieval_pointer_only` + 1-call cascade retraction (`POST /api/memory/retract`) |
 | **L3.5 · Domain Wiki** | `.archon/memory-wiki/_index.md` + `<seat>-<topic>.md` | 2-Hour Offline Cross-Seat "Dreaming" consolidation against raw ground-truth transcripts | **Anti-Borges Guard**: compression ratio strictly capped at `<= 0.15` |
-| **L4 · Agora Playbook** | `.archon/agora-library/archonos-dreamed-seat-rules-v5.json` | Automated promotion of dreamed `confirmed_rule` entries (`confidence >= 0.90`) | Cross-instance federated playbook |
+| **L4 · Agora Playbook** | `.archon/agora-library/archonos-dreamed-seat-rules-v0.5.json` | Automated promotion of dreamed `confirmed_rule` entries (`confidence >= 0.90`) | Cross-instance federated playbook |
 
 ---
 
@@ -103,7 +103,7 @@ flowchart TB
       STATE[".archon/workspace-state.json
 (Mandated Seats & Sessions)"]
       MEM[".archon/memory-index.json & memory-wiki/
-(Seat Memory v5.0 Pointers, Shards & Wiki)"]
+(Seat Memory v0.5 Pointers, Shards & Wiki)"]
       ARTS[".archon/artifacts/*.json
 (Canvas Artifact Datasets)"]
       SKILLS[".archon/skills/*/SKILL.md
@@ -179,7 +179,7 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 | **README Overview** | [README.md](./README.md) | [README.zh-CN.md](./README.zh-CN.md) |
 | **Quickstart Guide** | [docs/en/QUICKSTART.md](./docs/en/QUICKSTART.md) | [docs/zh-CN/QUICKSTART.md](./docs/zh-CN/QUICKSTART.md) |
 | **System Architecture** | [docs/en/ARCHITECTURE.md](./docs/en/ARCHITECTURE.md) | [docs/zh-CN/ARCHITECTURE.md](./docs/zh-CN/ARCHITECTURE.md) |
-| **Seat Memory v5.0 Spec** | [docs/archon-seat-memory-v5-architecture.md](./docs/archon-seat-memory-v5-architecture.md) | [docs/archon-seat-memory-v5-architecture.md](./docs/archon-seat-memory-v5-architecture.md) |
+| **Seat Memory v0.5 Spec** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) |
 | **Configuration & Governance** | [docs/en/CONFIGURATION.md](./docs/en/CONFIGURATION.md) | [docs/zh-CN/CONFIGURATION.md](./docs/zh-CN/CONFIGURATION.md) |
 | **Changelog & Versions** | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md) |
 
