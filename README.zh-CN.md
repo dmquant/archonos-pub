@@ -4,7 +4,7 @@
 
 **[English (英文)](./README.md) | [简体中文](./README.zh-CN.md)**
 
-**[快速入门指南](./docs/zh-CN/QUICKSTART.md)** • **[系统架构文档](./docs/zh-CN/ARCHITECTURE.md)** • **[配置与治理指南](./docs/zh-CN/CONFIGURATION.md)** • **[战略路线图](./ROADMAP.zh-CN.md)** • **[更新日志](./CHANGELOG.zh-CN.md)**
+**[快速入门指南](./docs/zh-CN/QUICKSTART.md)** • **[系统架构文档](./docs/zh-CN/ARCHITECTURE.md)** • **[Seat Memory v5.0 架构](./docs/archon-seat-memory-v5-architecture.md)** • **[配置与治理指南](./docs/zh-CN/CONFIGURATION.md)** • **[战略路线图](./ROADMAP.zh-CN.md)** • **[更新日志](./CHANGELOG.zh-CN.md)**
 
 </div>
 
@@ -47,6 +47,26 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
    - **本地工作站或 Cloudflare 边缘部署**：支持选择 100% 本地隔离运行（`127.0.0.1:8790`）或部署至 Cloudflare Edge Worker + 远端 PWA 控制台。
    - **远端安全调度本地 CLI 执掌**：在手机或移动浏览器端访问 Cloudflare 远端控制台（`https://<worker>.workers.dev`）直接输入对话，任务经由 R2 安全入队并由 MacBook 本地守护进程（`archon-sync-edge.mjs`）独占认领执行。本机模型手（`agy`、`claude`、`codex`）在私有工作区和本地 MCP 环境执行后，秒级流式回传结果并呈现状态实时联动（`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`）。
    - **对话历史双向镜像同步与健康看板**：支持本地 `workspace-state.json` 与云端 R2 自动 30s 定时增量同步、一键手动刷新徽标，并独立呈现本地执行手就绪状态（Custodian Readiness）。
+9. **ArchonOS Seat Memory v5.0（`L1–L4` 全席位 & 多模型手认知记忆体系）**:
+   - **Step-1 记忆优先于技能（Memory-Prior-to-Skills）执行管线**：所有席位与本地 CLI 模型手（`agy`、`claude`、`codex`）在每轮执行的第一步优先检索认知记忆索引，再推荐与挂载 `@skill` 技能，并强制执行 `memoryAuthority: "retrieval_pointer_only"`（仅作检索指针、严禁替代一手证据）。
+   - **单写者原话分片（Single-Writer Verbatim Shards，100% 事实存活率）**：彻底消除多智能体串联传递的“传话筒（Telephone Game）”信息衰减。各专职席位将一手引文、已验证指标与陷阱告警独立写入 `.archon/memory-shards/<workspace>/<campaign>/seat-<id>.json`，由幕僚长在战役边界无损聚合（`POST /api/memory/shard`、`GET /api/memory/shards`）。
+   - **查询时 `Wiki + 原话分片 + 认知指针` 三路融合**：在 Step-1 提示词信封中同时融合 **L3.5 领域 Wiki 导航图**（`wiki://<slug>.md`）、**单写者原话分片**（`shard://<campaign>/<seat>`）与 **L3 执行指针**（`turn://`、`artifact://`、`file://`、`skill://`）。
+   - **跨席位离线“梦境整合（Dreaming）”与反博尔赫斯守卫（`<= 0.15`）**：每 2 小时随 RSI 定时任务自动运行（或通过 `node scripts/architect-bridge.mjs dream` / `POST /api/memory/dream` 一键触发），自动重放原始会话轨迹、修正矛盾记忆、修复过期 `artifact://@rN` 链接，并在 `<= 0.15` 严格压缩比上限下编译 `.archon/memory-wiki/`。
+   - **闭环 `规则 + 验证方式 + 陷阱告警` 抽取与 L4 Agora 剧本晋升**：经 Fable-5 显著性门控过滤后，自动从高价值回合抽取结构化规则与防踩坑告警，并将高置信度已验证规则（`confidence >= 0.90`）导出至 `.archon/agora-library/archonos-dreamed-seat-rules-v5.json`。
+
+---
+
+## 🧠 Seat Memory v5.0 认知记忆架构（覆盖全席位与 `agy / claude / codex`）
+
+ArchonOS v5.0 在所有主权席位（`chief-of-staff`、`code-architect`、`deep-research`、`maritime-quant`、`creative-studio`、`ops-sre`）与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**。
+
+| 层级 | 作用域与存储路径 | 核心机制 | 认知权威与安全守卫 |
+| :--- | :--- | :--- | :--- |
+| **L1 · 粘性会话层** | 原生 CLI 会话绑定（`--session-id` / `--resume` / `--conversation`） | 原生多轮上下文保持 + 超过 12 轮自动压缩摘要 | 瞬态工作记忆 |
+| **L2 · 角色分立规则层** | `.archon/workspace-state.json` (`globalMemory` + `seatMemory`) | 非对称角色记忆模式（幕僚长全知元记忆 vs. 专家席位领域索引） | 强制清洗实体/标的污染，仅保留通用 SOP |
+| **L3 · 认知指针与原话分片** | `.archon/memory-index.json` + `.archon/memory-shards/` | Fable-5 显著性门控 + 闭环 `规则 + 验证 + 陷阱告警` + 单写者原话分片 | `retrieval_pointer_only` + 一键级联撤稿失效（`POST /api/memory/retract`） |
+| **L3.5 · 领域 Wiki 层** | `.archon/memory-wiki/_index.md` + `<seat>-<topic>.md` | 2 小时跨席位离线“梦境整合（Dreaming）”，基于原始对话真值回放纠偏 | **反博尔赫斯守卫（Anti-Borges Guard）**：压缩比严格 `<= 0.15` |
+| **L4 · Agora 联邦剧本** | `.archon/agora-library/archonos-dreamed-seat-rules-v5.json` | 自动晋升跨席位已验证规则（`confirmed_rule`，`confidence >= 0.90`） | 跨实例共享治理剧本 |
 
 ---
 
@@ -157,6 +177,7 @@ npm start
 | **README 项目总览** | [README.md](./README.md) | [README.zh-CN.md](./README.zh-CN.md) |
 | **快速入门指南** | [docs/en/QUICKSTART.md](./docs/en/QUICKSTART.md) | [docs/zh-CN/QUICKSTART.md](./docs/zh-CN/QUICKSTART.md) |
 | **系统架构文档** | [docs/en/ARCHITECTURE.md](./docs/en/ARCHITECTURE.md) | [docs/zh-CN/ARCHITECTURE.md](./docs/zh-CN/ARCHITECTURE.md) |
+| **Seat Memory v5.0 架构规范** | [docs/archon-seat-memory-v5-architecture.md](./docs/archon-seat-memory-v5-architecture.md) | [docs/archon-seat-memory-v5-architecture.md](./docs/archon-seat-memory-v5-architecture.md) |
 | **配置与治理指南** | [docs/en/CONFIGURATION.md](./docs/en/CONFIGURATION.md) | [docs/zh-CN/CONFIGURATION.md](./docs/zh-CN/CONFIGURATION.md) |
 | **更新日志与版本记录** | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md) |
 
