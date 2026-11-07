@@ -1,15 +1,16 @@
-// ArchonOS Seat Memory v3: Asymmetric Meta-Memory & Memory-as-Index Engine
+// ArchonOS Seat Memory v5.0: Asymmetric Meta-Memory, Single-Writer Shards & Memory-as-Index Engine
 //
 // Core Architectural Principles:
 // 1. Asymmetric Memory Mechanisms per Seat Role:
-//    - Chief of Staff (`chief-of-staff` & `de-chief-of-staff`): Omniscient Meta-Memory
+//    - Chief of Staff (`chief-of-staff`, the mandatory pre-seeded entry seat): Omniscient Meta-Memory
 //      (Live OS Asset Registry Index, Seat Alignment & Calibration Ledger, Cross-Seat Lineage Graph).
-//    - Specialist Seats (`code-architect`, `deep-research`, `maritime-quant`, `duo-design-architect`, `de-*`):
-//      Role-specialized indices (Procedural/Codebase, Epistemic/Audit, Time-Series/Ledger, Visual/Style).
+//    - Operator-Defined Specialist Seats (`seat:<custom-id>` created via Workbench or Chief of Staff):
+//      Role-specialized domain indices resolved dynamically by archetype (Procedural/Engineering,
+//      Epistemic/Research, Time-Series/Quantitative, Visual/Design, or General Specialist Domain).
 // 2. Memory-as-Index (Hippocampal Pointer Map over Execution History):
-//    - Memory is not just manually written notes; it is an associative index built continuously
-//      from every executed chat turn, artifact build, skill evolution, and scheduled task.
-//    - Each index entry stores compact pointers (`turn://`, `artifact://`, `file://`, `skill://`, `schedule://`)
+//    - Memory is an associative index built continuously from every executed chat turn, artifact build,
+//      skill evolution, and scheduled task across all local CLI hands (`agy`, `claude`, `codex`).
+//    - Each index entry stores compact pointers (`turn://`, `artifact://`, `file://`, `skill://`, `wiki://`)
 //      that fast-direct a seat to the exact historical content on hit.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -19,86 +20,42 @@ export const SEAT_MEMORY_ROLE_SCHEMAS = {
   'chief-of-staff': {
     archetype: 'omniscient-meta-memory',
     label: '👑 Omniscient OS Meta-Memory & Alignment Index',
+    description:
+      'Maintains the global workspace asset map, cross-seat delegation playbook, and synthesis lineage across all operator-defined seats and local CLI hands.',
     facets: ['liveAssetMap', 'seatAlignmentLedger', 'crossSeatLineage', 'operatorPlaybooks'],
     preferredUriSchemes: ['artifact://', 'seat://', 'turn://', 'skill://', 'schedule://', 'file://'],
   },
-  'de-chief-of-staff': {
-    archetype: 'omniscient-meta-memory',
-    label: '👔 CompanyOS Executive Meta-Memory & Gatekeeper Index',
-    facets: ['liveAssetMap', 'seatAlignmentLedger', 'crossSeatLineage', 'operatorPlaybooks'],
-    preferredUriSchemes: ['intent://', 'artifact://', 'seat://', 'turn://', 'skill://', 'file://'],
-  },
-  'code-architect': {
+  'specialist-engineering': {
     archetype: 'procedural-codebase-index',
-    label: '🏗️ Procedural & Codebase Ownership Index',
+    label: '🏗️ Procedural & Engineering Ownership Index',
+    description:
+      'Indexes repository file ownership, component contracts, test verification gates, and bugfix trajectories.',
     facets: ['fileOwnershipMap', 'componentContracts', 'bugfixTrajectories', 'artifactBuilders'],
     preferredUriSchemes: ['file://', 'artifact://', 'turn://', 'skill://'],
   },
-  'de-product-engineer': {
-    archetype: 'procedural-codebase-index',
-    label: '🛠️ CompanyOS Product Engineering & Repo Index',
-    facets: ['fileOwnershipMap', 'componentContracts', 'bugfixTrajectories', 'artifactBuilders'],
-    preferredUriSchemes: ['file://', 'intent://', 'turn://', 'artifact://'],
-  },
-  'deep-research': {
+  'specialist-research': {
     archetype: 'epistemic-audit-index',
-    label: '🔬 Epistemic Subgraph & Multi-Source Thesis Index',
-    facets: ['entityVerdicts', 'subgraphPaths', 'belnapDefeaters', 'reportDeliverables'],
+    label: '🔬 Epistemic Evidence & Multi-Source Research Index',
+    description:
+      'Indexes primary-source citations, verification hashes, hypothesis retractions, and structured report deliverables.',
+    facets: ['entityVerdicts', 'evidencePaths', 'hypothesisDefeaters', 'reportDeliverables'],
     preferredUriSchemes: ['artifact://', 'file://', 'turn://', 'mcp://'],
   },
-  'de-assurance-reviewer': {
-    archetype: 'epistemic-audit-index',
-    label: '⚖️ CompanyOS Assurance & Zero-Fabrication Audit Index',
-    facets: ['qaVerdicts', 'evidenceSignoffs', 'rejectedClaims', 'auditReceipts'],
-    preferredUriSchemes: ['intent://', 'turn://', 'file://', 'artifact://'],
-  },
-  'maritime-quant': {
+  'specialist-quant': {
     archetype: 'timeseries-ledger-index',
-    label: '📊 Chokepoint Flow & Quantitative Calibration Index',
-    facets: ['corridorCutoffs', 'anomalyBaselines', 'tonMileFormulas', 'globeSnapshots'],
+    label: '📊 Quantitative Time-Series & Calibration Index',
+    description:
+      'Indexes rolling data cutoffs, anomaly baselines, calibration formulas, and telemetry snapshots.',
+    facets: ['dataCutoffs', 'anomalyBaselines', 'calibrationFormulas', 'telemetrySnapshots'],
     preferredUriSchemes: ['artifact://', 'mcp://', 'turn://', 'file://'],
   },
-  'de-finance-operations': {
-    archetype: 'timeseries-ledger-index',
-    label: '💰 CompanyOS Finance, Margin & Unit-Economics Index',
-    facets: ['budgetLedgers', 'invoiceCutoffs', 'marginFormulas', 'approvalGates'],
-    preferredUriSchemes: ['intent://', 'turn://', 'file://', 'artifact://'],
-  },
-  'duo-design-architect': {
+  'specialist-design': {
     archetype: 'visual-style-index',
-    label: '🎨 Dual-Screen Foldable & Apple Minimalist Design Index',
-    facets: ['duoAdaptedArtifacts', 'postureLayouts', 'themeTokens', 'stitchScreens'],
+    label: '🎨 Interactive Canvas & Visual Design Index',
+    description:
+      'Indexes responsive layout tokens, dual-theme contrast invariants, and interactive 2D/3D Canvas artifacts.',
+    facets: ['canvasLayouts', 'viewportPostures', 'themeTokens', 'visualComponents'],
     preferredUriSchemes: ['artifact://', 'file://', 'turn://', 'mcp://'],
-  },
-  'eln-ops': {
-    archetype: 'timeseries-ledger-index',
-    label: '🏦 ELN Structured-Note Website, Daily Close & Weekly Slide Index',
-    facets: ['closeCutoffs', 'weeklyBriefs', 'slideBundles', 'elnSiteHealth'],
-    preferredUriSchemes: ['artifact://', 'schedule://', 'file://', 'turn://'],
-  },
-  'arena-quant': {
-    archetype: 'timeseries-ledger-index',
-    label: '🏟️ 236 Research & RL Arena (Financial Atlas × FMP × ROS RSI) Index',
-    facets: ['fmpDataCutoffs', 'atlasCalculations', 'rosRsiLoops', 'rlAgent120Agora'],
-    preferredUriSchemes: ['artifact://', 'skill://', 'mcp://', 'file://', 'turn://'],
-  },
-  'research-copilot': {
-    archetype: 'epistemic-audit-index',
-    label: '🧭 Layer-1 Epistemic Research Copilot & 3-Model Synthesis Index',
-    facets: ['entityVerdicts', 'candidateProposals', 'belnapDefeaters', 'rosReads'],
-    preferredUriSchemes: ['artifact://', 'mcp://', 'turn://', 'file://'],
-  },
-  'multi-agent-commander': {
-    archetype: 'omniscient-meta-memory',
-    label: '🎖️ Layer-1 Multi-Agent Epistemic Commander & Evidence Broker Index',
-    facets: ['decisionCutoffs', 'roundTokenLedgers', 'brokeredEvidence', 'houseBallots'],
-    preferredUriSchemes: ['artifact://', 'mcp://', 'schedule://', 'turn://'],
-  },
-  'de-growth-editor': {
-    archetype: 'visual-style-index',
-    label: '📣 CompanyOS Bilingual Brand & Growth Content Index',
-    facets: ['campaignAssets', 'toneExemplars', 'channelPlaybooks', 'publicationHistory'],
-    preferredUriSchemes: ['intent://', 'artifact://', 'turn://', 'file://'],
   },
 };
 
@@ -107,17 +64,35 @@ export function getSeatMemoryRoleSchema(seatId = 'chief-of-staff') {
   if (SEAT_MEMORY_ROLE_SCHEMAS[cleanId]) {
     return SEAT_MEMORY_ROLE_SCHEMAS[cleanId];
   }
-  if (cleanId.startsWith('de-')) {
+  if (/(?:code|eng|dev|arch|build|test)/i.test(cleanId)) {
     return {
-      archetype: 'companyos-specialist-index',
-      label: `🏢 DigiFront Specialist Execution Index (${cleanId})`,
-      facets: ['intentHistory', 'sopPlaybooks', 'artifactOutputs', 'handoffContracts'],
-      preferredUriSchemes: ['intent://', 'turn://', 'artifact://', 'file://'],
+      ...SEAT_MEMORY_ROLE_SCHEMAS['specialist-engineering'],
+      label: `🏗️ Procedural & Engineering Ownership Index (${cleanId})`,
+    };
+  }
+  if (/(?:research|analyst|audit|review|epistemic|study)/i.test(cleanId)) {
+    return {
+      ...SEAT_MEMORY_ROLE_SCHEMAS['specialist-research'],
+      label: `🔬 Epistemic Evidence & Research Index (${cleanId})`,
+    };
+  }
+  if (/(?:quant|data|metric|finance|ledger|flow|market)/i.test(cleanId)) {
+    return {
+      ...SEAT_MEMORY_ROLE_SCHEMAS['specialist-quant'],
+      label: `📊 Quantitative Time-Series & Calibration Index (${cleanId})`,
+    };
+  }
+  if (/(?:design|studio|ui|ux|visual|canvas|creative)/i.test(cleanId)) {
+    return {
+      ...SEAT_MEMORY_ROLE_SCHEMAS['specialist-design'],
+      label: `🎨 Interactive Canvas & Visual Design Index (${cleanId})`,
     };
   }
   return {
     archetype: 'specialist-domain-index',
     label: `🎯 Specialist Domain Execution Index (${cleanId})`,
+    description:
+      'Indexes domain-specific task trajectories, artifacts, governed skills, and workspace file coordinates for this operator-defined seat.',
     facets: ['taskTrajectories', 'domainArtifacts', 'skillPlaybooks', 'fileCoordinates'],
     preferredUriSchemes: ['artifact://', 'turn://', 'file://', 'skill://'],
   };
@@ -198,84 +173,36 @@ export function extractTargetPointersFromTurn({
 
 const DEFAULT_COS_ALIGNMENT_RULES = [
   {
-    ruleId: 'align-cos-3layer-code',
+    ruleId: 'align-cos-workspace-orchestrator',
     workspaceId: 'ws-default',
-    pattern: 'three-layer epistemic house / hemicycle / 100-house / 236-analyst topology',
-    keywords: ['three-layer', 'epistemic', 'hemicycle', '100-house', 'art-three-layer-epistemic-dashboard', '三层'],
-    targetSeatId: 'code-architect',
+    pattern: 'Workspace orchestration / cross-seat routing / telemetry matrix / skill governance',
+    keywords: ['orchestrator', 'workspace', 'telemetry', 'matrix', 'routing', 'skill', 'sop', 'seat', 'canvas'],
+    targetSeatId: 'chief-of-staff',
+    preferredEngine: 'agy',
+    rationale:
+      'seat:chief-of-staff is the mandatory default orchestrator, maintaining the workspace telemetry matrix and routing tasks across operator-defined specialist seats.',
+    targetUris: [
+      'skill://workspace-orchestrator-sop',
+      'artifact://art-telemetry-matrix',
+    ],
+    hitCount: 12,
+    confidence: 0.99,
+  },
+  {
+    ruleId: 'align-cos-mesh-federation',
+    workspaceId: 'ws-default',
+    pattern: 'Team shared workspace / topic rooms / colleague access keys / federated MCP relay',
+    keywords: ['mesh', 'team', 'room', 'channel', 'federation', 'relay', 'share', 'vault'],
+    targetSeatId: 'chief-of-staff',
     preferredEngine: 'claude',
-    rationale: 'Three-Layer Epistemic Topology & 100-House Hemicycle is built and maintained in-place by seat:code-architect via scripts/build-three-layer-dashboard.mjs.',
+    rationale:
+      'seat:chief-of-staff coordinates multi-user Team Shared Workspaces, Topic Rooms, and @mcp:archon-mesh colleague access keys.',
     targetUris: [
-      'artifact://art-three-layer-epistemic-dashboard',
-      'file://scripts/build-three-layer-dashboard.mjs',
-      'file://packages/archon-app/public/artifacts/art-three-layer-epistemic-dashboard.html',
+      'skill://archon-mesh-collaboration-sop',
+      'artifact://art-telemetry-matrix',
     ],
-    hitCount: 14,
-    confidence: 0.99,
-  },
-  {
-    ruleId: 'align-cos-duo-nondestructive',
-    workspaceId: 'ws-default',
-    pattern: 'iPhone Duo 180° / 0° closed dock / .duo.html adaptation / Stitch dual-screen',
-    keywords: ['duo', 'iphone', 'foldable', '180', 'closed', 'sidebar', 'fit-duo', 'duo.html', '双屏'],
-    targetSeatId: 'duo-design-architect',
-    preferredEngine: 'claude',
-    rationale: 'seat:duo-design-architect generates dedicated <artifactId>.duo.html for Display 2 (699×1017pt) while preserving desktop <artifactId>.html untouched.',
-    targetUris: [
-      'artifact://art-stitch-duo-shell',
-      'file://packages/archon-ios-duo/Sources/ArchonIOSDuo/DuoSplitShellView.swift',
-      'file://packages/archon-worker/src/duo-artifact-optimizer.mjs',
-    ],
-    hitCount: 19,
-    confidence: 0.99,
-  },
-  {
-    ruleId: 'align-cos-vortexa-maritime',
-    workspaceId: 'ws-default',
-    pattern: 'Seaborne commodity flows / maritime chokepoint telemetry / tanker ton-mile / 3D globe',
-    keywords: ['vortexa', 'chokepoint', 'corridor', 'tanker', 'crude', 'vlcc', 'globe', 'maritime', '原油', '航运'],
-    targetSeatId: 'maritime-quant',
-    preferredEngine: 'codex',
-    rationale: 'seat:maritime-quant owns seaborne commodity telemetry, rolling corridor validation gates, and art-vortexa-3d.',
-    targetUris: [
-      'artifact://art-vortexa-3d',
-      'artifact://art-vortexa-flow-dashboard',
-      'mcp://vortexa',
-    ],
-    hitCount: 16,
-    confidence: 0.99,
-  },
-  {
-    ruleId: 'align-cos-ros-deep-research',
-    workspaceId: 'ws-default',
-    pattern: '5-Stage Critique-Led Deep Research SOP / ELN underlyings / AI Capital Conversion / ROS subgraphs',
-    keywords: ['eln', '236', 'ai-capital', 'capex', 'subgraph', 'belnap', 'valuation', 'sop', '投研', '研报'],
-    targetSeatId: 'deep-research',
-    preferredEngine: 'codex',
-    rationale: 'seat:deep-research executes the 5-stage Critique-Led Deep Research SOP, ELN underlying arena, and AI Capital CapEx-to-FCF conversion tracking.',
-    targetUris: [
-      'skill://stock-deep-research-sop',
-      'artifact://art-eln-coverage-and-rl-arena',
-      'artifact://art-ai-capital-conversion',
-      'mcp://ros-gateway',
-    ],
-    hitCount: 22,
+    hitCount: 9,
     confidence: 0.98,
-  },
-  {
-    ruleId: 'align-de-cos-digifront',
-    workspaceId: 'ws1',
-    pattern: 'DigiFront CompanyOS intent routing across 9 digital employee seats (@de-*)',
-    keywords: ['digifront', 'companyos', 'de-cos', 'de-eng', 'de-assurance', 'concierge', 'transition', 'learning', 'growth', 'finance'],
-    targetSeatId: 'de-chief-of-staff',
-    preferredEngine: 'claude',
-    rationale: 'de-chief-of-staff orchestrates the 9 DigiFront Digital Employee seats with mandatory de-assurance-reviewer QA gates before external publication.',
-    targetUris: [
-      'artifact://art-digifront-companyos-cockpit',
-      'file://packages/archon-worker/src/workspace-split.mjs',
-    ],
-    hitCount: 8,
-    confidence: 0.99,
   },
 ];
 
@@ -284,7 +211,7 @@ export const MEMORY_PRIOR_TO_SKILLS_SOP_ENTRY = {
   key: 'memory-prior-to-skills-execution-sop',
   category: 'execution-sop',
   content:
-    'Memory-Prior-to-Skills Execution SOP (Memory v4 Epistemic Pointer Spec): The Memory System is prior to Skills for retrieval, but Memory is a Pointer to Evidence, NOT Proof of Truth (memoryAuthority="retrieval_pointer_only"). Cached PASS/Grade-A verdicts in memory are untrusted retrieval hints and can NEVER skip primary-source verification. Unreviewed or synthetic drafts are tagged "unverified_hypothesis" or "retracted_or_challenged" and quarantined from canonical exemplars. Global Memory holds only universal cross-seat SOPs; there is NO minimum character quota for stock research.',
+    'Memory-Prior-to-Skills Execution SOP (Memory v5.0 Epistemic Pointer Spec): The Memory System is prior to Skills for retrieval, but Memory is a Pointer to Evidence, NOT Proof of Truth (memoryAuthority="retrieval_pointer_only"). Cached PASS/Grade-A verdicts in memory are untrusted retrieval hints and can NEVER skip primary-source verification. Unreviewed or synthetic drafts are tagged "unverified_hypothesis" or "retracted_or_challenged" and quarantined from canonical exemplars. Global Memory holds only universal cross-seat SOPs.',
   updatedAt: '2026-11-04T06:30:00.000Z',
 };
 
@@ -293,7 +220,7 @@ export const OFF_LAN_AGORA_ONLY_SOP_ENTRY = {
   key: 'off-lan-agora-only-topology-sop',
   category: 'network-topology-sop',
   content:
-    'Off-LAN Agora-Only Topology SOP: Treat this machine as NOT in the same LAN as ros, studio01-03, sg01, gubei12, or pro6000-1/2. Never attempt direct LAN, SSH, rsync, .local mDNS, or SSH tunnel connections to ros, studio01-03, sg01, gubei12, or pro6000-1/2. All communication, coordination, contract/library exchange, and status sync with ros (@ai-institute, @rho, @epistates, @vibe), studio01-03, sg01, gubei12, and @local-fabric (pro6000-1/2) must go exclusively through Agora (@mcp:agora-admin).',
+    'Off-LAN Federated Relay Topology SOP: Treat remote peer nodes and external clusters as off-LAN by default. Never attempt direct LAN, SSH, rsync, or .local mDNS connections to remote peer hosts; route cross-instance messages, contracts, and shared playbooks exclusively through governed MCP relays (@mcp:archon-mesh / @mcp:agora-admin).',
   updatedAt: '2026-11-05T00:55:00.000Z',
 };
 
@@ -475,8 +402,8 @@ export function extractClosedLoopLearningRule({
 /**
  * Cross-Seat & Multi-Hand Offline Consolidation ("Dreaming" Engine):
  * Runs during ArchonOS 2-Hour RSI ticks (`runInfiniteRsiSeatCoordTick`) or via `POST /api/memory/dream`.
- * Works across ALL seats (`chief-of-staff`, `code-architect`, `deep-research`, `maritime-quant`,
- * `duo-design-architect`, `ws2-*` / `de-*`) and ALL CLI hands (`agy`, `claude`, `codex`):
+ * Works across ALL seats (`chief-of-staff` and any operator-defined specialist seats)
+ * and ALL CLI hands (`agy`, `claude`, `codex`):
  *   1. Replays recent session transcripts against stored L2/L3 seat memories to detect & rewrite contradicted notes.
  *   2. Repairs broken/renamed `artifact://`, `file://`, and `skill://` links across `pointers[]` and `alignmentLedger[]`.
  *   3. Merges duplicate alignment rules and prunes low-salience / stale noise.
@@ -488,7 +415,7 @@ export function dreamConsolidateCrossSeatMemory(
   {
     runtime = null,
     workspaceState = null,
-    digifrontState = null,
+    secondaryWorkspaceState = null,
     repoRoot = null,
     writeWikiToDisk = false,
     nowIso = new Date().toISOString(),
@@ -508,7 +435,7 @@ export function dreamConsolidateCrossSeatMemory(
   // 1. Replay recent transcripts across workspaces to catch and rewrite contradicted/failed beliefs
   const wsPairs = [
     { wsId: 'ws-default', state: workspaceState },
-    { wsId: 'ws1', state: digifrontState },
+    { wsId: 'ws2', state: secondaryWorkspaceState },
   ];
 
   const transcriptOutcomeByTurnUri = new Map();
@@ -870,7 +797,7 @@ export function upsertSeatVerbatimShard(
   {
     workspaceId = 'ws-default',
     campaignId = 'default-campaign',
-    seatId = 'deep-research',
+    seatId = 'chief-of-staff',
     engine = 'codex',
     entityId = 'general',
     title = '',
@@ -888,7 +815,7 @@ export function upsertSeatVerbatimShard(
   if (!Array.isArray(indexState.verbatimShards)) {
     indexState.verbatimShards = [];
   }
-  const cleanSeatId = String(seatId || 'deep-research').replace(/^seat:/, '');
+  const cleanSeatId = String(seatId || 'chief-of-staff').replace(/^seat:/, '');
   const cleanCampaign = String(campaignId || 'default-campaign').replace(/[^a-zA-Z0-9._-]/g, '-');
   const cleanEntity = String(entityId || 'general').replace(/[^a-zA-Z0-9._-]/g, '-');
   const shardId = `shard-${workspaceId}-${cleanCampaign}-${cleanSeatId}-${cleanEntity}`;
@@ -991,10 +918,10 @@ export function synthesizeCampaignShards(
 }
 
 /**
- * Dreaming -> L4 Agora Federated Playbook Promotion (`exportDreamedAgoraPlaybook`):
+ * Dreaming -> L4 Federated Playbook Promotion (`exportDreamedAgoraPlaybook`):
  * Packages entity-sanitized, cross-seat confirmed rules & failure trap warnings into a structured
- * Agora Library playbook (`archonos-dreamed-seat-rules-v5.json`) for federated transfer across
- * `ws1` <-> `ws2` and Off-LAN Agora nodes (`ros`, `studio01..03`).
+ * Federated Library playbook (`archonos-dreamed-seat-rules-v5.json`) for knowledge transfer across
+ * workspaces and remote peer instances.
  */
 export function exportDreamedAgoraPlaybook(
   indexState,
@@ -1346,11 +1273,11 @@ export function recordExecutionMemoryPointer(indexState, {
   return pointer;
 }
 
-export function bootstrapMemoryIndexFromHistory(indexState, { runtime, workspaceState, digifrontState } = {}) {
+export function bootstrapMemoryIndexFromHistory(indexState, { runtime, workspaceState, secondaryWorkspaceState } = {}) {
   if (!indexState) return indexState;
   const statesToScan = [
     { wsId: 'ws-default', state: workspaceState },
-    { wsId: 'ws1', state: digifrontState },
+    { wsId: 'ws2', state: secondaryWorkspaceState },
   ];
 
   for (const { wsId, state } of statesToScan) {
@@ -1402,7 +1329,7 @@ export function bootstrapMemoryIndexFromHistory(indexState, { runtime, workspace
       const ptrId = `ptr-asset-${art.artifactId}`;
       if (indexState.pointers.some((p) => p.pointerId === ptrId)) continue;
       const ownerSeat = String(art.publishedBySeat || 'chief-of-staff').replace(/^seat:/, '');
-      const wsId = art.artifactId.includes('digifront') ? 'ws1' : 'ws-default';
+      const wsId = art.workspaceId || art.metadata?.workspaceId || 'ws-default';
       const htmlPath = art.metadata?.localHtmlPath || `packages/archon-app/public/artifacts/${art.artifactId}.html`;
       const kws = tokenizeMemoryQuery(`${art.artifactId} ${art.title || ''} ${(art.tags || []).join(' ')} ${art.folderId || ''}`);
       indexState.pointers.push({
@@ -1601,16 +1528,13 @@ export function querySeatMemoryIndex(indexState, {
   // Build Chief of Staff Live OS Asset Inventory Summary scoped to workspaceId
   const wsSeatsCount = runtime?.sharedStore?.seats
     ? [...runtime.sharedStore.seats.values()].filter((s) => {
-        const sWs = s.workspaceId || (String(s.id || '').startsWith('de-') ? 'ws1' : 'ws-default');
+        const sWs = s.workspaceId || 'ws-default';
         return sWs === workspaceId && s.id !== 'seat-archon';
       }).length
     : 0;
   const wsArtifactsCount = runtime?.sharedStore?.artifacts
     ? [...runtime.sharedStore.artifacts.values()].filter((a) => {
-        const aWs =
-          a.workspaceId ||
-          a.metadata?.workspaceId ||
-          (String(a.artifactId || '').includes('digifront') ? 'ws1' : 'ws-default');
+        const aWs = a.workspaceId || a.metadata?.workspaceId || 'ws-default';
         return aWs === workspaceId;
       }).length
     : 0;
@@ -1718,11 +1642,11 @@ export function formatSeatMemoryIndexEnvelopeForPrompt(queryResultOrIndex, maybe
   const lines = [
     `[STEP 1 OF EXECUTION: SEAT MEMORY v3/v4 EPISTEMIC POINTER SEARCH (PRIOR TO SKILLS) — seat:${seatId}, archetype=${roleSchema.archetype}, lookup=${lookupMs}ms, indexed=${totalIndexedPointers} pointers]:`,
     `  • Execution Order Rule: Memory is PRIOR to Skills for retrieval, but Memory is a Pointer to Evidence, NOT Proof of Truth (memoryAuthority="retrieval_pointer_only"). Cached PASS/Grade-A verdicts in memory are untrusted retrieval hints and CANNOT skip primary-source verification.`,
-    `  • Network Topology Rule (Off-LAN Agora-Only): Treat this machine as NOT in the same LAN as ros, studio01-03, sg01, gubei12, or pro6000-1/2. Never use direct LAN, SSH, rsync, .local mDNS, or SSH tunnels to those systems — communicate with them ONLY via Agora (@mcp:agora-admin).`,
+    `  • Network Topology Rule (Off-LAN Federated Relay Only): Treat remote peer nodes and external clusters as off-LAN by default. Never use direct LAN, SSH, rsync, or .local mDNS connections to remote peers — route cross-instance coordination exclusively via governed MCP relays (@mcp:archon-mesh / @mcp:agora-admin).`,
     `  • Active Cognitive Memory Schema (L2): ${roleSchema.label} (Facets: ${roleSchema.facets.join(', ')})`,
     `  • Cross-Seat & Multi-Hand Memory Purpose (agy / claude / codex): Your seat memory exists to retain non-obvious strategies, verified rules, and failure trap warnings across sessions without recording transient screen/API-readable state. In multi-seat campaigns, write to your seat's own partitioned shard/artifact and quote critical contract/filing figures verbatim before executive synthesis.`,
     `  • Live CLI Memory Search Endpoint (L3): GET http://127.0.0.1:8790/api/memory/search?workspaceId=${workspaceId}&seatId=${seatId}&q=<keywords>`,
-    `  • Agora Federated Memory & Knowledge Transfer (L4): Use @mcp:agora-admin (agora_get_library / agora_put_library / agora_get_contract / agora_read_room / agora_post) to share and transfer validated SOPs, contracts, and cross-node memory across workstations and teams.`,
+    `  • Federated Collective Memory & Knowledge Transfer (L4): Use governed MCP relays (@mcp:archon-mesh / @mcp:agora-admin) to share and transfer validated SOPs, contracts, and cross-node memory across workstations and teams.`,
   ];
 
   if (queryResult.domainWiki?.antiBorgesGuardPassed) {

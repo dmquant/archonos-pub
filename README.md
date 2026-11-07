@@ -19,8 +19,8 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 ## ✨ Key Capabilities
 
 1. **Mandatory Chief of Staff & Zero-Config Autonomous Init (`npm run init` / `npx archon init`)**:
-   - **Pre-Seeded Chief of Staff (`seat:chief-of-staff`)**: Every ArchonOS instance boots with the Chief of Staff seat permanently initialized as the default conversational entry-point and orchestrator. Directives are automatically classified and routed to specialist seats (`code-architect`, `deep-research`, `maritime-quant`, `ops-guardian`) with shared cross-seat session context.
-   - **Multi-Tenant Seat & Asset Privacy (Default Invariant)**: For external users and standard collaborators, specialist seats (`code-architect`, `maritime-quant`, etc.), private MCP connections, API keys, and custom operator skills are strictly hidden and isolated from visibility or direct access. Interactions funnel exclusively through the Chief of Staff unless explicit per-seat access or delegation permissions are authorized by the host operator.
+   - **Pre-Seeded Chief of Staff (`seat:chief-of-staff`)**: Every ArchonOS instance boots with only the Chief of Staff seat pre-seeded as the default conversational entry-point and orchestrator. You can define any custom specialist seats (`seat:<custom-id>`) via the Workbench or Chief of Staff, and directives are automatically classified and routed with shared cross-seat session context.
+   - **Multi-Tenant Seat & Asset Privacy (Default Invariant)**: For external users and standard collaborators, operator-defined specialist seats, private MCP connections, API keys, and custom operator skills are strictly hidden and isolated from visibility or direct access. Interactions funnel exclusively through the Chief of Staff unless explicit per-seat access or delegation permissions are authorized by the host operator.
    - **Autonomous Host Discovery**: Probes installed local CLI model hands (`claude`, `codex`, `agy`, `opencode`) across standard paths (`~/.local/bin`, `/opt/homebrew/bin`, `~/.npm-global/bin`, `$PATH`) and configures headless execution with zero plaintext credential leakage.
    - **Portable Configuration**: Writes `.archon/config.json` and seeds `.archon/skills/` starter Harness2 `SKILL.md` workflows.
 2. **Multi-Line Intelligent Chat & Interactive Artifact Quoting (`💬 Quote to Modify`)**:
@@ -58,7 +58,7 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 
 ## 🧠 Seat Memory v5.0 Architecture (`L1–L4` Across All Seats & CLI Hands)
 
-ArchonOS v5.0 implements a 4-tier epistemic memory hierarchy across every sovereign seat (`chief-of-staff`, `code-architect`, `deep-research`, `maritime-quant`, `creative-studio`, `ops-sre`) and every local CLI hand (`agy`, `claude`, `codex`). Full specification: **[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**.
+ArchonOS v5.0 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specification: **[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**.
 
 | Tier | Scope & Storage | Core Mechanism | Authority & Safeguard |
 | :--- | :--- | :--- | :--- |
@@ -80,15 +80,15 @@ flowchart TB
     
     subgraph Seats["ArchonOS Multi-Seat Plane"]
       COS["👑 seat:chief-of-staff
-(Default Entry-Point & Intelligent Router)"]
-      CODE["🛠️ seat:code-architect
-(Full-Stack Engineering & Tests)"]
-      RES["🔬 seat:deep-research
-(Equity Research & SOP Monograph)"]
-      QUANT["🌊 seat:maritime-quant
-(Flow Analysis & Chokepoints)"]
-      OPS["🛡️ seat:ops-guardian
-(MCP Gates & Audit Replay)"]
+(Pre-Seeded Default Entry-Point & Router)"]
+      SPEC1["🛠️ seat:<custom-engineering>
+(Operator-Defined Engineering Seat)"]
+      SPEC2["🔬 seat:<custom-research>
+(Operator-Defined Research Seat)"]
+      SPEC3["📊 seat:<custom-quant>
+(Operator-Defined Quantitative Seat)"]
+      SPEC4["🎨 seat:<custom-design>
+(Operator-Defined Visual/Studio Seat)"]
     end
 
     subgraph Hands["Local Headless CLI Engines"]
@@ -102,6 +102,8 @@ flowchart TB
 (Zero-Leak Portable Config)"]
       STATE[".archon/workspace-state.json
 (Mandated Seats & Sessions)"]
+      MEM[".archon/memory-index.json & memory-wiki/
+(Seat Memory v5.0 Pointers, Shards & Wiki)"]
       ARTS[".archon/artifacts/*.json
 (Canvas Artifact Datasets)"]
       SKILLS[".archon/skills/*/SKILL.md
@@ -109,14 +111,14 @@ flowchart TB
     end
 
     subgraph MCP["External Governed MCP Layer (Default-Deny)"]
-      MCP1["agora-admin (Build Rooms & Contracts)"]
-      MCP2["ros-gateway (Epistemic Graphs & Defeaters)"]
-      MCP3["vortexa (Crude Tanker & Flow Telemetry)"]
+      MCP1["archon-mesh (Team Rooms & Vault Relay)"]
+      MCP2["local-stdio-fs (Workspace Filesystem)"]
+      MCP3["custom-mcp (Operator-Registered MCPs)"]
     end
   end
 
   UI --> COS
-  COS -->|Auto-Route / Delegate| CODE & RES & QUANT & OPS
+  COS -->|Auto-Route / Delegate| SPEC1 & SPEC2 & SPEC3 & SPEC4
   Seats --> Hands
   Seats --> Storage
   Seats -->|Interactive Hands-Up Grant Required| MCP
@@ -186,7 +188,7 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 ## 🛡️ Security & Privacy Invariants
 
 - **Mandatory Seat Bootstrapping**: `seat:chief-of-staff` is immutably initialized on fresh installation, guaranteeing an operational orchestrator out of the box.
-- **Seat, MCP & Skill Privacy Isolation**: Except for the Chief of Staff serving as the conversational interface, specialist seats (`seat:code-architect`, `seat:deep-research`, `seat:maritime-quant`, `seat:ops-guardian`), registered MCP server handles, and private skills are never exposed to external or guest users.
+- **Seat, MCP & Skill Privacy Isolation**: Only `seat:chief-of-staff` is pre-seeded on a clean clone. Operator-defined specialist seats (`seat:<custom-id>`), registered MCP server handles, and private skills are never exposed to external or guest users.
 - **Zero Plaintext Secrets**: MCP credentials use opaque `secret://...` URIs. Secrets are never logged, exported, or embedded in client bundles.
 - **Strict Localhost Binding**: Binds exclusively to `127.0.0.1` (`ARCHON_PORT=8790`), ensuring zero open inbound ports to public networks.
 

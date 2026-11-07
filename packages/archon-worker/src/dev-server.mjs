@@ -7815,7 +7815,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         const shard = upsertSeatVerbatimShard(memoryIndexState, {
           workspaceId: reqWsId,
           campaignId: payload.campaignId || 'default-campaign',
-          seatId: payload.seatId || 'deep-research',
+          seatId: payload.seatId || 'chief-of-staff',
           engine: payload.engine || 'codex',
           entityId: payload.entityId || 'general',
           title: payload.title || '',

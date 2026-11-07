@@ -18,24 +18,24 @@ import {
 } from '../src/seat-memory-index.mjs';
 import { startLocalEdgeServer } from '../src/dev-server.mjs';
 
-test('Seat Memory v3: asymmetric memory role schemas differentiate Chief of Staff Meta-Memory from specialist seats', () => {
+test('Seat Memory v3: asymmetric memory role schemas differentiate Chief of Staff Meta-Memory from operator-defined specialist seats', () => {
   const cosSchema = getSeatMemoryRoleSchema('chief-of-staff');
-  const deCosSchema = getSeatMemoryRoleSchema('de-chief-of-staff');
-  const codeSchema = getSeatMemoryRoleSchema('code-architect');
-  const rschSchema = getSeatMemoryRoleSchema('deep-research');
-  const quantSchema = getSeatMemoryRoleSchema('maritime-quant');
-  const duoSchema = getSeatMemoryRoleSchema('duo-design-architect');
+  const engSchema = getSeatMemoryRoleSchema('specialist-eng');
+  const rschSchema = getSeatMemoryRoleSchema('specialist-research');
+  const quantSchema = getSeatMemoryRoleSchema('specialist-quant');
+  const designSchema = getSeatMemoryRoleSchema('specialist-design');
+  const customSchema = getSeatMemoryRoleSchema('custom-operator-seat');
 
   assert.equal(cosSchema.archetype, 'omniscient-meta-memory');
-  assert.equal(deCosSchema.archetype, 'omniscient-meta-memory');
   assert.ok(cosSchema.facets.includes('liveAssetMap'));
   assert.ok(cosSchema.facets.includes('seatAlignmentLedger'));
 
-  assert.equal(codeSchema.archetype, 'procedural-codebase-index');
+  assert.equal(engSchema.archetype, 'procedural-codebase-index');
   assert.equal(rschSchema.archetype, 'epistemic-audit-index');
   assert.equal(quantSchema.archetype, 'timeseries-ledger-index');
-  assert.equal(duoSchema.archetype, 'visual-style-index');
-  assert.ok(Object.keys(SEAT_MEMORY_ROLE_SCHEMAS).length >= 10);
+  assert.equal(designSchema.archetype, 'visual-style-index');
+  assert.equal(customSchema.archetype, 'specialist-domain-index');
+  assert.ok(Object.keys(SEAT_MEMORY_ROLE_SCHEMAS).length >= 5);
 });
 
 test('Seat Memory v3: Memory-as-Index records ExecutionIndexPointers and fast-directs queries to turn://, artifact://, and file:// URIs', () => {
@@ -43,30 +43,30 @@ test('Seat Memory v3: Memory-as-Index records ExecutionIndexPointers and fast-di
   const ptr = recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',
     sessionId: 'session-main',
-    messageId: 'msg-a-test-vortexa',
-    seatId: 'duo-design-architect',
+    messageId: 'msg-a-test-canvas',
+    seatId: 'specialist-design',
     routedByCos: true,
-    routingReason: 'Adapted Vortexa 3D Globe for iPhone Duo 180-degree & closed dock',
+    routingReason: 'Adapted interactive Canvas dashboard for responsive split-view dock',
     engine: 'claude',
     kind: 'artifact-evolution',
-    userPrompt: 'Update art-vortexa-3d for iPhone Duo closed status sidebar icons',
-    replyText: 'Generated packages/archon-app/public/artifacts/art-vortexa-3d.duo.html with 6-icon dock.',
+    userPrompt: 'Update art-telemetry-matrix for responsive split-view sidebar icons',
+    replyText: 'Generated packages/archon-app/public/artifacts/art-telemetry-matrix.html with responsive dock.',
     artifactUpdated: {
-      artifactId: 'art-vortexa-3d',
+      artifactId: 'art-telemetry-matrix',
       revision: 25,
-      localHtmlPath: 'packages/archon-app/public/artifacts/art-vortexa-3d.duo.html',
+      localHtmlPath: 'packages/archon-app/public/artifacts/art-telemetry-matrix.html',
     },
     outcome: 'completed',
     latencyMs: 1200,
   });
 
   assert.ok(ptr);
-  assert.ok(ptr.targets.includes('turn://ws-default/session-main/msg-a-test-vortexa'));
-  assert.ok(ptr.targets.includes('artifact://art-vortexa-3d@r25'));
-  assert.ok(ptr.targets.includes('file://packages/archon-app/public/artifacts/art-vortexa-3d.duo.html'));
+  assert.ok(ptr.targets.includes('turn://ws-default/session-main/msg-a-test-canvas'));
+  assert.ok(ptr.targets.includes('artifact://art-telemetry-matrix@r25'));
+  assert.ok(ptr.targets.includes('file://packages/archon-app/public/artifacts/art-telemetry-matrix.html'));
 
   const res = querySeatMemoryIndex(idx, {
-    query: 'vortexa 3d globe closed sidebar duo',
+    query: 'telemetry matrix responsive sidebar dock',
     seatId: 'chief-of-staff',
     workspaceId: 'ws-default',
     limit: 5,
@@ -77,7 +77,7 @@ test('Seat Memory v3: Memory-as-Index records ExecutionIndexPointers and fast-di
 
   const envelope = formatSeatMemoryIndexEnvelopeForPrompt(res);
   assert.ok(envelope.includes('SEAT MEMORY v3'));
-  assert.ok(envelope.includes('artifact://art-vortexa-3d@r25'));
+  assert.ok(envelope.includes('artifact://art-telemetry-matrix@r25'));
 });
 
 test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v3 pointers and CoS alignment ledger', async () => {
@@ -87,17 +87,17 @@ test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v3 pointers
   const base = `http://127.0.0.1:${port}`;
 
   try {
-    const idxRes = await fetch(`${base}/api/memory/index?seatId=chief-of-staff&q=three-layer+epistemic+hemicycle`);
+    const idxRes = await fetch(`${base}/api/memory/index?seatId=chief-of-staff&q=workspace+orchestrator+telemetry`);
     assert.equal(idxRes.status, 200);
     const idxJson = await idxRes.json();
     assert.equal(idxJson.ok, true);
     assert.equal(idxJson.version, 'seat-memory-index.v3');
     assert.equal(idxJson.roleSchema.archetype, 'omniscient-meta-memory');
     assert.ok(idxJson.totalIndexedPointers > 0);
-    assert.ok(idxJson.alignmentHits.some((r) => r.targetSeatId === 'code-architect'));
+    assert.ok(idxJson.alignmentHits.some((r) => r.targetSeatId === 'chief-of-staff'));
     assert.ok(idxJson.cosAssetOverview.totalArtifacts >= 1);
 
-    const memRes = await fetch(`${base}/api/memory?seatId=code-architect&q=three-layer`);
+    const memRes = await fetch(`${base}/api/memory?seatId=specialist-eng&q=telemetry`);
     assert.equal(memRes.status, 200);
     const memJson = await memRes.json();
     assert.equal(memJson.ok, true);
@@ -109,14 +109,14 @@ test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v3 pointers
     );
     assert.ok(
       memJson.globalMemory.every((m) => !/\b(?:GEV|301087\.SZ|Hormuz\s+Eastbound)\b/i.test(String(m.content || ''))),
-      'Global memory must only keep universal SOPs and never entity-specific tickers/corridors like GEV or Hormuz'
+      'Global memory must only keep universal SOPs and never entity-specific tickers/corridors'
     );
 
-    const searchRes = await fetch(`${base}/api/memory/search?seatId=deep-research&q=stock+sop+valuation`).then((r) => r.json());
+    const searchRes = await fetch(`${base}/api/memory/search?seatId=chief-of-staff&q=workspace+orchestrator+sop`).then((r) => r.json());
     assert.equal(searchRes.ok, true);
     assert.equal(searchRes.executionPriority, 'memory-prior-to-skills');
     assert.equal(searchRes.memoryAuthority, 'retrieval_pointer_only');
-    assert.ok(searchRes.recommendedSkills.includes('stock-deep-research-sop'));
+    assert.ok(searchRes.recommendedSkills.includes('workspace-orchestrator-sop'));
     assert.match(searchRes.promptEnvelope, /STEP 1 OF EXECUTION: SEAT MEMORY v3\/v4 EPISTEMIC POINTER SEARCH \(PRIOR TO SKILLS\)/);
   } finally {
     server.close();
@@ -128,9 +128,9 @@ test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic r
   const legacyPtr = recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',
     sessionId: 'session-main',
-    messageId: 'msg-legacy-nvda-100k',
-    seatId: 'deep-research',
-    userPrompt: 'Generate >= 100,000 characters monograph for NVDA',
+    messageId: 'msg-legacy-synth-100k',
+    seatId: 'specialist-research',
+    userPrompt: 'Generate >= 100,000 characters monograph for SYNTH',
     replyText: 'Published art-stock-sop-nvda with 100K+ Monograph Compiler PASS.',
     outcome: 'completed',
   });
@@ -142,7 +142,7 @@ test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic r
     workspaceId: 'ws-default',
     sessionId: 'session-main',
     messageId: 'msg-tsm-draft',
-    seatId: 'report-editor',
+    seatId: 'specialist-review',
     userPrompt: 'Review TSM accounting note',
     replyText: 'Draft note for TSM waiting for upstream evidence.',
     outcome: 'completed',
@@ -151,7 +151,7 @@ test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic r
 
   const wsState = {
     seatMemory: {
-      'deep-research': [{ id: 'm1', key: 'stock-sop:TSM', content: 'TSM Grade A PASS' }],
+      'specialist-research': [{ id: 'm1', key: 'research-sop:TSM', content: 'TSM Grade A PASS' }],
     },
   };
   const retractRes = invalidateMemoryPointersByRetraction(idx, wsState, {
@@ -160,7 +160,7 @@ test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic r
   });
   assert.ok(retractRes.invalidatedCount >= 1);
   assert.equal(draftPtr.epistemicProvenance.verificationStatus, 'retracted_or_challenged');
-  assert.equal(wsState.seatMemory['deep-research'][0].verificationStatus, 'retracted_or_challenged');
+  assert.equal(wsState.seatMemory['specialist-research'][0].verificationStatus, 'retracted_or_challenged');
 });
 
 test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience Gate, Closed-Loop Rule+Trap Extraction, Offline Dreaming & Anti-Borges Wiki', () => {
@@ -189,12 +189,12 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
     workspaceId: 'ws-default',
     sessionId: 'session-main',
     messageId: 'msg-codex-rule-1',
-    seatId: 'deep-research',
+    seatId: 'specialist-research',
     engine: 'codex',
-    userPrompt: 'Verify primary filing hash for ASML and record SOP rule',
+    userPrompt: 'Verify primary filing hash for ACME and record SOP rule',
     replyText:
-      'Rule: Always verify primaryFilingHash before promoting an epistemic subgraph verdict. Trap: Never skip primary filing arithmetic verification on cached Grade-A notes. Verified with 73/73 tests passing.',
-    selectedSkills: ['stock-deep-research-sop'],
+      'Rule: Always verify primaryFilingHash before promoting an epistemic verdict. Trap: Never skip primary filing arithmetic verification on cached Grade-A notes. Verified with 46/46 tests passing.',
+    selectedSkills: ['workspace-orchestrator-sop'],
     outcome: 'completed',
   });
   assert.ok(codexPtr);
@@ -203,19 +203,19 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
   assert.match(codexPtr.learningRule.ruleStatement, /verify primaryFilingHash/i);
   assert.match(codexPtr.learningRule.trapWarning, /skip primary filing arithmetic/i);
 
-  // 3. Record an initially wrong note on seat:code-architect (claude), followed by operator feedback + correction in transcript
+  // 3. Record an initially wrong note on an operator-defined specialist seat (claude), followed by operator feedback + correction in transcript
   const buggyPtr = recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',
     sessionId: 'session-main',
     messageId: 'msg-harvest-bug',
-    seatId: 'code-architect',
+    seatId: 'specialist-eng',
     engine: 'claude',
-    userPrompt: 'Update art-eln-coverage-and-rl-arena in-place via Quote to Modify',
-    replyText: 'Updated art-eln-coverage-and-rl-arena@r10 in outputs/ folder.',
+    userPrompt: 'Update art-telemetry-matrix in-place via Quote to Modify',
+    replyText: 'Updated art-telemetry-matrix@r10 in outputs/ folder.',
     artifactUpdated: {
-      artifactId: 'art-eln-coverage-and-rl-arena',
+      artifactId: 'art-telemetry-matrix',
       revision: 10,
-      localHtmlPath: 'packages/archon-app/public/artifacts/art-eln-coverage-and-rl-arena.html',
+      localHtmlPath: 'packages/archon-app/public/artifacts/art-telemetry-matrix.html',
     },
     outcome: 'completed',
   });
@@ -225,17 +225,17 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
     sharedStore: {
       artifacts: new Map([
         [
-          'art-eln-coverage-and-rl-arena',
+          'art-telemetry-matrix',
           {
-            artifactId: 'art-eln-coverage-and-rl-arena',
-            title: 'ELN 236 & 120-Agent RL Arena',
+            artifactId: 'art-telemetry-matrix',
+            title: 'Sovereign Telemetry Matrix',
             currentRevision: 17,
-            publishedBySeat: 'deep-research',
+            publishedBySeat: 'chief-of-staff',
           },
         ],
       ]),
       skills: new Map([
-        ['stock-deep-research-sop', { name: 'stock-deep-research-sop', state: 'active' }],
+        ['workspace-orchestrator-sop', { name: 'workspace-orchestrator-sop', state: 'active' }],
       ]),
     },
   };
@@ -248,9 +248,9 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
           {
             id: 'msg-harvest-bug',
             role: 'assistant',
-            seatId: 'code-architect',
+            seatId: 'specialist-eng',
             engine: 'claude',
-            content: 'Updated art-eln-coverage-and-rl-arena@r10 in outputs/ folder.',
+            content: 'Updated art-telemetry-matrix@r10 in outputs/ folder.',
           },
           {
             id: 'msg-u-feedback',
@@ -260,7 +260,7 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
           {
             id: 'msg-a-fixed',
             role: 'assistant',
-            seatId: 'code-architect',
+            seatId: 'specialist-eng',
             engine: 'claude',
             content:
               'Rule: Stage localHtmlPath before USER_OUTPUTS_DIR and compare stagedFileHashes so unchanged staged copies are never re-harvested.',
@@ -287,7 +287,7 @@ test('Seat Memory v4.5 Cross-Seat & Multi-Hand (agy / claude / codex): Salience 
   const updatedBuggyPtr = idx.pointers.find((p) => p.messageId === 'msg-harvest-bug');
   assert.equal(updatedBuggyPtr.outcome, 'corrected_by_dreaming');
   assert.match(updatedBuggyPtr.replyExcerpt, /Dreaming Consolidated Correction/);
-  assert.ok(updatedBuggyPtr.targets.includes('artifact://art-eln-coverage-and-rl-arena@r17'));
+  assert.ok(updatedBuggyPtr.targets.includes('artifact://art-telemetry-matrix@r17'));
 });
 
 test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Query-Time Wiki+Shard+Pointer Fusion, and L4 Agora Playbook Promotion across all seats & hands', () => {
@@ -296,61 +296,61 @@ test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Quer
   // 1. Multi-seat & multi-hand Single-Writer Verbatim Shards (no shared-table overwrite contention)
   const shardResearch = upsertSeatVerbatimShard(idx, {
     workspaceId: 'ws-default',
-    campaignId: 'cmp-q4-equity-audit',
-    seatId: 'deep-research',
+    campaignId: 'cmp-q4-audit',
+    seatId: 'specialist-research',
     engine: 'codex',
-    entityId: 'NVDA.US',
+    entityId: 'ACME-CORP',
     verbatimQuotes: [
-      { quote: 'Data Center revenue for Q3 FY27 reached $42.8B, up 94% YoY.', source: 'sec-10q-nvda-2026q3#item2' },
+      { quote: 'Cloud segment revenue for Q3 reached $42.8B, up 94% YoY.', source: 'filing-10q-acme-2026q3#item2' },
     ],
-    verifiedFacts: ['NVDA Q3 FY27 Data Center gross margin held at 75.4%.'],
-    primaryFilingHash: 'sha256:nvda10q2026q3',
-    targetUris: ['artifact://art-nvda-10q-audit@r3'],
+    verifiedFacts: ['ACME Q3 gross margin held at 75.4%.'],
+    primaryFilingHash: 'sha256:acme10q2026q3',
+    targetUris: ['artifact://art-acme-audit@r3'],
     writeToDisk: false,
   });
 
   const shardQuant = upsertSeatVerbatimShard(idx, {
     workspaceId: 'ws-default',
-    campaignId: 'cmp-q4-equity-audit',
-    seatId: 'maritime-quant',
+    campaignId: 'cmp-q4-audit',
+    seatId: 'specialist-quant',
     engine: 'codex',
-    entityId: 'VLCC-TD3C',
+    entityId: 'INDEX-VOL',
     verbatimQuotes: [
-      { quote: 'TD3C MEG-China TCE printed $54,200/day on 14-day rolling fixture ledger.', source: 'baltic-td3c-20261106' },
+      { quote: 'Rolling 14-day realized volatility printed 18.4% on primary ledger.', source: 'ledger-vol-20261106' },
     ],
-    verifiedFacts: ['VLCC fleet utilization crossed 89.2% threshold.'],
-    primaryFilingHash: 'sha256:td3c20261106',
-    targetUris: ['artifact://art-vlcc-regime-monitor@r5'],
+    verifiedFacts: ['Capacity utilization crossed 89.2% threshold.'],
+    primaryFilingHash: 'sha256:vol20261106',
+    targetUris: ['artifact://art-regime-monitor@r5'],
     writeToDisk: false,
   });
 
-  const shardCode = upsertSeatVerbatimShard(idx, {
+  const shardEng = upsertSeatVerbatimShard(idx, {
     workspaceId: 'ws-default',
-    campaignId: 'cmp-q4-equity-audit',
-    seatId: 'code-architect',
+    campaignId: 'cmp-q4-audit',
+    seatId: 'specialist-eng',
     engine: 'claude',
     entityId: 'archon-memory-v5',
     verbatimQuotes: [
       { quote: 'Single-writer per-entity shard partitioning preserves 57/57 facts (100% survival vs 72% shared table).', source: 'harvey-lab-benchmark' },
     ],
-    verifiedFacts: ['All 8 seats and 3 CLI hands (agy, claude, codex) write to isolated shardIds.'],
+    verifiedFacts: ['All operator seats and CLI hands (agy, claude, codex) write to isolated shardIds.'],
     writeToDisk: false,
   });
 
-  assert.ok(shardResearch.shardId.includes('deep-research-NVDA.US'));
-  assert.ok(shardQuant.shardId.includes('maritime-quant-VLCC-TD3C'));
-  assert.ok(shardCode.shardId.includes('code-architect-archon-memory-v5'));
+  assert.ok(shardResearch.shardId.includes('specialist-research-ACME-CORP'));
+  assert.ok(shardQuant.shardId.includes('specialist-quant-INDEX-VOL'));
+  assert.ok(shardEng.shardId.includes('specialist-eng-archon-memory-v5'));
 
   const synthesis = synthesizeCampaignShards(idx, {
     workspaceId: 'ws-default',
-    campaignId: 'cmp-q4-equity-audit',
+    campaignId: 'cmp-q4-audit',
   });
   assert.equal(synthesis.shardCount, 3);
   assert.equal(synthesis.totalVerbatimQuotes, 3);
   assert.equal(synthesis.totalVerifiedFacts, 3);
   assert.equal(synthesis.factSurvivalRate, 1.0);
-  assert.match(synthesis.synthesisMd, /Data Center revenue for Q3 FY27 reached \$42\.8B/);
-  assert.match(synthesis.synthesisMd, /TD3C MEG-China TCE printed \$54,200\/day/);
+  assert.match(synthesis.synthesisMd, /Cloud segment revenue for Q3 reached \$42\.8B/);
+  assert.match(synthesis.synthesisMd, /Rolling 14-day realized volatility printed 18\.4%/);
 
   // 2. Record confirmed cross-seat rules (>=2 signals for anti-Borges wiki synthesis) and run Dreaming + L4 Agora Playbook Promotion
   recordExecutionMemoryPointer(idx, {
@@ -358,20 +358,20 @@ test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Quer
     messageId: 'msg-v5-rule-1',
     seatId: 'chief-of-staff',
     engine: 'agy',
-    userPrompt: 'Consolidate multi-seat campaign memory and enforce off-LAN Agora-only rule',
+    userPrompt: 'Consolidate multi-seat campaign memory and enforce off-LAN federated relay rule',
     replyText:
-      'Rule: Never use direct LAN SSH to studio01 or ros; route all cross-node dispatches via @mcp:agora-admin and single-writer verbatim shards.\nVerified by: `node --test packages/archon-worker/test/seat-memory-index.test.mjs` (all pass).\nTrap: Shared multi-agent summary tables drop 28% of primary clauses.',
-    artifactUpdated: 'art-nvda-10q-audit@r3',
+      'Rule: Never use direct LAN SSH to remote peers; route all cross-node dispatches via governed MCP relays and single-writer verbatim shards.\nVerified by: `node --test packages/archon-worker/test/seat-memory-index.test.mjs` (all pass).\nTrap: Shared multi-agent summary tables drop 28% of primary clauses.',
+    artifactUpdated: 'art-acme-audit@r3',
   });
   recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',
     messageId: 'msg-v5-rule-2',
     seatId: 'chief-of-staff',
     engine: 'claude',
-    userPrompt: 'Audit NVDA Data Center revenue verbatim shard synthesis',
+    userPrompt: 'Audit ACME Cloud segment revenue verbatim shard synthesis',
     replyText:
-      'Rule: Always synthesize NVDA Data Center revenue from single-writer verbatim shards with primaryFilingHash.\nVerified by: `node --test packages/archon-worker/test/seat-memory-index.test.mjs` factSurvivalRate === 1.0.',
-    artifactUpdated: 'art-vlcc-regime-monitor@r5',
+      'Rule: Always synthesize campaign metrics from single-writer verbatim shards with primaryFilingHash.\nVerified by: `node --test packages/archon-worker/test/seat-memory-index.test.mjs` factSurvivalRate === 1.0.',
+    artifactUpdated: 'art-regime-monitor@r5',
   });
 
   const dreamRes = dreamConsolidateCrossSeatMemory(idx, {
@@ -390,7 +390,7 @@ test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Quer
   const qRes = querySeatMemoryIndex(idx, {
     seatId: 'chief-of-staff',
     workspaceId: 'ws-default',
-    query: 'NVDA Data Center revenue verbatim shard Agora',
+    query: 'ACME Cloud segment revenue verbatim shard',
     limit: 6,
   });
   assert.ok(Array.isArray(qRes.wikiHits) && qRes.wikiHits.length >= 1, 'Query fusion must return L3.5 Domain Wiki hits');
@@ -399,5 +399,5 @@ test('Seat Memory v5.0: Single-Writer Verbatim Shards (100% fact survival), Quer
   const promptEnvelope = formatSeatMemoryIndexEnvelopeForPrompt(qRes);
   assert.match(promptEnvelope, /Query-Time Fused Domain Wiki Pages/);
   assert.match(promptEnvelope, /Single-Writer Verbatim Campaign Shards/);
-  assert.match(promptEnvelope, /Data Center revenue for Q3 FY27 reached \$42\.8B/);
+  assert.match(promptEnvelope, /Cloud segment revenue for Q3 reached \$42\.8B/);
 });

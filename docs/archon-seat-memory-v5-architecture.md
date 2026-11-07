@@ -29,7 +29,7 @@ Anthropic’s research post starts from Kierkegaard’s observation—*"life can
 
 ## 2. ArchonOS Seat Memory v5.0: Cross-Seat & Multi-Hand Architecture
 
-ArchonOS implements **Seat Memory v5.0** at the OS kernel level so **all seats** (`chief-of-staff`, `code-architect`, `deep-research`, `maritime-quant`, `duo-design-architect`, `arena-quant`, `eln-ops`, `ws2` enterprise seats) and **all CLI model hands** (`agy`, `claude`, `codex`, `async-seat-queue`) inherit the same hippocampal-to-neocortical memory stack:
+ArchonOS implements **Seat Memory v5.0** at the OS kernel level so the mandatory pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats** (`seat:<custom-id>` registered dynamically via the Workbench or Chief of Staff), and **all local CLI model hands** (`agy`, `claude`, `codex`) inherit the same hippocampal-to-neocortical memory stack:
 
 ```mermaid
 flowchart LR

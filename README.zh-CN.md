@@ -19,8 +19,8 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
 ## ✨ 核心特性
 
 1. **新用户强制幕僚长与零配置自主初始化 (`npm run init` / `npx archon init`)**:
-   - **预植入幕僚长席位 (`seat:chief-of-staff`)**：任何新用户安装初始化时，强制并持久化植入智枢幕僚长作为默认会话入口与调度器，指令自动分类并分发至专职席位（`code-architect`、`deep-research`、`maritime-quant`、`ops-guardian`），全席位共享统一上下文与工作区文件。
-   - **席位、MCP 与技能隔离保护（默认安全不变式）**：除面向用户的幕僚长（Chief of Staff）作为统一交互门户之外，其他专职席位（如 `code-architect` 代码架构师、`deep-research` 深度投研等）、操作者配置的私有 MCP 接口以及自定义技能库对外部或普通用户默认完全不可见且不可直接越权访问，确保操作者核心能力与环境配置的安全隐私。
+   - **预植入幕僚长席位 (`seat:chief-of-staff`)**：全新克隆安装时，系统仅默认植入智枢幕僚长（`seat:chief-of-staff`）作为统一会话入口与调度器。操作者可随时按需创建任意自定义专职席位（`seat:<custom-id>`），幕僚长将自动分类并分发任务，全席位共享统一上下文与工作区文件。
+   - **席位、MCP 与技能隔离保护（默认安全不变式）**：除面向用户的幕僚长（Chief of Staff）作为统一交互门户之外，操作者自行创建的专职席位、私有 MCP 接口以及自定义技能库对外部或普通用户默认完全不可见且不可直接越权访问，确保操作者核心能力与环境配置的安全隐私。
    - **主机执行手自动探测**：自动识别本地已安装的 CLI 引擎（`claude`、`codex`、`agy`、`opencode`），智能配置无头执行参数与超时熔断保护，杜绝任何个人绝对路径与密钥泄露。
    - **轻量便携配置**：自动生成 `.archon/config.json` 与 `.archon/skills/` 初始技能库。
 2. **多行自由输入对话与工件引用对话修改 (`💬 引用修改 / Quote to Modify`)**:
@@ -58,7 +58,7 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
 
 ## 🧠 Seat Memory v5.0 认知记忆架构（覆盖全席位与 `agy / claude / codex`）
 
-ArchonOS v5.0 在所有主权席位（`chief-of-staff`、`code-architect`、`deep-research`、`maritime-quant`、`creative-studio`、`ops-sre`）与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**。
+ArchonOS v5.0 在默认预置的**智枢幕僚长（`seat:chief-of-staff`）**、**操作者按需创建的任意专职席位（`seat:<custom-id>`）**与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v5-architecture.md`](./docs/archon-seat-memory-v5-architecture.md)**。
 
 | 层级 | 作用域与存储路径 | 核心机制 | 认知权威与安全守卫 |
 | :--- | :--- | :--- | :--- |
@@ -80,15 +80,15 @@ flowchart TB
     
     subgraph Seats["ArchonOS 席位协作层"]
       COS["👑 seat:chief-of-staff
-(默认入口席位 & 智能调度器)"]
-      CODE["🛠️ seat:code-architect
-(全栈工程架构与验证)"]
-      RES["🔬 seat:deep-research
-(深度投研与研报生成)"]
-      QUANT["🌊 seat:maritime-quant
-(海运量化与咽喉流向)"]
-      OPS["🛡️ seat:ops-guardian
-(MCP 网关与审计重放)"]
+(默认预置入口席位 & 智能调度器)"]
+      SPEC1["🛠️ seat:<custom-engineering>
+(操作者自定义工程席位)"]
+      SPEC2["🔬 seat:<custom-research>
+(操作者自定义研究席位)"]
+      SPEC3["📊 seat:<custom-quant>
+(操作者自定义量化席位)"]
+      SPEC4["🎨 seat:<custom-design>
+(操作者自定义设计席位)"]
     end
 
     subgraph Hands["本地无头 CLI 执行引擎"]
@@ -102,6 +102,8 @@ flowchart TB
 (零泄露便携配置文件)"]
       STATE[".archon/workspace-state.json
 (席位与会话状态)"]
+      MEM[".archon/memory-index.json & memory-wiki/
+(Seat Memory v5.0 指针、原话分片与 Wiki)"]
       ARTS[".archon/artifacts/*.json
 (画布工件数据集)"]
       SKILLS[".archon/skills/*/SKILL.md
@@ -109,14 +111,14 @@ flowchart TB
     end
 
     subgraph MCP["外部受控 MCP 服务层 (默认拒绝)"]
-      MCP1["agora-admin (协作构建室与交付契约)"]
-      MCP2["ros-gateway (认知图谱与击败项)"]
-      MCP3["vortexa (全球油轮流向遥测数据)"]
+      MCP1["archon-mesh (团队房间与共享工作区)"]
+      MCP2["local-stdio-fs (本地工作区文件系统)"]
+      MCP3["custom-mcp (操作者按需挂载 MCP)"]
     end
   end
 
   UI --> COS
-  COS -->|自主路由 / 上下文交接| CODE & RES & QUANT & OPS
+  COS -->|自主路由 / 上下文交接| SPEC1 & SPEC2 & SPEC3 & SPEC4
   Seats --> Hands
   Seats --> Storage
   Seats -->|需交互式手动授权方可调用| MCP
@@ -186,7 +188,7 @@ npm start
 ## 🛡️ 安全与环境准则
 
 - **席位强制植入**：初始安装自动持久化 `seat:chief-of-staff`，确保系统开箱即具备全权总览协调能力。
-- **席位、MCP 与技能隔离保护**：除统一交互入口幕僚长席位外，专职席位（`seat:code-architect`、`seat:deep-research`、`seat:maritime-quant` 等）、已注册的 MCP 句柄与私有自定义技能对外部访客或普通用户默认完全不可见，杜绝越权探测。
+- **席位、MCP 与技能隔离保护**：全新安装仅默认预置统一交互入口幕僚长席位（`seat:chief-of-staff`）；操作者自定义的专职席位（`seat:<custom-id>`）、已注册的 MCP 句柄与私有技能对外部访客或普通用户默认完全不可见，杜绝越权探测。
 - **零明文敏感密钥**：外部 MCP 鉴权完全采用 `secret://...` 不透明句柄，从不硬编码、输出或写入前端。
 - **严格回环监听**：服务仅绑定 `127.0.0.1` 本地回环网络，杜绝任何未经授权的外部网络穿透风险。
 
