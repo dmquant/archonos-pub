@@ -3,6 +3,7 @@
 > [!NOTE]
 > **Reference Sources**
 > - **Anthropic Research**: [*"The components of agent memory"*](https://www.anthropic.com/research/components-of-agent-memory) (Published Nov 6, 2026 · Engineering Team, written by Lance Martin)
+> - **Foundational Seat Memory v0.3 → v0.4 Architecture (Memory-Prior-to-Skills & Epistemic Pointer Spec)**: [`docs/archon-seat-memory-v0.4-architecture.md`](./archon-seat-memory-v0.4-architecture.md)
 > - **ArchonOS Kernel Implementation**: [`packages/archon-worker/src/seat-memory-index.mjs`](../packages/archon-worker/src/seat-memory-index.mjs), [`packages/archon-worker/src/dev-server.mjs`](../packages/archon-worker/src/dev-server.mjs), [`scripts/architect-bridge.mjs`](../scripts/architect-bridge.mjs), and [`packages/archon-worker/test/seat-memory-index.test.mjs`](../packages/archon-worker/test/seat-memory-index.test.mjs)
 
 ---

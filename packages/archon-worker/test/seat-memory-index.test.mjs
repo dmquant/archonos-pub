@@ -123,7 +123,7 @@ test('Live HTTP /api/memory/index and /api/memory expose Seat Memory v0.3 pointe
   }
 });
 
-test('Seat Memory v4 Epistemic Pointer Spec: quarantines legacy 100k synthetic reports and supports retraction invalidation', () => {
+test('Seat Memory v0.4 Epistemic Pointer Spec: quarantines legacy 100k synthetic reports and supports retraction invalidation', () => {
   const idx = loadOrInitMemoryIndex(null);
   const legacyPtr = recordExecutionMemoryPointer(idx, {
     workspaceId: 'ws-default',

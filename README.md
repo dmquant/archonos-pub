@@ -58,7 +58,7 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 
 ## 🧠 Seat Memory v0.5 Architecture (`L1–L4` Across All Seats & CLI Hands)
 
-ArchonOS v0.5 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specification: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)**.
+ArchonOS v0.5 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specifications: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** and **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)** (`v0.3 → v0.4` Epistemic Pointer Spec).
 
 | Tier | Scope & Storage | Core Mechanism | Authority & Safeguard |
 | :--- | :--- | :--- | :--- |
@@ -180,6 +180,7 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 | **Quickstart Guide** | [docs/en/QUICKSTART.md](./docs/en/QUICKSTART.md) | [docs/zh-CN/QUICKSTART.md](./docs/zh-CN/QUICKSTART.md) |
 | **System Architecture** | [docs/en/ARCHITECTURE.md](./docs/en/ARCHITECTURE.md) | [docs/zh-CN/ARCHITECTURE.md](./docs/zh-CN/ARCHITECTURE.md) |
 | **Seat Memory v0.5 Spec** | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) | [docs/archon-seat-memory-v0.5-architecture.md](./docs/archon-seat-memory-v0.5-architecture.md) |
+| **Seat Memory v0.3 → v0.4 Spec** | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) | [docs/archon-seat-memory-v0.4-architecture.md](./docs/archon-seat-memory-v0.4-architecture.md) |
 | **Configuration & Governance** | [docs/en/CONFIGURATION.md](./docs/en/CONFIGURATION.md) | [docs/zh-CN/CONFIGURATION.md](./docs/zh-CN/CONFIGURATION.md) |
 | **Changelog & Versions** | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md) |
 
