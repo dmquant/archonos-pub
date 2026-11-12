@@ -13,6 +13,8 @@
   - **OpenAI Codex CLI** (`codex`)
   - **Antigravity CLI** (`agy`)
   - **OpenCode CLI** (`opencode`)
+  - **DeepSeek Harness CLI** (`dsh`)
+    - 无头模式使用 `dsh --profile headless --json "<task>"`，需要提供模型凭据：在启动环境中提供 `DEEPSEEK_API_KEY`，或在 `$DSH_HOME/profiles/headless/cordis.patch.yml` 中声明一条路由（例如通过 `@deepseek-ai/dsh-llm-pi-ai` 接入 OpenAI 兼容网关）。ArchonOS 不会改写启动环境变量，会原样透传给本地模型手。
 
 > **提示**：即便本机尚未安装任何 CLI 工具，ArchonOS 依然可以正常启动并提供确定性的受控回退合成响应，方便您立即体验全部 6 大工作台视图、MCP 权限演练场、Harness2 RSI 技能门控以及 3D/2D 交互式画布工件。
 
@@ -36,7 +38,7 @@ cd archon-os
    - `.archon/skills/`（存放工作区 `SKILL.md` 技能包）
    - `packages/archon-app/public/artifacts/`（存放对话生成的交互式 HTML 看板文件）
 2. **自动探测本地无头 CLI 执行手（Local Model Hands）**：
-   - 自动扫描 `$PATH`、`~/.local/bin`、`~/.npm-global/bin`、`/opt/homebrew/bin` 与 `/usr/local/bin` 中的 `claude`、`codex`、`agy` 与 `opencode`。
+   - 自动扫描 `$PATH`、`~/.local/bin`、`~/.npm-global/bin`、`/opt/homebrew/bin` 与 `/usr/local/bin` 中的 `claude`、`codex`、`agy`、`opencode` 与 `dsh`。
    - 自动将用户主目录脱敏替换为 `~`，确保网页前端与配置文件中**绝不泄露任何个人机器路径**。
    - 自动为每个 CLI 写入最佳无头（Headless）调用模板、工作目录隔离（`cwd=/tmp`）与超时熔断参数至 `.archon/config.json`：
      - `claude`: `claude -p "{{prompt}}" --output-format stream-json --verbose`

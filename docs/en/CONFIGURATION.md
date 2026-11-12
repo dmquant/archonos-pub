@@ -51,9 +51,9 @@ ArchonOS stores all host-specific runtime configuration in `.archon/config.json`
 ## 2. Managing Local Model Hands (`⚙️ Local Hands`)
 
 In the **⚙️ Local Hands** view of the Web Workbench (`http://127.0.0.1:8790`):
-1. **⚡ 1-Click Autonomous Initialize & Re-Scan**: Scans your machine for `claude`, `codex`, `agy`, and `opencode`, discovers local MCP servers, and updates `.archon/config.json`.
+1. **⚡ 1-Click Autonomous Initialize & Re-Scan**: Scans your machine for `claude`, `codex`, `agy`, `opencode`, and `dsh`, discovers local MCP servers, and updates `.archon/config.json`.
 2. **🛠️ Model Hand Headless Mode Configurator**:
-   - Select any CLI engine (`claude`, `codex`, `agy`, `opencode`).
+   - Select any CLI engine (`claude`, `codex`, `agy`, `opencode`, `dsh`).
    - Set **Binary Path** to `auto` (dynamic `$PATH` / `~/.local/bin` discovery) or a custom path (`~/.local/bin/codex`).
    - Customize the **Headless Arguments Template** (using `{{prompt}}` where the user/seat prompt should be injected) and **Timeout (ms)**.
    - Click **💾 Save Headless Profile** to persist changes immediately to `.archon/config.json`.
@@ -80,7 +80,7 @@ In the **🔌 External MCPs** view:
 ## 4. Managing Harness2 RSI Skills (`🧬 RSI & Skills`)
 
 In the **🧬 RSI & Skills** view:
-- **⚡ Live Harness2 RSI Synthesis**: Spawn a local CLI hand (`claude`, `codex`, `agy`) to synthesize a new `SKILL.md` from workspace trajectories and automatically run the $k = 3$ held-out replay verifier.
+- **⚡ Live Harness2 RSI Synthesis**: Spawn a local CLI hand (`claude`, `codex`, `agy`, `opencode`, `dsh`) to synthesize a new `SKILL.md` from workspace trajectories and automatically run the $k = 3$ held-out replay verifier.
 - **⚡ Quick Create & Activate (Operator Mode)**: Author or edit a `SKILL.md` directly and activate it in one step with operator interactive authority (`origin = "interactive"`).
 - **✏️ Edit / 🗑️ Delete / Disable**: Click **✏️ Edit** on any skill row to load its `SKILL.md` into the editor and bump its version, **Disable** active skills, or **🗑️** delete obsolete skills.
 
@@ -89,5 +89,5 @@ In the **🧬 RSI & Skills** view:
 ## 5. Managing Archon Seats (`🪑 Archon Seats`)
 
 In the **🪑 Archon Seats** view:
-- Create new seats or click any existing seat card (`chief-of-staff`, `code-architect`, `maritime-quant`, `ops-guardian`) to edit its **Display Name**, **Default CLI Hand** (`claude`, `codex`, `agy`, `opencode`), and **System Prompt**.
+- Create new seats or click any existing seat card (`chief-of-staff`, `code-architect`, `maritime-quant`, `ops-guardian`) to edit its **Display Name**, **Default CLI Hand** (`claude`, `codex`, `agy`, `opencode`, `dsh`), and **System Prompt**.
 - Toggle seats enabled/disabled or delete custom seats at any time.

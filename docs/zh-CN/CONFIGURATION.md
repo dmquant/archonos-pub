@@ -51,9 +51,9 @@ ArchonOS 将所有与本机环境相关的运行时配置保存在 `.archon/conf
 ## 2. 本地 CLI 执行手管理与无头模式配置 (`⚙️ 本地执行手`)
 
 在 Web 工作台（`http://127.0.0.1:8790`）的 **⚙️ 本地执行手** 视图中：
-1. **⚡ 一键自动初始化与重新扫描 (`1-Click Autonomous Initialize & Re-Scan`)**：自动重新扫描本机安装的 `claude`、`codex`、`agy`、`opencode` 二进制文件与本地 MCP 服务，并更新 `.archon/config.json`。
+1. **⚡ 一键自动初始化与重新扫描 (`1-Click Autonomous Initialize & Re-Scan`)**：自动重新扫描本机安装的 `claude`、`codex`、`agy`、`opencode`、`dsh` 二进制文件与本地 MCP 服务，并更新 `.archon/config.json`。
 2. **🛠️ 模型执行手无头模式配置器 (`Model Hand Headless Mode Configurator`)**：
-   - 选择任意 CLI 引擎（`claude`、`codex`、`agy`、`opencode`），或直接点击上方表格中的 **⚙️ Configure** 按钮。
+   - 选择任意 CLI 引擎（`claude`、`codex`、`agy`、`opencode`、`dsh`），或直接点击上方表格中的 **⚙️ Configure** 按钮。
    - 设置**二进制路径**为 `auto`（自动动态探测）或指定路径（如 `~/.local/bin/codex`）。
    - 自定义**无头参数模板**（使用 `{{prompt}}` 作为提示词注入占位符）与**超时阈值 (ms)**。
    - 点击 **💾 Save Headless Profile** 即可实时保存至 `.archon/config.json` 并立即生效。
@@ -80,7 +80,7 @@ ArchonOS 将所有与本机环境相关的运行时配置保存在 `.archon/conf
 ## 4. Harness2 RSI 技能全生命周期管理 (`🧬 RSI 与技能`)
 
 在 **🧬 RSI 与技能** 视图中：
-- **⚡ 实时 Harness2 RSI 技能蒸馏**：调用本地 `claude`、`codex` 或 `agy` CLI 从工作区轨迹自动合成 `SKILL.md` 并执行 $k = 3$ 留出集回放门控验证。
+- **⚡ 实时 Harness2 RSI 技能蒸馏**：调用本地 `claude`、`codex`、`agy`、`opencode` 或 `dsh` CLI 从工作区轨迹自动合成 `SKILL.md` 并执行 $k = 3$ 留出集回放门控验证。
 - **⚡ 快速创建并激活（操作员模式 `Quick Create & Activate`）**：由操作员直接编写或粘贴 `SKILL.md`，一键完成创建与交互式授权激活，立即注入对应席位的 CLI 系统提示词中。
 - **✏️ 编辑 / 🗑️ 删除 / 禁用**：点击技能列表中的 **✏️ Edit** 可将该技能加载至编辑器并自动递增版本号，支持随时 **Disable** 停用或 **🗑️** 删除技能。
 
@@ -89,5 +89,5 @@ ArchonOS 将所有与本机环境相关的运行时配置保存在 `.archon/conf
 ## 5. 执政官席位可视化管理 (`🪑 席位配置`)
 
 在 **🪑 席位配置** 视图中：
-- 点击任意席位卡片即可加载至右侧表单，自由修改**席位显示名称**、**默认绑定的本地 CLI 执行手**（`claude`、`codex`、`agy`、`opencode`）以及**系统角色提示词（System Prompt）**。
+- 点击任意席位卡片即可加载至右侧表单，自由修改**席位显示名称**、**默认绑定的本地 CLI 执行手**（`claude`、`codex`、`agy`、`opencode`、`dsh`）以及**系统角色提示词（System Prompt）**。
 - 支持随时新增专职席位、一键切换启用/禁用或删除自定义席位。

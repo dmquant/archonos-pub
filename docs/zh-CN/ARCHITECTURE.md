@@ -14,7 +14,7 @@ sequenceDiagram
   participant Op as 操作员 (Web 工作台 / CLI)
   participant DO as WorkspaceOrchestratorDO
   participant Gate as 注册表与策略门控
-  participant Hand as 本地 CLI 执行手 (claude/codex/agy)
+  participant Hand as 本地 CLI 执行手 (claude/codex/agy/dsh)
   participant Canvas as 五阶段 R2-First 版本门控
 
   Op->>DO: 向指定席位发送指令 (如 seat:maritime-quant)
@@ -59,5 +59,5 @@ sequenceDiagram
   5. **阶段 5（实时广播）**：向前端 iframe 发送 `ARCHON_ARTIFACT_UPDATED` 消息实现无刷新热更新。
 
 ### 不变量五：可移植无头 CLI 隔离执行 (`local-hands-runner.mjs`)
-- 本地 CLI 二进制文件（`claude`、`codex`、`agy`、`opencode`）统一在中性隔离目录（`/tmp`）且关闭标准输入（`stdin: 'ignore'`）的条件下派生执行，彻底避免因工作区陈旧锁文件或交互式确认提示导致的进程挂起。
+- 本地 CLI 二进制文件（`claude`、`codex`、`agy`、`opencode`、`dsh`）统一在中性隔离目录（`/tmp`）且关闭标准输入（`stdin: 'ignore'`）的条件下派生执行，彻底避免因工作区陈旧锁文件或交互式确认提示导致的进程挂起。
 - 内置滚动遥测引擎实时统计各 CLI 的调用次数、平均耗时、超时次数与熔断器健康状态（`CLOSED (HEALTHY)` 或 `HALF-OPEN (DEGRADED)`）。

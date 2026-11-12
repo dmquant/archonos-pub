@@ -13,6 +13,8 @@
   - **OpenAI Codex CLI** (`codex`)
   - **Antigravity CLI** (`agy`)
   - **OpenCode CLI** (`opencode`)
+  - **DeepSeek Harness CLI** (`dsh`)
+    - Headless runs use `dsh --profile headless --json "<task>"` and need a provider credential: either `DEEPSEEK_API_KEY` in the launching environment, or a route declared in `$DSH_HOME/profiles/headless/cordis.patch.yml` (for example an OpenAI-compatible gateway via `@deepseek-ai/dsh-llm-pi-ai`). ArchonOS passes the launching environment through to the hand unchanged.
 
 > **Note:** Even if no CLI binaries are installed yet, ArchonOS boots cleanly and provides deterministic governed synthesis fallbacks so you can explore all 6 views, MCP playgrounds, Harness2 RSI skill gates, and 3D/2D Canvas Artifacts immediately.
 
@@ -36,7 +38,7 @@ cd archon-os
    - `.archon/skills/` (workspace `SKILL.md` bundles)
    - `packages/archon-app/public/artifacts/` (rendered HTML dashboards)
 2. **Probes Local Headless CLI Hands**:
-   - Scans `$PATH`, `~/.local/bin`, `~/.npm-global/bin`, `/opt/homebrew/bin`, and `/usr/local/bin` for `claude`, `codex`, `agy`, and `opencode`.
+   - Scans `$PATH`, `~/.local/bin`, `~/.npm-global/bin`, `/opt/homebrew/bin`, and `/usr/local/bin` for `claude`, `codex`, `agy`, `opencode`, and `dsh`.
    - Masks your home directory as `~` so personal filesystem paths are never leaked to the UI or config files.
    - Configures each CLI engine's non-interactive headless arguments and circuit-breaker timeouts in `.archon/config.json`:
      - `claude`: `claude -p "{{prompt}}" --output-format stream-json --verbose`
