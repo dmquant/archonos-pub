@@ -61,7 +61,7 @@ flowchart TB
 
 ## 2. 执行工作流：为什么记忆必须优先于技能 (`Step 1 → Step 2 → Step 3`)
 
-大多数智能体框架收到用户指令后直接跳入技能/工具调用，导致智能体无法获知：已有工件（`artifact://...@rN`）或历史回合（`turn://...`）是否已解决了核心问题、哪个专职席位与模型手（`claude`、`codex`、`agy`）在该类任务上验证通过率最高，以及过去踩过哪些陷阱。
+大多数智能体框架收到用户指令后直接跳入技能/工具调用，导致智能体无法获知：已有工件（`artifact://...@rN`）或历史回合（`turn://...`）是否已解决了核心问题、哪个专职席位与模型手（`claude`、`codex`、`agy`、`opencode`、`dsh`）在该类任务上验证通过率最高，以及过去踩过哪些陷阱。
 
 在 ArchonOS（[`packages/archon-worker/src/seat-memory-index.mjs`](../packages/archon-worker/src/seat-memory-index.mjs)）中，每个席位在每次执行时都严格遵循 **`Step 1（记忆检索）→ Step 2（技能与工具绑定）→ Step 3（本地 CLI 模型手执行）`**：
 

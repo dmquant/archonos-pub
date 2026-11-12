@@ -4,6 +4,24 @@
 
 ---
 
+## [未发布 (Unreleased)]
+
+### 新增 (Added)
+- **OpenCode CLI 模型手成为一等公民**：`opencode`（v2 `run --format json`）可被探测、可选择，并正式加入注册表 hand 集合（不再被当作 `codex` 别名）；新增其 NDJSON 事件流解析（`step_start` / `text` / `tool_use` / `step_finish` / `error`），支持按步 Token 统计与 `--session <id>` 会话续接。
+- **DeepSeek Harness CLI 模型手（`dsh`）**：新增本地模型手，调用 `dsh --profile headless --json "<task>"`；解析 NDJSON 运行事件（`session` / `status` / `text` / `tool_call` / `final`，并把回合级 error 事件判定为失败），支持 `--session-id <id>` 续接，并以步级 usage 聚合，任何一步缺少用量时绝不输出部分合计。
+- Worker、注册表、CLI、默认/示例配置、Python `archon-hands` 适配器与用量解析器、能力探测，以及 Web 控制台的模型手选择器，均已支持本地模型手（`claude`、`codex`、`agy`、`opencode`、`dsh`；`gemini` 仍为仅解析引擎）。
+
+### 修复 (Fixed)
+- **失败的模型手不再被当作成功答复**：opencode/dsh 现在要求退出码为 0 且没有引擎错误事件；中途失败但已输出部分文本的运行会判定失败，而不会成为助手答复。
+- **旧的模型手配置可自愈**：历史版本写入的无头参数组合（opencode 缺 `--format json`/`--auto`、claude 使用 `--output-format text`）在加载时自动迁移，不再被 `npm run init` 反复写回。
+- **macOS 专属副作用在 Linux 上被隔离**：异步任务完成通知不再因 `osascript` 异步 spawn 错误导致服务崩溃；「在文件管理器中显示」在非 macOS 上变为空操作。
+- **会话与路由信息如实呈现**：降级不再把其它引擎的原生会话绑定到主模型手；执行手说明改为每次尝试重建；降级只选择已安装且启用的模型手，并受总时限约束。
+
+### 测试 (Tests)
+- 新增 opencode/dsh 调用与 NDJSON 投影的 Worker 测试、原生 `opencode`/`dsh` 注册表测试，以及 `dsh` 的 Python 适配器/用量/fixture 测试（合计 151 项）。
+
+---
+
 ## [0.5.0] - 2026-11-07
 
 ### 新增 (Added)

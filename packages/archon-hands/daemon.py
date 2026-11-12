@@ -77,7 +77,7 @@ def compute_poll_backoff_ms(base_ms=1000, attempt=0, jitter_fn=None):
     return int(backoff + jitter)
 
 
-def probe_capabilities(hand_id, nonce, available_engines=("claude", "codex", "opencode", "agy", "gemini")):
+def probe_capabilities(hand_id, nonce, available_engines=("claude", "codex", "opencode", "dsh", "agy", "gemini")):
     """Executes an Echo Probe across installed engines and signs a hand-operator capability receipt."""
     if not hand_id or not nonce:
         raise ValueError("hand_id and nonce are required")

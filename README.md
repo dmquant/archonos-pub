@@ -10,7 +10,7 @@
 
 ---
 
-**ArchonOS** is an open-source, standalone **Personal RSI Intelligent Operating System** running locally on your workstation (macOS / Linux). It seamlessly unifies **Chief of Staff Auto-Routing**, **Multi-Line Fluid Chat & Input Ergonomics**, **Local Headless Model Hands** (`claude`, `codex`, `agy`, `opencode`), **Default-Deny MCP Tool Federation**, **Interactive Canvas Artifact Quoting & Modification**, and **Harness2 Recursive Self-Improvement (RSI) Skills** into a single bilingual (`EN / 中文`) intelligent control console.
+**ArchonOS** is an open-source, standalone **Personal RSI Intelligent Operating System** running locally on your workstation (macOS / Linux). It seamlessly unifies **Chief of Staff Auto-Routing**, **Multi-Line Fluid Chat & Input Ergonomics**, **Local Headless Model Hands** (`claude`, `codex`, `agy`, `opencode`, `dsh`), **Default-Deny MCP Tool Federation**, **Interactive Canvas Artifact Quoting & Modification**, and **Harness2 Recursive Self-Improvement (RSI) Skills** into a single bilingual (`EN / 中文`) intelligent control console.
 
 ArchonOS is designed as an autonomous, self-contained personal intelligent operating system. It operates completely independently with optional modular integration with external MCP networks, codebases, and Antigravity architect bridges whenever requested.
 
@@ -21,7 +21,7 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 1. **Mandatory Chief of Staff & Zero-Config Autonomous Init (`npm run init` / `npx archon init`)**:
    - **Pre-Seeded Chief of Staff (`seat:chief-of-staff`)**: Every ArchonOS instance boots with only the Chief of Staff seat pre-seeded as the default conversational entry-point and orchestrator. You can define any custom specialist seats (`seat:<custom-id>`) via the Workbench or Chief of Staff, and directives are automatically classified and routed with shared cross-seat session context.
    - **Multi-Tenant Seat & Asset Privacy (Default Invariant)**: For external users and standard collaborators, operator-defined specialist seats, private MCP connections, API keys, and custom operator skills are strictly hidden and isolated from visibility or direct access. Interactions funnel exclusively through the Chief of Staff unless explicit per-seat access or delegation permissions are authorized by the host operator.
-   - **Autonomous Host Discovery**: Probes installed local CLI model hands (`claude`, `codex`, `agy`, `opencode`) across standard paths (`~/.local/bin`, `/opt/homebrew/bin`, `~/.npm-global/bin`, `$PATH`) and configures headless execution with zero plaintext credential leakage.
+   - **Autonomous Host Discovery**: Probes installed local CLI model hands (`claude`, `codex`, `agy`, `opencode`, `dsh`) across standard paths (`~/.local/bin`, `/opt/homebrew/bin`, `~/.npm-global/bin`, `$PATH`) and configures headless execution with zero plaintext credential leakage.
    - **Portable Configuration**: Writes `.archon/config.json` and seeds `.archon/skills/` starter Harness2 `SKILL.md` workflows.
 2. **Multi-Line Intelligent Chat & Interactive Artifact Quoting (`💬 Quote to Modify`)**:
    - **Fluid Multi-Line Input Box**: Upgraded conversational interface with multi-line auto-expanding textarea support. Press `Enter` to send instructions immediately, or `Shift+Enter` to insert clean linebreaks for complex prompts, structured code blocks, and multi-paragraph directives.
@@ -45,10 +45,10 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
    - Instant 1-click theme switcher between **Obsidian Dark** and **Paper Light** modes with synchronized Chart.js, Mermaid.js, and 3D Canvas rendering.
 8. **Dual-Target Deployment & Remote-to-Local Sovereign Chat Bridge**:
    - **Local Workstation OR Cloudflare Remote**: Choose between 100% offline local workstation deployment (`127.0.0.1:8790`) or Cloudflare Edge Worker + Remote PWA console.
-   - **Remote Sovereign Chat Bridge**: Submit chat turns directly from your mobile/remote PWA (`https://<worker>.workers.dev`), queued securely into Cloudflare R2 and claimed exclusively by your local MacBook daemon (`archon-sync-edge.mjs`). Local CLI hands (`agy`, `claude`, `codex`) execute with private data/tools/MCPs on-device, and reply back to the remote UI with live status updates (`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`).
+   - **Remote Sovereign Chat Bridge**: Submit chat turns directly from your mobile/remote PWA (`https://<worker>.workers.dev`), queued securely into Cloudflare R2 and claimed exclusively by your local MacBook daemon (`archon-sync-edge.mjs`). Local CLI hands (`agy`, `claude`, `codex`, `opencode`, `dsh`) execute with private data/tools/MCPs on-device, and reply back to the remote UI with live status updates (`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`).
    - **Live Chat History Synchronization**: Two-way encrypted sync between local `workspace-state.json` and Cloudflare R2, with automatic 30s background sync watcher, manual 1-click sync badge, and separate local-hand execution readiness monitoring.
 9. **ArchonOS Seat Memory v0.5 (`L1–L4` Multi-Seat & Multi-Hand Epistemic Memory)**:
-   - **Step-1 Memory-Prior-to-Skills Pipeline**: Every chat turn across all seats and CLI hands (`agy`, `claude`, `codex`) executes Step-1 memory retrieval *before* loading `@skill` or `@mcp` specifications, enforcing strict `memoryAuthority: "retrieval_pointer_only"` provenance.
+   - **Step-1 Memory-Prior-to-Skills Pipeline**: Every chat turn across all seats and CLI hands (`agy`, `claude`, `codex`, `opencode`, `dsh`) executes Step-1 memory retrieval *before* loading `@skill` or `@mcp` specifications, enforcing strict `memoryAuthority: "retrieval_pointer_only"` provenance.
    - **Single-Writer Verbatim Shards (`100% Fact Survival`)**: Eliminates multi-agent "telephone game" summarization loss. Specialist seats write structured verbatim quotes, verified metrics, and trap warnings to dedicated per-seat shards (`.archon/memory-shards/<workspace>/<campaign>/seat-<id>.json`), synthesized deterministically at campaign boundaries (`POST /api/memory/shard`, `GET /api/memory/shards`).
    - **Query-Time `Wiki + Verbatim Shard + Pointer` Fusion**: Fuses high-level **L3.5 Domain Wiki** maps (`wiki://<slug>.md`) with **Single-Writer Verbatim Shards** (`shard://<campaign>/<seat>`) and **L3 Epistemic Pointers** (`turn://`, `artifact://`, `file://`, `skill://`) in a single Step-1 prompt envelope.
    - **Offline Cross-Seat "Dreaming" & Anti-Borges Guard (`<= 0.15`)**: Runs automatically on the 2-hour RSI tick (or on demand via `node scripts/architect-bridge.mjs dream` / `POST /api/memory/dream`) to replay raw transcripts, rewrite contradicted turns, repair stale `artifact://@rN` links, and compile `.archon/memory-wiki/` under a strict `<= 0.15` compression ratio cap.
@@ -58,7 +58,7 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 
 ## 🧠 Seat Memory v0.5 Architecture (`L1–L4` Across All Seats & CLI Hands)
 
-ArchonOS v0.5 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`). Full specifications: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** and **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)** (`v0.3 → v0.4` Epistemic Pointer Spec).
+ArchonOS v0.5 implements a 5-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`, `opencode`, `dsh`). Full specifications: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** and **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)** (`v0.3 → v0.4` Epistemic Pointer Spec).
 
 | Tier | Scope & Storage | Core Mechanism | Authority & Safeguard |
 | :--- | :--- | :--- | :--- |
@@ -95,6 +95,8 @@ flowchart TB
       CLI1["claude CLI (Anthropic Claude Code)"]
       CLI2["codex CLI (OpenAI Codex / LLM)"]
       CLI3["agy CLI (Google Antigravity CLI)"]
+      CLI4["opencode CLI (OpenCode)"]
+      CLI5["dsh CLI (DeepSeek Harness)"]
     end
 
     subgraph Storage["Personal Workspace Storage (.archon/)"]
@@ -145,7 +147,7 @@ npm install
 # 2. Run autonomous host discovery (mandates Chief of Staff & probes CLI hands)
 npm run init
 
-# 3. Execute monorepo test suite (107/107 tests across 9 packages)
+# 3. Execute monorepo test suite (151/151 tests across 9 packages)
 npm test
 
 # 4. Start ArchonOS Web Console on http://127.0.0.1:8790
@@ -166,7 +168,7 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 | [`packages/archon-skills`](./packages/archon-skills) | TypeScript / Node.js | Harness2 3-valued epistemic skill eligibility verifier (`pass \| fail \| insufficient`, $n \ge 2, k = 3$) |
 | [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 5-Stage R2-First atomic artifact revision gate & HTML accessibility parity verifier |
 | [`packages/archon-ledger`](./packages/archon-ledger) | Python 3 | Default-deny policy gate & SHA-256 hash-chained audit ledger (`policy_ledger.py`) |
-| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | Local CLI stream normalizer (`claude`, `codex`, `agy`, `opencode`), credential scrubber & lease manager |
+| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | Local CLI stream normalizer (`claude`, `codex`, `agy`, `opencode`, `dsh`), credential scrubber & lease manager |
 | [`packages/archon-mesh`](./packages/archon-mesh) | Node.js ESM | Ed25519-signed `.archon-bundle` export/import with mandatory secret & raw trajectory stripping |
 | [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` CLI (`archon init`, `archon up`, `archon status`, `archon hands probe`) |
 

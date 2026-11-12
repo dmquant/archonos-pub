@@ -2499,7 +2499,7 @@
       <div class="brand-logo">🏛️</div>
       <div>
         <div class="brand-title" data-i18n="app_title">ArchonOS — Personal RSI Intelligent OS Console</div>
-        <div class="brand-sub" data-i18n="app_subtitle">Independent Multi-Seat Control Plane • Local CLI Hands (claude / codex / agy) • Personal RSI Engine</div>
+        <div class="brand-sub" data-i18n="app_subtitle">Independent Multi-Seat Control Plane • Local CLI Hands (claude / codex / agy / opencode / dsh) • Personal RSI Engine</div>
       </div>
     </div>
     <div class="header-controls">
@@ -2575,7 +2575,7 @@
           <span class="nav-label-text" data-i18n="nav_mcp_hub">External MCPs</span>
           <span class="nav-badge">0</span>
         </button>
-        <button class="nav-btn" id="nav-hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy)">
+        <button class="nav-btn" id="nav-hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy, opencode, dsh)">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#settings"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_local_hands">Local Hands &amp; Settings</span>
           <span class="nav-badge">local</span>
@@ -2817,6 +2817,8 @@
                 <option value="claude">hand: claude</option>
                 <option value="codex">hand: codex</option>
                 <option value="agy">hand: agy</option>
+                <option value="opencode">hand: opencode</option>
+                <option value="dsh">hand: dsh</option>
               </select>
               <select id="chat-skill-select" onchange="onComposerSkillSelect(this.value)" title="Pin a Governed Skill or Multi-Stage Workflow SOP">
                 <option value="">⚡ @skill...</option>
@@ -3098,7 +3100,7 @@
             <div>
               <div class="card-title" style="font-size:15px;" data-i18n="seats_page_title">🪑 ArchonOS Native Seat Management (Full CRUD)</div>
               <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;" data-i18n="seats_page_sub">
-                Seats belong strictly to your ArchonOS system. Bind each seat to a local MacBook CLI Hand (`claude`, `codex`, `agy`) — models are resolved automatically by your local CLI configuration.
+                Seats belong strictly to your ArchonOS system. Bind each seat to a local MacBook CLI Hand (`claude`, `codex`, `agy`, `opencode`, `dsh`) — models are resolved automatically by your local CLI configuration.
               </div>
             </div>
             <button class="btn" onclick="resetSeatForm()" data-i18n="btn_new_seat">+ New Seat Form</button>
@@ -3125,6 +3127,8 @@
                   <option value="claude">claude (Claude Code CLI)</option>
                   <option value="codex">codex (OpenAI Codex CLI)</option>
                   <option value="agy">agy (Antigravity CLI)</option>
+                  <option value="opencode">opencode (OpenCode CLI)</option>
+                  <option value="dsh">dsh (DeepSeek Harness CLI)</option>
                 </select>
               </div>
             </div>
@@ -3162,7 +3166,7 @@
           <div class="card-header">
             <div>
               <div class="card-title" style="font-size:14px; color:var(--emerald);">
-                🧠 Seat Memory v0.5 — Cross-Seat Dreaming (`agy / claude / codex`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
+                🧠 Seat Memory v0.5 — Cross-Seat Dreaming (`claude / codex / agy / opencode / dsh`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
               </div>
               <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
                 Every seat turn passes the Fable-5 Salience Gate, extracts Closed-Loop <code>Rule + Trap Warning</code> metadata, consolidates via 2-Hour Offline Dreaming against raw transcripts, and fuses <code>wiki://</code> maps with <code>turn://</code> / <code>artifact://</code> / <code>file://</code> pointers.
@@ -3330,7 +3334,7 @@
             <div>
               <div class="card-title" style="font-size:15px;" data-i18n="hands_page_title">⚙️ Local Hands CLI &amp; Autonomous Headless Federation</div>
               <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;" data-i18n="hands_page_sub">
-                Auto-discovered headless CLI binaries on your local host (`claude`, `codex`, `agy`). Zero personal paths leaked (`~` masked), stale-PWD guard (`cwd=/tmp`), credential scrubbing, and rolling circuit-breaker telemetry.
+                Auto-discovered headless CLI binaries on your local host (`claude`, `codex`, `agy`, `opencode`, `dsh`). Zero personal paths leaked (`~` masked), stale-PWD guard (`cwd=/tmp`), credential scrubbing, and rolling circuit-breaker telemetry.
               </div>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -3464,6 +3468,7 @@
                     <option value="codex">codex (OpenAI Codex CLI)</option>
                     <option value="agy">agy (Antigravity CLI)</option>
                     <option value="opencode">opencode (OpenCode CLI)</option>
+                    <option value="dsh">dsh (DeepSeek Harness CLI)</option>
                   </select>
                 </div>
                 <div class="form-field">
@@ -3472,7 +3477,7 @@
                 </div>
                 <div class="form-field">
                   <label>Timeout (ms)</label>
-                  <input type="number" id="cfg-hand-timeout" value="28000" min="3000" max="180000" required />
+                  <input type="number" id="cfg-hand-timeout" value="45000" min="3000" max="180000" required />
                 </div>
               </div>
               <div class="form-field">
@@ -3634,7 +3639,7 @@
               <div>
                 <div class="card-title" style="font-size:13.5px; color:var(--emerald);">⚡ Live Harness2 RSI Synthesis (via Local CLI Hand)</div>
                 <div style="font-size:11px; color:var(--text-secondary);">
-                  Distills a reusable `SKILL.md` from recent workspace trajectories using your local `claude`, `codex`, or `agy` CLI and evaluates it through the `k=3` held-out replay gate.
+                  Distills a reusable `SKILL.md` from recent workspace trajectories using your local `claude`, `codex`, `agy`, `opencode`, or `dsh` CLI and evaluates it through the `k=3` held-out replay gate.
                 </div>
               </div>
             </div>
@@ -3657,6 +3662,8 @@
                     <option value="claude">claude (Claude Code CLI)</option>
                     <option value="codex">codex (OpenAI Codex CLI)</option>
                     <option value="agy">agy (Antigravity CLI)</option>
+                    <option value="opencode">opencode (OpenCode CLI)</option>
+                    <option value="dsh">dsh (DeepSeek Harness CLI)</option>
                   </select>
                 </div>
               </div>
@@ -4877,7 +4884,7 @@
       en: {
         banner_indep: 'ArchonOS is an independent Personal RSI Intelligent OS • External MCPs & Warroom are optional modular extensions',
         app_title: 'ArchonOS — Personal RSI Intelligent OS Console',
-        app_subtitle: 'Independent Multi-Seat Control Plane • Local MacBook CLI Hands (claude / codex / agy) • MCP Artifact Canvas',
+        app_subtitle: 'Independent Multi-Seat Control Plane • Local MacBook CLI Hands (claude / codex / agy / opencode / dsh) • MCP Artifact Canvas',
         active_seats_label: 'Archon Seats:',
         nav_workbenches: 'OS Workbenches',
         nav_chat_canvas: 'Chat & Canvas',
@@ -4924,7 +4931,7 @@
         fed_art_title: 'Agora & ROS MCP Bridge',
         fed_art_sub: 'Managed via external MCPs (agora-admin + ros-gateway).',
         seats_page_title: '🪑 ArchonOS Native Seat Management (Full CRUD)',
-        seats_page_sub: 'Seats belong strictly to your ArchonOS system. Bind each seat to a local MacBook CLI Hand (claude, codex, agy) — models are resolved automatically by your local CLI configuration.',
+        seats_page_sub: 'Seats belong strictly to your ArchonOS system. Bind each seat to a local MacBook CLI Hand (claude, codex, agy, opencode, dsh) — models are resolved automatically by your local CLI configuration.',
         btn_new_seat: '+ New Seat Form',
         lbl_seat_id: 'Seat ID (slug)',
         lbl_seat_name_en: 'Display Name (EN)',
@@ -4943,7 +4950,7 @@
         mcp_playground_title: '⚡ Governed MCP Live Tool Call Playground (Round 7 RSI — ALLOW vs 403 Default-Deny)',
         mcp_playground_sub: 'Test live governed MCP tool calls on behalf of any Archon Seat. Authorized calls return live 2026-10-21 telemetry; ungranted calls are deterministically blocked with 403 Default-Deny.',
         hands_page_title: '⚙️ Local Hands CLI (This MacBook — Headless Engines & Round 6 Circuit Telemetry)',
-        hands_page_sub: 'Verified headless CLI binaries on this MacBook (claude, codex, agy). Stale-PWD guard (cwd=/tmp), credential scrubbing, rolling latency telemetry, and circuit-breaker health active.',
+        hands_page_sub: 'Verified headless CLI binaries on this MacBook (claude, codex, agy, opencode, dsh). Stale-PWD guard (cwd=/tmp), credential scrubbing, rolling latency telemetry, and circuit-breaker health active.',
         btn_probe_hands: '↻ Probe Local Binaries',
         rsi_10round_title: '🔁 ArchonOS Project — 10-Round Recursive Self-Improvement (RSI) Loop (R1 → R10)',
         rsi_10round_sub: 'Recursive self-improvement across all 9 @archon-os monorepo packages: Zero-Leak Autonomous Init (R1), Headless CLI Isolation (R2), Default-Deny MCP CRUD (R3), Harness2 k=3 Skill Gate (R4), Project Canvas Compiler (R5), SHA-256 Diff Engine (R6), Ed25519 Mesh Bundle (R7), Crash-Safe 5-Step DO (R8), Bilingual UI & Split Docs (R9), and 9-Package Formal Verification Seal (R10).',
@@ -4957,7 +4964,7 @@
       zh: {
         banner_indep: 'ArchonOS 是独立的个人自进化智能操作系统 • 外部 MCP 与 Warroom 均为可选模块',
         app_title: 'ArchonOS — 智枢个人自进化智能操作系统控制台',
-        app_subtitle: '独立多席位控制平面 • 本机 CLI 执行手 (claude / codex / agy) • MCP 制品画布',
+        app_subtitle: '独立多席位控制平面 • 本机 CLI 执行手 (claude / codex / agy / opencode / dsh) • MCP 制品画布',
         active_seats_label: '智枢席位:',
         nav_workbenches: '系统工作台',
         nav_chat_canvas: '对话与智枢画布',
@@ -5004,7 +5011,7 @@
         fed_art_title: '外部 Agora 与 ROS MCP 桥接快照',
         fed_art_sub: '由 ArchonOS 通过外部 MCP 按需拉取。',
         seats_page_title: '🪑 ArchonOS 原生席位管理 (增删改查 CRUD)',
-        seats_page_sub: '席位完全归属于 ArchonOS 系统。只需绑定本机 CLI 执行手（claude / codex / agy），模型将直接沿用本地 CLI 默认配置，无需手动选择模型或配置预算。',
+        seats_page_sub: '席位完全归属于 ArchonOS 系统。只需绑定本机 CLI 执行手（claude / codex / agy / opencode / dsh），模型将直接沿用本地 CLI 默认配置，无需手动选择模型或配置预算。',
         btn_new_seat: '+ 清空并新建席位',
         lbl_seat_id: '席位 ID (英文标识)',
         lbl_seat_name_en: '英文名称 (EN)',
@@ -5023,7 +5030,7 @@
         mcp_playground_title: '⚡ 受控 MCP 实时工具调用演练场（授权放行 vs 403 默认拒绝验证）',
         mcp_playground_sub: '模拟任意 Archon 席位发起受控 MCP 工具调用：已授权工具返回实时遥测数据，未授权调用将被 403 默认拒绝闸门阻断。',
         hands_page_title: '⚙️ 本机 CLI 执行手（无头模式配置与熔断遥测）',
-        hands_page_sub: '自动探测本机无头 CLI（claude、codex、agy），内置 /tmp 防失效目录守卫、凭据清洗、滚动延迟遥测与熔断器状态监控。',
+        hands_page_sub: '自动探测本机无头 CLI（claude、codex、agy、opencode、dsh），内置 /tmp 防失效目录守卫、凭据清洗、滚动延迟遥测与熔断器状态监控。',
         btn_probe_hands: '↻ 重新探测本机二进制',
         rsi_10round_title: '🔁 ArchonOS 项目 — 10 轮递归自改进 (RSI) 工程收敛账本 (R1 → R10)',
         rsi_10round_sub: '覆盖 @archon-os 九大核心模块的全栈递归自改进：零隐私泄露自动初始化 (R1)、无头 CLI 隔离 (R2)、默认拒绝 MCP 全生命周期管理 (R3)、Harness2 k=3 技能门控 (R4)、项目画布编译器 (R5)、SHA-256 结构化差分 (R6)、Ed25519 网格签名包 (R7)、五步崩溃安全 DO (R8)、中英双语工作台与文档拆分 (R9) 及 9 包形式化测试封存 (R10)。',
@@ -5066,8 +5073,8 @@
       if (chatInput) {
         chatInput.placeholder =
           currentLang === 'zh'
-            ? '向当前 Archon 席位提问（支持 Markdown 与 Mermaid 架构图渲染，直接调用本机 claude / codex / agy）...'
-            : 'Ask your Archon Seat (Markdown + Mermaid.js supported, executes local claude / codex / agy)...';
+            ? '向当前 Archon 席位提问（支持 Markdown 与 Mermaid 架构图渲染，直接调用本机 claude / codex / agy / opencode / dsh）...'
+            : 'Ask your Archon Seat (Markdown + Mermaid.js supported, executes local claude / codex / agy / opencode / dsh)...';
       }
 
       renderSeatsEverywhere();
@@ -6591,10 +6598,11 @@
       const sel = document.getElementById('cfg-hand-engine');
       if (sel && sel.value !== engine) sel.value = engine;
       const defaults = {
-        claude: { binaryPath: 'auto', headlessArgs: ['-p', '{{prompt}}', '--output-format', 'stream-json', '--verbose'], timeoutMs: 28000 },
-        codex: { binaryPath: 'auto', headlessArgs: ['exec', '{{prompt}}', '--skip-git-repo-check'], timeoutMs: 28000 },
-        agy: { binaryPath: 'auto', headlessArgs: ['chat', '--mode', 'agent', '--print', '{{prompt}}'], timeoutMs: 22000 },
-        opencode: { binaryPath: 'auto', headlessArgs: ['run', '{{prompt}}'], timeoutMs: 28000 },
+        claude: { binaryPath: 'auto', headlessArgs: ['-p', '{{prompt}}', '--output-format', 'stream-json', '--verbose'], timeoutMs: 45000 },
+        codex: { binaryPath: 'auto', headlessArgs: ['exec', '{{prompt}}', '--skip-git-repo-check'], timeoutMs: 45000 },
+        agy: { binaryPath: 'auto', headlessArgs: ['chat', '-m', '{{prompt}}'], timeoutMs: 25000 },
+        opencode: { binaryPath: 'auto', headlessArgs: ['run', '--format', 'json', '--auto', '{{prompt}}'], timeoutMs: 45000 },
+        dsh: { binaryPath: 'auto', headlessArgs: ['--profile', 'headless', '--json', '{{prompt}}'], timeoutMs: 45000 },
       };
       const cfg = workspaceConfigCache?.hands?.[engine] || workspaceConfigCache?.hands?.engines?.[engine] || defaults[engine] || defaults.claude;
       const binEl = document.getElementById('cfg-hand-binary');
@@ -6611,7 +6619,7 @@
       e.preventDefault();
       const engine = document.getElementById('cfg-hand-engine').value;
       const binaryPath = document.getElementById('cfg-hand-binary').value.trim() || 'auto';
-      const timeoutMs = Number(document.getElementById('cfg-hand-timeout').value || 28000);
+      const timeoutMs = Number(document.getElementById('cfg-hand-timeout').value || 45000);
       const argsStr = document.getElementById('cfg-hand-args').value.trim();
       const headlessArgs = argsStr.split(/\s+/).filter(Boolean);
       const statusEl = document.getElementById('cfg-hand-status');
@@ -8101,7 +8109,7 @@
         const dreamRep = idx.lastDreamReport || null;
         const wikiObj = idx.domainWiki || null;
         const dreamBadge = dreamRep
-          ? `<div class="mono" style="font-size:9.5px; color:#A7F3D0; margin-top:3px;">🌙 Offline Dreaming (<code>agy / claude / codex</code>): <strong>${Number(dreamRep.transcriptsReplayed || 0)}</strong> turns replayed · <strong>${Number(dreamRep.brokenLinksRepaired || 0)}</strong> links repaired · <strong>${Number(dreamRep.wikiTopicsBuilt || wikiObj?.topics?.length || 0)}</strong> wiki pages · compression <code>${Number(dreamRep.wikiCompressionRatio || wikiObj?.compressionRatio || 0)} &lt;= 0.15</code> (${dreamRep.antiBorgesGuardPassed !== false ? 'Anti-Borges PASS' : 'WARN'})</div>`
+          ? `<div class="mono" style="font-size:9.5px; color:#A7F3D0; margin-top:3px;">🌙 Offline Dreaming (<code>claude / codex / agy / opencode / dsh</code>): <strong>${Number(dreamRep.transcriptsReplayed || 0)}</strong> turns replayed · <strong>${Number(dreamRep.brokenLinksRepaired || 0)}</strong> links repaired · <strong>${Number(dreamRep.wikiTopicsBuilt || wikiObj?.topics?.length || 0)}</strong> wiki pages · compression <code>${Number(dreamRep.wikiCompressionRatio || wikiObj?.compressionRatio || 0)} &lt;= 0.15</code> (${dreamRep.antiBorgesGuardPassed !== false ? 'Anti-Borges PASS' : 'WARN'})</div>`
           : '';
         roleBar.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
