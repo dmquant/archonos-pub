@@ -14,7 +14,7 @@ sequenceDiagram
   participant Op as 操作员 (Web 工作台 / CLI)
   participant DO as WorkspaceOrchestratorDO
   participant Gate as 注册表与策略门控
-  participant Hand as 本地 CLI 执行手 (claude/codex/agy/dsh)
+  participant Hand as 本地 CLI 执行手 (claude/codex/agy/opencode/dsh)
   participant Canvas as 五阶段 R2-First 版本门控
 
   Op->>DO: 向指定席位发送指令 (如 seat:maritime-quant)

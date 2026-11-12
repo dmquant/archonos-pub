@@ -14,7 +14,7 @@ sequenceDiagram
   participant Op as Operator (Web UI / CLI)
   participant DO as WorkspaceOrchestratorDO
   participant Gate as Registry & Policy Gate
-  participant Hand as Local CLI Hand (claude/codex/agy/dsh)
+  participant Hand as Local CLI Hand (claude/codex/agy/opencode/dsh)
   participant Canvas as 5-Stage R2-First Revision Gate
 
   Op->>DO: Dispatch Prompt to Seat (e.g. seat:maritime-quant)
