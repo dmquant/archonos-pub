@@ -8,8 +8,6 @@ import lease  # noqa: E402
 import usage  # noqa: E402
 
 S = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures") + "/"
-if not os.path.isdir(S):
-    S = "/var/ros/local-fabric/work/arc138-engine-streams/"
 
 
 def stream(name):
@@ -42,6 +40,15 @@ class UsageReal(unittest.TestCase):
         self.assertEqual((val(u, "input_uncached"), val(u, "cache_read"), val(u, "output")), (11579, 1792, 3))
         self.assertEqual(val(u, "wall_ms"), 350)
 
+    def test_dsh(self):
+        # Captured from dsh 0.2.2-rc.1: step 1 has no cache bucket (omitted), step 2
+        # reports a 5120-token cache read; totalTokens is cumulative and is not summed.
+        u = usage.parse("dsh", stream("dsh"))
+        self.assertEqual([val(u, k) for k in ("input_uncached", "cache_read", "cache_write", "output")],
+                         [5150 + 78, 5120, 0, 41 + 3])
+        self.assertEqual(val(u, "tool_calls"), 1)
+        self.assertEqual(u["wall_ms"]["state"], "unmetered")
+
     def test_agy(self):
         u = usage.parse("agy", stream("agy"))
         self.assertEqual((val(u, "input_uncached"), val(u, "output"), val(u, "wall_ms")), (15325, 1, 16163))
@@ -54,8 +61,10 @@ class UsageReal(unittest.TestCase):
             self.assertEqual(u[k]["state"], "unmetered")
             self.assertNotIn("value", u[k])
 
-    def test_tool_calls_always_unmetered(self):
-        for e in ("claude", "codex", "opencode", "agy"):
+    def test_tool_calls_counted_where_the_event_is_verified(self):
+        self.assertEqual(val(usage.parse("dsh", stream("dsh")), "tool_calls"), 1)
+        self.assertEqual(val(usage.parse("opencode", stream("opencode")), "tool_calls"), 0)
+        for e in ("claude", "codex", "agy"):
             self.assertEqual(usage.parse(e, stream(e))["tool_calls"]["state"], "unmetered")
 
 
@@ -64,7 +73,13 @@ class UsageEdges(unittest.TestCase):
         for e in usage.ENGINES:
             u = usage.parse(e, ["not json", "", "[1]"])
             self.assertEqual(set(u), set(usage.FIELDS))
-            self.assertTrue(all("state" in v for v in u.values()))
+            # opencode/dsh can count tool calls from a parsed stream (zero here);
+            # every other metric must stay unmetered rather than reporting a fake 0.
+            for k, v in u.items():
+                if k == "tool_calls" and e in ("opencode", "dsh"):
+                    self.assertEqual(v, {"value": 0})
+                else:
+                    self.assertIn("state", v, "%s/%s" % (e, k))
 
     def test_unknown_engine(self):
         with self.assertRaises(ValueError):
@@ -86,6 +101,37 @@ class UsageEdges(unittest.TestCase):
         s = '{"type":"step_start","timestamp":100}'
         u = usage.parse("opencode", [s, r % 150, r % 400])
         self.assertEqual((val(u, "input_uncached"), val(u, "cache_write"), val(u, "wall_ms")), (20, 6, 300))
+
+    def test_dsh_incomplete_step_not_partial_sum(self):
+        a = '{"type":"status","phase":"step_end","usage":{"inputTokens":10,"outputTokens":1,"cacheReadTokens":2,"cacheWriteTokens":0}}'
+        b = '{"type":"status","phase":"step_end","usage":{"inputTokens":20,"cacheReadTokens":4,"cacheWriteTokens":0}}'
+        u = usage.parse("dsh", [a, b])
+        self.assertEqual(val(u, "input_uncached"), 30)
+        self.assertEqual(val(u, "cache_read"), 6)
+        self.assertEqual(u["output"]["state"], "unmetered")
+
+    def test_dsh_step_without_usage_is_never_zero(self):
+        rows = ['{"type":"status","phase":"step_end"}',
+                '{"type":"status","phase":"step_end","usage":{"inputTokens":5,"outputTokens":1}}']
+        u = usage.parse("dsh", rows)
+        for k in ("input_uncached", "cache_read", "cache_write", "output"):
+            self.assertEqual(u[k]["state"], "unmetered")
+
+    def test_opencode_missing_field_in_one_step_unmeters_only_that_field(self):
+        rows = ['{"type":"step_finish","part":{"tokens":{"input":10,"output":2,"cache":{"read":1,"write":0}}}}',
+                '{"type":"step_finish","part":{"tokens":{"input":20,"cache":{"read":3,"write":0}}}}']
+        u = usage.parse("opencode", rows)
+        self.assertEqual(val(u, "input_uncached"), 30)
+        self.assertEqual(val(u, "cache_read"), 4)
+        self.assertEqual(u["output"]["state"], "unmetered")
+
+    def test_dsh_absent_cache_buckets_are_zero_not_unmetered(self):
+        row = '{"type":"status","phase":"step_end","usage":{"inputTokens":5143,"outputTokens":20,"totalTokens":5163}}'
+        u = usage.parse("dsh", [row])
+        self.assertEqual(val(u, "input_uncached"), 5143)
+        self.assertEqual(val(u, "output"), 20)
+        self.assertEqual(val(u, "cache_read"), 0)
+        self.assertEqual(val(u, "cache_write"), 0)
 
 
 class LeaseTests(unittest.TestCase):
@@ -207,6 +253,12 @@ class AdapterTests(unittest.TestCase):
         st, _, u = self.run_a("gemini", 0, ["hello"])
         self.assertEqual(st, "done")
         self.assertEqual(u["output"]["state"], "unmetered")
+
+    def test_dsh_argv(self):
+        self.assertEqual(adapter.get("dsh").argv("hello"),
+                         ["dsh", "--profile", "headless", "--json", "hello"])
+        with self.assertRaises(ValueError):
+            adapter.get("nope")
 
     def test_bad_task_and_engine(self):
         with self.assertRaises(ValueError):

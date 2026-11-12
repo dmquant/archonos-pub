@@ -5,10 +5,8 @@ const HAND_ALIASES = {
   "claude-api": "claude",
   "codex-api": "codex",
   "gemini-api": "gemini",
-  "opencode": "codex",
-  "agy": "claude",
 };
-const HANDS = new Set(["claude", "codex", "gemini"]);
+const HANDS = new Set(["claude", "codex", "gemini", "opencode", "dsh", "agy"]);
 const TRANSPORTS = new Set(["http", "sse", "stdio-bridge"]);
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
 // auth_ref must be a secret-store handle ("secret://name"), never a value.

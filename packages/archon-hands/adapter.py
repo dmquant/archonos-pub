@@ -15,9 +15,13 @@ class Adapter:
 
     def run(self, task, runner, clock):
         """runner(argv) -> (exit_code, stdout_lines). Returns (state, reason, usage)."""
+        try:
+            argv = self.argv(task)
+        except Exception as e:  # an invalid task is the caller's error, not a runner failure
+            return "failed", "invalid task: %s" % type(e).__name__, self._usage([], 0)
         t0 = clock()
         try:
-            code, lines = runner(self.argv(task))
+            code, lines = runner(argv)
         except Exception as e:  # runner failure is a failed fire, not a silent drop
             return "failed", "runner raised %s" % type(e).__name__, self._usage([], clock() - t0)
         u = self._usage(lines, clock() - t0)
@@ -47,7 +51,8 @@ class _Simple(Adapter):
 ADAPTERS = {
     "claude": _Simple("claude", ["claude", "-p", "--output-format", "stream-json", "--verbose"]),
     "codex": _Simple("codex", ["codex", "exec", "--json"]),
-    "opencode": _Simple("opencode", ["opencode", "run", "--format", "json"]),
+    "opencode": _Simple("opencode", ["opencode", "run", "--format", "json", "--auto"]),
+    "dsh": _Simple("dsh", ["dsh", "--profile", "headless", "--json"]),
     "agy": _Simple("agy", ["agy", "--json"]),
     "gemini": _Simple("gemini", ["gemini", "-p"]),
 }
