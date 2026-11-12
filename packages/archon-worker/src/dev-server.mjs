@@ -3174,6 +3174,9 @@ export function harvestAndCopyHandJobOutputs({
 }
 
 export function notifyMacOsJobCompleted({ seatId, engine, fileCount, userOutputDir }) {
+  // macOS-only feature: spawning `osascript` on Linux/Windows emits an async
+  // 'error' event that a try/catch cannot intercept and would crash the server.
+  if (process.platform !== 'darwin') return;
   try {
     const msg =
       fileCount > 0
@@ -3184,6 +3187,7 @@ export function notifyMacOsJobCompleted({ seatId, engine, fileCount, userOutputD
       ['-e', `display notification ${JSON.stringify(msg)} with title "ArchonOS — Async Hand Job Completed" sound name "Glass"`],
       { stdio: 'ignore', detached: true }
     );
+    child.on('error', () => {});
     child.unref();
   } catch (_) {}
 }
@@ -5840,7 +5844,7 @@ export async function executeChiefOfStaffExecutiveCommand(
   // MODE 0B: MANAGE SEATS & CLI HANDS (via Chief of Staff)
   // ---------------------------------------------------------------------------
   if (mode === 'manage-seats') {
-    const handMatch = p.match(/\b(claude|codex|agy|opencode)\b/i);
+    const handMatch = p.match(/\b(claude|codex|agy|opencode|dsh)\b/i);
     let targetSeatForHand = null;
     for (const [alias, canonicalId] of Object.entries(SEAT_SHORTHAND_MAP)) {
       if (new RegExp(`\\b${alias.replace('-', '[\\s-]')}\\b`, 'i').test(p)) {
@@ -6646,7 +6650,7 @@ function loadPersistedWorkspaceState(runtime) {
       };
       for (const s of raw.seats) {
         const seeded = runtime.sharedStore.seats.get(s.id) || {};
-        const roleHandMatch = String(s.role_en || '').match(/\((claude|codex|agy|opencode)\s+CLI\)/i);
+        const roleHandMatch = String(s.role_en || '').match(/\((claude|codex|agy|opencode|dsh)\s+CLI\)/i);
         const recoveredHand =
           !s.handCustomizedByOperator && roleHandMatch && /^Custom Sovereign Seat/i.test(String(s.role_en || ''))
             ? roleHandMatch[1].toLowerCase()
@@ -8122,14 +8126,16 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           const candidate = isAbsolute(rawPath) ? rawPath : join(REPO_ROOT, rawPath.replace(/^\/+/, ''));
           if (existsSync(candidate)) targetAbs = candidate;
         }
-        try {
-          const st = statSync(targetAbs);
-          if (st.isFile()) {
-            spawnSync('open', ['-R', targetAbs], { timeout: 3000 });
-          } else {
-            spawnSync('open', [targetAbs], { timeout: 3000 });
-          }
-        } catch (_) {}
+        if (process.platform === 'darwin') {
+          try {
+            const st = statSync(targetAbs);
+            if (st.isFile()) {
+              spawnSync('open', ['-R', targetAbs], { timeout: 3000 });
+            } else {
+              spawnSync('open', [targetAbs], { timeout: 3000 });
+            }
+          } catch (_) {}
+        }
         return sendJson(res, 200, {
           ok: true,
           revealedPath: targetAbs,
@@ -10297,12 +10303,18 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         const effectivePromptForHand = crossSeatCtx.hasCrossSeatHandoff
           ? `${crossSeatCtx.handoffBlock}\n\n[Operator's Current Order to seat:${seat.id}]:\n${basePromptForHand}`
           : basePromptForHand;
+        // The prompt is rebuilt per attempt: after a failover the answering hand is
+        // no longer `engine`, so baking the name into the cached persona would lie.
+        const promptForHand = (handEngine) =>
+          `${effectivePromptForHand}\n\n[ArchonOS execution note: this turn is executed by local CLI hand "${handEngine}". If asked which hand runs this turn, answer "${handEngine}".]`;
+        const personaForHand = (handEngine) =>
+          `${persona}\n\n[Authoritative runtime fact: the local CLI hand executing THIS turn is "${handEngine}". Any seat→hand mapping listed above describes saved defaults and does not apply to this turn.]`;
 
         const handPromise = (async () => {
           let execRes = await runLocalHandSubprocess({
             engine,
-            prompt: effectivePromptForHand,
-            systemPersona: persona,
+            prompt: promptForHand(engine),
+            systemPersona: personaForHand(engine),
             cwd: jobWorkDir,
             timeoutMs: Number(payload.timeoutMs || 600000),
             handSessionId: handBinding.handSessionId,
@@ -10327,16 +10339,21 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
           });
 
           if (!execRes.ok && !abortController.signal.aborted) {
-            const fallbackOrder = ['claude', 'codex', 'agy'].filter((h) => h !== engine);
+            const probed = probeAllHands();
+            const fallbackOrder = ['claude', 'codex', 'agy', 'opencode', 'dsh'].filter(
+              (h) => h !== engine && probed[h]?.installed && probed[h]?.enabled !== false
+            );
+            const failoverDeadline = Date.now() + 240000;
             for (const altEngine of fallbackOrder) {
-              if (abortController.signal.aborted) break;
+              const remainingMs = failoverDeadline - Date.now();
+              if (abortController.signal.aborted || remainingMs < 15000) break;
               jobState.activeStep = `Primary hand (${engine}) failed/timed out — failing over to ${altEngine}...`;
               const altRes = await runLocalHandSubprocess({
                 engine: altEngine,
-                prompt: effectivePromptForHand,
-                systemPersona: persona,
+                prompt: promptForHand(altEngine),
+                systemPersona: personaForHand(altEngine),
                 cwd: jobWorkDir,
-                timeoutMs: 300000,
+                timeoutMs: Math.min(300000, remainingMs),
                 handSessionId: null,
                 isResumeTurn: false,
                 abortSignal: abortController.signal,
@@ -10351,6 +10368,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
               });
               if (altRes.ok) {
                 execRes = altRes;
+                jobState.engine = altRes.engine;
                 break;
               }
             }
@@ -10367,7 +10385,14 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
 
         const finalizeCompletedTurn = (execResult, targetAssistantRecord) => {
           if (execResult.handSessionId) {
-            handBinding.handSessionId = execResult.handSessionId;
+            if (execResult.engine === engine) {
+              handBinding.handSessionId = execResult.handSessionId;
+            } else {
+              // A fallback engine's session id is meaningless to the primary hand;
+              // adopt the new engine and drop the stale id instead of resuming across engines.
+              handBinding.engine = execResult.engine;
+              handBinding.handSessionId = null;
+            }
           }
           handBinding.turns += 1;
           handBinding.lastActiveAt = new Date().toISOString();
