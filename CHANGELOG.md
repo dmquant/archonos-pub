@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - **OpenCode CLI hand is now first-class**: `opencode` (v2 `run --format json`) is probed, selectable, resident in the registry hand set (no longer aliased to `codex`), and parsed from its NDJSON event stream (`step_start` / `text` / `tool_use` / `step_finish` / `error`), including per-step token accounting and `--session <id>` conversational continuity.
-- **DeepSeek Harness CLI hand (`dsh`)**: new local hand invoking `dsh --profile headless --json "<task>"`, with NDJSON run-event parsing (`session` / `status` / `text` / `thinking` / `tool_call` / `tool_result` / `final`), `--session-id <id>` resume support, and step-level usage aggregation that never publishes a partial token sum.
-- Worker, registry, CLI, config defaults/examples, Python `archon-hands` adapters/usage parsers/probe capabilities, and the web console hand selectors all list the five hands (`claude`, `codex`, `agy`, `opencode`, `dsh`).
+- **DeepSeek Harness CLI hand (`dsh`)**: new local hand invoking `dsh --profile headless --json "<task>"`, with NDJSON run-event parsing (`session` / `status` / `text` / `tool_call` / `final`, with turn-level error events treated as failures), `--session-id <id>` resume support, and step-level usage aggregation that never publishes a partial token sum.
+- Worker, registry, CLI, config defaults/examples, Python `archon-hands` adapters/usage parsers/probe capabilities, and the web console hand selectors list the local hands (`claude`, `codex`, `agy`, `opencode`, `dsh`; `gemini` remains a parser-only engine).
 
 ### Fixed
 - **Failed hand runs are no longer reported as answers**: opencode/dsh turns now require a zero exit status and no engine error event, so a mid-run provider failure with partial text fails the turn instead of becoming the assistant reply.
@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Session and routing honesty**: failover no longer binds another engine's native session to the primary hand, the executing-hand statement is rebuilt per attempt, and failover only targets installed/enabled hands under a bounded total deadline.
 
 ### Tests
-- Added worker coverage for opencode/dsh invocation and NDJSON projection, registry coverage for native `opencode`/`dsh` hands, and Python adapter/usage/fixture coverage for `dsh` (149 total).
+- Added worker coverage for opencode/dsh invocation and NDJSON projection, registry coverage for native `opencode`/`dsh` hands, and Python adapter/usage/fixture coverage for `dsh` (151 total).
 
 ---
 

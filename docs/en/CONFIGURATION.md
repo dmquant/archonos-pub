@@ -20,27 +20,35 @@ ArchonOS stores all host-specific runtime configuration in `.archon/config.json`
     "port": 8790
   },
   "hands": {
-    "defaultCwd": "/tmp",
-    "timeoutMs": 28000,
-    "engines": {
-      "claude": {
-        "enabled": true,
-        "binaryPath": "auto",
-        "headlessArgs": ["-p", "{{prompt}}", "--output-format", "stream-json", "--verbose"],
-        "timeoutMs": 28000
-      },
-      "codex": {
-        "enabled": true,
-        "binaryPath": "auto",
-        "headlessArgs": ["exec", "{{prompt}}", "--skip-git-repo-check"],
-        "timeoutMs": 28000
-      },
-      "agy": {
-        "enabled": true,
-        "binaryPath": "auto",
-        "headlessArgs": ["chat", "--mode", "agent", "--print", "{{prompt}}"],
-        "timeoutMs": 22000
-      }
+    "claude": {
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["-p", "{{prompt}}", "--output-format", "stream-json", "--verbose"],
+      "timeoutMs": 45000
+    },
+    "codex": {
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["exec", "--skip-git-repo-check", "{{prompt}}"],
+      "timeoutMs": 45000
+    },
+    "agy": {
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["chat", "-m", "{{prompt}}"],
+      "timeoutMs": 25000
+    },
+    "opencode": {
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["run", "--format", "json", "--auto", "{{prompt}}"],
+      "timeoutMs": 45000
+    },
+    "dsh": {
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["--profile", "headless", "--json", "{{prompt}}"],
+      "timeoutMs": 45000
     }
   }
 }

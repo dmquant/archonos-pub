@@ -58,7 +58,7 @@ ArchonOS is designed as an autonomous, self-contained personal intelligent opera
 
 ## 🧠 Seat Memory v0.5 Architecture (`L1–L4` Across All Seats & CLI Hands)
 
-ArchonOS v0.5 implements a 4-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`, `opencode`, `dsh`). Full specifications: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** and **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)** (`v0.3 → v0.4` Epistemic Pointer Spec).
+ArchonOS v0.5 implements a 5-tier epistemic memory hierarchy across the pre-seeded **Chief of Staff (`seat:chief-of-staff`)**, **any operator-defined specialist seats (`seat:<custom-id>`)**, and every local CLI hand (`agy`, `claude`, `codex`, `opencode`, `dsh`). Full specifications: **[`docs/archon-seat-memory-v0.5-architecture.md`](./docs/archon-seat-memory-v0.5-architecture.md)** and **[`docs/archon-seat-memory-v0.4-architecture.md`](./docs/archon-seat-memory-v0.4-architecture.md)** (`v0.3 → v0.4` Epistemic Pointer Spec).
 
 | Tier | Scope & Storage | Core Mechanism | Authority & Safeguard |
 | :--- | :--- | :--- | :--- |
@@ -95,6 +95,8 @@ flowchart TB
       CLI1["claude CLI (Anthropic Claude Code)"]
       CLI2["codex CLI (OpenAI Codex / LLM)"]
       CLI3["agy CLI (Google Antigravity CLI)"]
+      CLI4["opencode CLI (OpenCode)"]
+      CLI5["dsh CLI (DeepSeek Harness)"]
     end
 
     subgraph Storage["Personal Workspace Storage (.archon/)"]
@@ -145,7 +147,7 @@ npm install
 # 2. Run autonomous host discovery (mandates Chief of Staff & probes CLI hands)
 npm run init
 
-# 3. Execute monorepo test suite (149/149 tests across 9 packages)
+# 3. Execute monorepo test suite (151/151 tests across 9 packages)
 npm test
 
 # 4. Start ArchonOS Web Console on http://127.0.0.1:8790

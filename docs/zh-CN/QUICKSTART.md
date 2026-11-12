@@ -14,7 +14,7 @@
   - **Antigravity CLI** (`agy`)
   - **OpenCode CLI** (`opencode`)
   - **DeepSeek Harness CLI** (`dsh`)
-    - 无头模式使用 `dsh --profile headless --json "<task>"`，需要提供模型凭据：在启动环境中提供 `DEEPSEEK_API_KEY`，或在 `$DSH_HOME/profiles/headless/cordis.patch.yml` 中声明一条路由（例如通过 `@deepseek-ai/dsh-llm-pi-ai` 接入 OpenAI 兼容网关）。ArchonOS 不会改写启动环境变量，会原样透传给本地模型手。
+    - 无头模式使用 `dsh --profile headless --json "<task>"`，需要提供模型凭据：在启动环境中提供 `DEEPSEEK_API_KEY`，或在 `$DSH_HOME/profiles/headless/cordis.patch.yml` 中声明一条路由（例如通过 `@deepseek-ai/dsh-llm-pi-ai` 接入 OpenAI 兼容网关）。ArchonOS 会继承启动环境（仅过滤自身的 `ARCHON_*` 密钥并重建 `PATH`）。
 
 > **提示**：即便本机尚未安装任何 CLI 工具，ArchonOS 依然可以正常启动并提供确定性的受控回退合成响应，方便您立即体验全部 6 大工作台视图、MCP 权限演练场、Harness2 RSI 技能门控以及 3D/2D 交互式画布工件。
 

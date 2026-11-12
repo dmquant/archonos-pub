@@ -6,6 +6,7 @@ import {
   handRunSucceeded,
   mergeHandConfig,
   parseHandStreamOutput,
+  probeAllHands,
   selectFirstAvailableHand,
 } from '../src/local-hands-runner.mjs';
 
@@ -124,6 +125,21 @@ test('dsh empty final never falls back to earlier partial text', () => {  const 
   );
   assert.equal(parsed.replyText, '');
   assert.equal(parsed.turnCompleted, false);
+  assert.equal(parsed.engineError, 'dsh_no_terminal_turn');
+  assert.equal(handRunSucceeded('dsh', parsed, 0), false);
+});
+
+test('probeAllHands exposes the new engines with their invocation specs', () => {
+  const hands = probeAllHands();
+  for (const engine of ['opencode', 'dsh']) {
+    assert.ok(hands[engine], `${engine} is probed`);
+    assert.equal(hands[engine].enabled, true);
+    assert.ok(
+      hands[engine].invocation.includes(engine === 'opencode' ? 'run --format json --auto' : '--profile headless --json'),
+      `${engine} invocation: ${hands[engine].invocation}`
+    );
+    assert.ok(hands[engine].label);
+  }
 });
 
 test('invocation specs keep native session continuation flags for both hands', () => {

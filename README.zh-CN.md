@@ -145,7 +145,7 @@ npm install
 # 2. 运行自主环境发现（强制初始化幕僚长席位，探测本地 CLI 执行手）
 npm run init
 
-# 3. 运行跨语言全量测试套件（9 个子包共 149/149 测试全部通过）
+# 3. 运行跨语言全量测试套件（9 个子包共 151/151 测试全部通过）
 npm test
 
 # 4. 启动 ArchonOS 控制台服务 (默认端口 8790)
@@ -166,7 +166,7 @@ npm start
 | [`packages/archon-skills`](./packages/archon-skills) | TypeScript / Node.js | Harness2 三值认知技能验证器（`pass \| fail \| insufficient`, $n \ge 2, k = 3$） |
 | [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 5 阶段 R2-First 原子化工件版本推进引擎与 HTML 可访问性平权审计器 |
 | [`packages/archon-ledger`](./packages/archon-ledger) | Python 3 | 默认拒绝策略拦截器与基于 SHA-256 哈希链的防篡改审计账本 |
-| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化、密钥敏感信息脱敏与执行租约管理 |
+| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化（`claude`、`codex`、`agy`、`opencode`、`dsh`）、密钥敏感信息脱敏与执行租约管理 |
 | [`packages/archon-mesh`](./packages/archon-mesh) | Node.js ESM | 基于 Ed25519 签名的 `.archon-bundle` 导出与导入，强制剔除敏感密钥与轨迹 |
 | [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` 命令行工具（`archon init`、`archon up`、`archon status`） |
 

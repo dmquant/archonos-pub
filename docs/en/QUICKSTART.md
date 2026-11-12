@@ -14,9 +14,9 @@
   - **Antigravity CLI** (`agy`)
   - **OpenCode CLI** (`opencode`)
   - **DeepSeek Harness CLI** (`dsh`)
-    - Headless runs use `dsh --profile headless --json "<task>"` and need a provider credential: either `DEEPSEEK_API_KEY` in the launching environment, or a route declared in `$DSH_HOME/profiles/headless/cordis.patch.yml` (for example an OpenAI-compatible gateway via `@deepseek-ai/dsh-llm-pi-ai`). ArchonOS passes the launching environment through to the hand unchanged.
+    - Headless runs use `dsh --profile headless --json "<task>"` and need a provider credential: either `DEEPSEEK_API_KEY` in the launching environment, or a route declared in `$DSH_HOME/profiles/headless/cordis.patch.yml` (for example an OpenAI-compatible gateway via `@deepseek-ai/dsh-llm-pi-ai`). ArchonOS inherits the launching environment for the hand (it filters its own `ARCHON_*` secrets and rebuilds `PATH`).
 
-> **Note:** Even if no CLI binaries are installed yet, ArchonOS boots cleanly and provides deterministic governed synthesis fallbacks so you can explore all 6 views, MCP playgrounds, Harness2 RSI skill gates, and 3D/2D Canvas Artifacts immediately.
+> **Note:** Even if no CLI binaries are installed yet, ArchonOS boots cleanly and provides deterministic governed synthesis fallbacks so you can explore all console views, MCP playgrounds, Harness2 RSI skill gates, and 3D/2D Canvas Artifacts immediately.
 
 ---
 
@@ -42,9 +42,10 @@ cd archon-os
    - Masks your home directory as `~` so personal filesystem paths are never leaked to the UI or config files.
    - Configures each CLI engine's non-interactive headless arguments and circuit-breaker timeouts in `.archon/config.json`:
      - `claude`: `claude -p "{{prompt}}" --output-format stream-json --verbose`
-     - `codex`: `codex exec "{{prompt}}" --skip-git-repo-check`
-     - `agy`: `agy chat --mode agent --print "{{prompt}}"`
-     - `opencode`: `opencode run "{{prompt}}"`
+     - `codex`: `codex exec --skip-git-repo-check --json "{{prompt}}"`
+     - `agy`: `agy --model=gemini-3.8-flash-low --effort=low -p="{{prompt}}"`
+     - `opencode`: `opencode run --format json --auto "{{prompt}}"`
+     - `dsh`: `dsh --profile headless --json "{{prompt}}"`
 3. **Auto-Discovers Local MCP Servers**:
    - Scans `~/.gemini/antigravity/mcp`, `~/.cursor/mcp.json`, and `~/.claude/claude_desktop_config.json` (plus optional `.archon/mcp.json`).
    - Registers discovered MCP servers with opaque `secret://mcp/<server-id>` handles (never copying plaintext tokens).

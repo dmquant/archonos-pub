@@ -3166,7 +3166,7 @@
           <div class="card-header">
             <div>
               <div class="card-title" style="font-size:14px; color:var(--emerald);">
-                🧠 Seat Memory v0.5 — Cross-Seat Dreaming (`agy / claude / codex`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
+                🧠 Seat Memory v0.5 — Cross-Seat Dreaming (`claude / codex / agy / opencode / dsh`), Anti-Borges Domain Wiki &amp; Single-Writer Verbatim Shards
               </div>
               <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
                 Every seat turn passes the Fable-5 Salience Gate, extracts Closed-Loop <code>Rule + Trap Warning</code> metadata, consolidates via 2-Hour Offline Dreaming against raw transcripts, and fuses <code>wiki://</code> maps with <code>turn://</code> / <code>artifact://</code> / <code>file://</code> pointers.
@@ -6600,7 +6600,7 @@
       const defaults = {
         claude: { binaryPath: 'auto', headlessArgs: ['-p', '{{prompt}}', '--output-format', 'stream-json', '--verbose'], timeoutMs: 45000 },
         codex: { binaryPath: 'auto', headlessArgs: ['exec', '{{prompt}}', '--skip-git-repo-check'], timeoutMs: 45000 },
-        agy: { binaryPath: 'auto', headlessArgs: ['chat', '--mode', 'agent', '--print', '{{prompt}}'], timeoutMs: 22000 },
+        agy: { binaryPath: 'auto', headlessArgs: ['chat', '-m', '{{prompt}}'], timeoutMs: 25000 },
         opencode: { binaryPath: 'auto', headlessArgs: ['run', '--format', 'json', '--auto', '{{prompt}}'], timeoutMs: 45000 },
         dsh: { binaryPath: 'auto', headlessArgs: ['--profile', 'headless', '--json', '{{prompt}}'], timeoutMs: 45000 },
       };
@@ -8109,7 +8109,7 @@
         const dreamRep = idx.lastDreamReport || null;
         const wikiObj = idx.domainWiki || null;
         const dreamBadge = dreamRep
-          ? `<div class="mono" style="font-size:9.5px; color:#A7F3D0; margin-top:3px;">🌙 Offline Dreaming (<code>agy / claude / codex</code>): <strong>${Number(dreamRep.transcriptsReplayed || 0)}</strong> turns replayed · <strong>${Number(dreamRep.brokenLinksRepaired || 0)}</strong> links repaired · <strong>${Number(dreamRep.wikiTopicsBuilt || wikiObj?.topics?.length || 0)}</strong> wiki pages · compression <code>${Number(dreamRep.wikiCompressionRatio || wikiObj?.compressionRatio || 0)} &lt;= 0.15</code> (${dreamRep.antiBorgesGuardPassed !== false ? 'Anti-Borges PASS' : 'WARN'})</div>`
+          ? `<div class="mono" style="font-size:9.5px; color:#A7F3D0; margin-top:3px;">🌙 Offline Dreaming (<code>claude / codex / agy / opencode / dsh</code>): <strong>${Number(dreamRep.transcriptsReplayed || 0)}</strong> turns replayed · <strong>${Number(dreamRep.brokenLinksRepaired || 0)}</strong> links repaired · <strong>${Number(dreamRep.wikiTopicsBuilt || wikiObj?.topics?.length || 0)}</strong> wiki pages · compression <code>${Number(dreamRep.wikiCompressionRatio || wikiObj?.compressionRatio || 0)} &lt;= 0.15</code> (${dreamRep.antiBorgesGuardPassed !== false ? 'Anti-Borges PASS' : 'WARN'})</div>`
           : '';
         roleBar.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
