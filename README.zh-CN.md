@@ -10,7 +10,7 @@
 
 ---
 
-**ArchonOS（智枢）** 是一套开源、在本地工作站（macOS / Linux）独立运行的**个人自进化智能操作系统（Personal RSI Intelligent OS）**。系统将 **幕僚长（Chief of Staff）自主路由**、**多行自由输入对话框**、**本机无头 CLI 模型执行手**（`claude`、`codex`、`agy`、`opencode`）、**默认拒绝（Default-Deny）的 MCP 工具联邦**、**工件引用对话即时修改（Quote-to-Modify）** 以及 **Harness2 递归自改进技能体系（RSI）** 深度整合为统一的双语（`中文 / EN`）智能控制台。
+**ArchonOS（智枢）** 是一套开源、在本地工作站（macOS / Linux）独立运行的**个人自进化智能操作系统（Personal RSI Intelligent OS）**。系统将 **幕僚长（Chief of Staff）自主路由**、**多行自由输入对话框**、**本机无头 CLI 模型执行手**（`claude`、`codex`、`agy`、`opencode`、`dsh`）、**默认拒绝（Default-Deny）的 MCP 工具联邦**、**工件引用对话即时修改（Quote-to-Modify）** 以及 **Harness2 递归自改进技能体系（RSI）** 深度整合为统一的双语（`中文 / EN`）智能控制台。
 
 ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行；同时无缝支持按需接入外部 MCP 网络、本地代码库以及 Antigravity 架构师闭环。
 
@@ -21,7 +21,7 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
 1. **新用户强制幕僚长与零配置自主初始化 (`npm run init` / `npx archon init`)**:
    - **预植入幕僚长席位 (`seat:chief-of-staff`)**：全新克隆安装时，系统仅默认植入智枢幕僚长（`seat:chief-of-staff`）作为统一会话入口与调度器。操作者可随时按需创建任意自定义专职席位（`seat:<custom-id>`），幕僚长将自动分类并分发任务，全席位共享统一上下文与工作区文件。
    - **席位、MCP 与技能隔离保护（默认安全不变式）**：除面向用户的幕僚长（Chief of Staff）作为统一交互门户之外，操作者自行创建的专职席位、私有 MCP 接口以及自定义技能库对外部或普通用户默认完全不可见且不可直接越权访问，确保操作者核心能力与环境配置的安全隐私。
-   - **主机执行手自动探测**：自动识别本地已安装的 CLI 引擎（`claude`、`codex`、`agy`、`opencode`），智能配置无头执行参数与超时熔断保护，杜绝任何个人绝对路径与密钥泄露。
+   - **主机执行手自动探测**：自动识别本地已安装的 CLI 引擎（`claude`、`codex`、`agy`、`opencode`、`dsh`），智能配置无头执行参数与超时熔断保护，杜绝任何个人绝对路径与密钥泄露。
    - **轻量便携配置**：自动生成 `.archon/config.json` 与 `.archon/skills/` 初始技能库。
 2. **多行自由输入对话与工件引用对话修改 (`💬 引用修改 / Quote to Modify`)**:
    - **多行自由输入框**：输入框全新升级为多行自适应文本域，支持直接按 `Enter` 快速发送指令，或使用 `Shift+Enter` 灵活换行输入长段文字、结构化提示词与代码块。
@@ -45,10 +45,10 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
    - 一键秒级切换深邃黑曜石与纸质高对比度模式，Chart.js、Mermaid 图表及 3D 视口自适应渲染。
 8. **双目标部署与远端-本地主权对话调度桥接 (Dual-Target & Remote Sovereign Chat Bridge)**:
    - **本地工作站或 Cloudflare 边缘部署**：支持选择 100% 本地隔离运行（`127.0.0.1:8790`）或部署至 Cloudflare Edge Worker + 远端 PWA 控制台。
-   - **远端安全调度本地 CLI 执掌**：在手机或移动浏览器端访问 Cloudflare 远端控制台（`https://<worker>.workers.dev`）直接输入对话，任务经由 R2 安全入队并由 MacBook 本地守护进程（`archon-sync-edge.mjs`）独占认领执行。本机模型手（`agy`、`claude`、`codex`）在私有工作区和本地 MCP 环境执行后，秒级流式回传结果并呈现状态实时联动（`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`）。
+   - **远端安全调度本地 CLI 执掌**：在手机或移动浏览器端访问 Cloudflare 远端控制台（`https://<worker>.workers.dev`）直接输入对话，任务经由 R2 安全入队并由 MacBook 本地守护进程（`archon-sync-edge.mjs`）独占认领执行。本机模型手（`agy`、`claude`、`codex`、`opencode`、`dsh`）在私有工作区和本地 MCP 环境执行后，秒级流式回传结果并呈现状态实时联动（`QUEUED FOR MACBOOK` → `RUNNING ON MACBOOK` → `DONE`）。
    - **对话历史双向镜像同步与健康看板**：支持本地 `workspace-state.json` 与云端 R2 自动 30s 定时增量同步、一键手动刷新徽标，并独立呈现本地执行手就绪状态（Custodian Readiness）。
 9. **ArchonOS Seat Memory v0.5（`L1–L4` 全席位 & 多模型手认知记忆体系）**:
-   - **Step-1 记忆优先于技能（Memory-Prior-to-Skills）执行管线**：所有席位与本地 CLI 模型手（`agy`、`claude`、`codex`）在每轮执行的第一步优先检索认知记忆索引，再推荐与挂载 `@skill` 技能，并强制执行 `memoryAuthority: "retrieval_pointer_only"`（仅作检索指针、严禁替代一手证据）。
+   - **Step-1 记忆优先于技能（Memory-Prior-to-Skills）执行管线**：所有席位与本地 CLI 模型手（`agy`、`claude`、`codex`、`opencode`、`dsh`）在每轮执行的第一步优先检索认知记忆索引，再推荐与挂载 `@skill` 技能，并强制执行 `memoryAuthority: "retrieval_pointer_only"`（仅作检索指针、严禁替代一手证据）。
    - **单写者原话分片（Single-Writer Verbatim Shards，100% 事实存活率）**：彻底消除多智能体串联传递的“传话筒（Telephone Game）”信息衰减。各专职席位将一手引文、已验证指标与陷阱告警独立写入 `.archon/memory-shards/<workspace>/<campaign>/seat-<id>.json`，由幕僚长在战役边界无损聚合（`POST /api/memory/shard`、`GET /api/memory/shards`）。
    - **查询时 `Wiki + 原话分片 + 认知指针` 三路融合**：在 Step-1 提示词信封中同时融合 **L3.5 领域 Wiki 导航图**（`wiki://<slug>.md`）、**单写者原话分片**（`shard://<campaign>/<seat>`）与 **L3 执行指针**（`turn://`、`artifact://`、`file://`、`skill://`）。
    - **跨席位离线“梦境整合（Dreaming）”与反博尔赫斯守卫（`<= 0.15`）**：每 2 小时随 RSI 定时任务自动运行（或通过 `node scripts/architect-bridge.mjs dream` / `POST /api/memory/dream` 一键触发），自动重放原始会话轨迹、修正矛盾记忆、修复过期 `artifact://@rN` 链接，并在 `<= 0.15` 严格压缩比上限下编译 `.archon/memory-wiki/`。
@@ -56,9 +56,9 @@ ArchonOS 专注于作为一套自包含的个人智能操作系统独立运行�
 
 ---
 
-## 🧠 Seat Memory v0.5 认知记忆架构（覆盖全席位与 `agy / claude / codex`）
+## 🧠 Seat Memory v0.5 认知记忆架构（覆盖全席位与 `agy / claude / codex / opencode / dsh`）
 
-ArchonOS v0.5 在默认预置的**智枢幕僚长（`seat:chief-of-staff`）**、**操作者按需创建的任意专职席位（`seat:<custom-id>`）**与本地 CLI 模型手（`agy`、`claude`、`codex`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v0.5-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md)** 与 **[`docs/archon-seat-memory-v0.4-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md)**（`v0.3 → v0.4` 认知指针与撤稿隔离规范）。
+ArchonOS v0.5 在默认预置的**智枢幕僚长（`seat:chief-of-staff`）**、**操作者按需创建的任意专职席位（`seat:<custom-id>`）**与本地 CLI 模型手（`agy`、`claude`、`codex`、`opencode`、`dsh`）之上构建了五层认知记忆架构。完整规范请参阅：**[`docs/archon-seat-memory-v0.5-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.5-architecture.zh-CN.md)** 与 **[`docs/archon-seat-memory-v0.4-architecture.zh-CN.md`](./docs/archon-seat-memory-v0.4-architecture.zh-CN.md)**（`v0.3 → v0.4` 认知指针与撤稿隔离规范）。
 
 | 层级 | 作用域与存储路径 | 核心机制 | 认知权威与安全守卫 |
 | :--- | :--- | :--- | :--- |
@@ -145,7 +145,7 @@ npm install
 # 2. 运行自主环境发现（强制初始化幕僚长席位，探测本地 CLI 执行手）
 npm run init
 
-# 3. 运行跨语言全量测试套件（9 个子包共 107/107 测试全部通过）
+# 3. 运行跨语言全量测试套件（9 个子包共 151/151 测试全部通过）
 npm test
 
 # 4. 启动 ArchonOS 控制台服务 (默认端口 8790)
@@ -166,7 +166,7 @@ npm start
 | [`packages/archon-skills`](./packages/archon-skills) | TypeScript / Node.js | Harness2 三值认知技能验证器（`pass \| fail \| insufficient`, $n \ge 2, k = 3$） |
 | [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 5 阶段 R2-First 原子化工件版本推进引擎与 HTML 可访问性平权审计器 |
 | [`packages/archon-ledger`](./packages/archon-ledger) | Python 3 | 默认拒绝策略拦截器与基于 SHA-256 哈希链的防篡改审计账本 |
-| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化、密钥敏感信息脱敏与执行租约管理 |
+| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化（`claude`、`codex`、`agy`、`opencode`、`dsh`）、密钥敏感信息脱敏与执行租约管理 |
 | [`packages/archon-mesh`](./packages/archon-mesh) | Node.js ESM | 基于 Ed25519 签名的 `.archon-bundle` 导出与导入，强制剔除敏感密钥与轨迹 |
 | [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` 命令行工具（`archon init`、`archon up`、`archon status`） |
 

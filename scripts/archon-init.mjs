@@ -6,7 +6,7 @@
 //
 // Actions performed autonomously:
 // 1. Verifies Node.js & Python 3 runtimes and initializes .archon/ workspace directories.
-// 2. Auto-detects installed Local CLI Model Hands (claude, codex, agy, opencode) and configures headless mode flags.
+// 2. Auto-detects installed Local CLI Model Hands (claude, codex, agy, opencode, dsh) and configures headless mode flags.
 // 3. Auto-discovers local MCP servers (from standard MCP dirs or config/archon.defaults.json) with zero secret leakage.
 // 4. Materializes starter Harness2 RSI SKILL.md files in .archon/skills/ and writes portable .archon/config.json.
 

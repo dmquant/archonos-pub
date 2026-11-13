@@ -272,3 +272,14 @@ test('Model-authored artifact iframes are sandboxed without same-origin access',
     assert.doesNotMatch(tag, /allow-same-origin/, `${id} must not share the console origin`);
   }
 });
+
+test('Hand selectors expose every supported local CLI engine', () => {
+  const html = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../public/index.html'), 'utf8');
+  for (const selectId of ['chat-engine-select', 'crud-seat-hand', 'cfg-hand-engine', 'synth-skill-engine']) {
+    const block = html.split(`id="${selectId}"`)[1]?.split('</select>')[0] || '';
+    assert.ok(block, `${selectId} exists`);
+    for (const engine of ['claude', 'codex', 'agy', 'opencode', 'dsh']) {
+      assert.match(block, new RegExp(`value="${engine}"`), `${selectId} offers ${engine}`);
+    }
+  }
+});

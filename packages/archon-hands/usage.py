@@ -1,4 +1,4 @@
-"""5-engine usage parser for archon-hands (ARC-141 / ARC-139B rules).
+"""6-engine usage parser for archon-hands (ARC-141 / ARC-139B rules).
 
 parse(engine, lines) -> dict of field -> {"value": n} or {"state": "unmetered", "reason": str}.
 A figure that cannot be read is never 0 and never omitted (ARC-138 s2).
@@ -9,7 +9,7 @@ unmetered here rather than guessed.
 """
 import json
 
-ENGINES = ("claude", "codex", "opencode", "agy", "gemini")
+ENGINES = ("claude", "codex", "opencode", "dsh", "agy", "gemini")
 FIELDS = ("input_uncached", "cache_read", "cache_write", "output", "wall_ms", "tool_calls")
 
 
@@ -79,24 +79,60 @@ def _opencode(rows):
     if not fin:
         return _blank("no opencode step_finish with tokens")
     out = _blank("field absent from opencode step_finish")
-    inp = out_t = rd = wr = 0
-    ok = True
-    for r in fin:  # one row per step: sum steps
+    totals = {"input_uncached": 0, "output": 0, "cache_read": 0, "cache_write": 0}
+    ok = {k: True for k in totals}
+    for r in fin:  # one row per step: sum steps; a field missing in ANY step is unmetered
         t = r["part"]["tokens"]
         c = t.get("cache") if isinstance(t.get("cache"), dict) else {}
-        vals = [_int(t.get("input")), _int(t.get("output")), _int(c.get("read")), _int(c.get("write"))]
-        if None in vals:
-            ok = False
-            break
-        inp, out_t, rd, wr = inp + vals[0], out_t + vals[1], rd + vals[2], wr + vals[3]
-    if ok:  # input excludes cache
-        _fill(out, input_uncached=inp, output=out_t, cache_read=rd, cache_write=wr)
+        vals = {
+            "input_uncached": _int(t.get("input")),
+            "output": _int(t.get("output")),
+            "cache_read": 0 if c.get("read") is None else _int(c.get("read")),
+            "cache_write": 0 if c.get("write") is None else _int(c.get("write")),
+        }
+        for k, v in vals.items():
+            if v is None:
+                ok[k] = False
+            else:
+                totals[k] += v
+    for k in totals:
+        if ok[k]:  # input excludes cache
+            out[k] = {"value": totals[k]}
     starts = [r["timestamp"] for r in rows if r.get("type") == "step_start" and _int(r.get("timestamp")) is not None]
     ends = [r["timestamp"] for r in fin if _int(r.get("timestamp")) is not None]
     if starts and ends and max(ends) >= min(starts):
         out["wall_ms"] = {"value": max(ends) - min(starts)}
     else:
         out["wall_ms"] = _um("no step timestamps")
+    return out
+
+
+def _dsh(rows):
+    ends = [r for r in rows if r.get("type") == "status" and r.get("phase") == "step_end"]
+    if not ends:
+        return _blank("no dsh status step_end events")
+    out = _blank("field absent or invalid in a dsh step_end")
+    # inputTokens/outputTokens are always projected; cache buckets are omitted when empty.
+    pairs = (("input_uncached", "inputTokens", False), ("output", "outputTokens", False),
+             ("cache_read", "cacheReadTokens", True), ("cache_write", "cacheWriteTokens", True))
+    totals = {k: 0 for k, _, _ in pairs}
+    ok = {k: True for k, _, _ in pairs}
+    for r in ends:  # one row per step: sum steps
+        u = r.get("usage") if isinstance(r.get("usage"), dict) else None
+        if u is None:
+            # The engine reported a step without usage: nothing is known, never publish 0.
+            return _blank("a dsh step_end carried no usage")
+        for k, src, optional in pairs:
+            raw = u.get(src)
+            v = 0 if raw is None and optional else _int(raw)
+            if v is None:
+                ok[k] = False
+            else:
+                totals[k] += v
+    for k, _, _ in pairs:
+        if ok[k]:  # input excludes cache
+            out[k] = {"value": totals[k]}
+    out["wall_ms"] = _um("dsh event stream carries no timestamps")
     return out
 
 
@@ -121,14 +157,24 @@ def _gemini(rows):
     return _blank("gemini emits no usage stream (IneligibleTierError seen)")
 
 
-_PARSERS = {"claude": _claude, "codex": _codex, "opencode": _opencode, "agy": _agy, "gemini": _gemini}
+_PARSERS = {"claude": _claude, "codex": _codex, "opencode": _opencode, "dsh": _dsh,
+            "agy": _agy, "gemini": _gemini}
+
+# Engines whose stream carries a modelled tool-call event (verified against real
+# captures); the others stay unmetered until a sample proves their event shape.
+_TOOL_EVENT = {"opencode": "tool_use", "dsh": "tool_call"}
 
 
 def parse(engine, lines):
     if engine not in _PARSERS:
         raise ValueError("unknown engine %r" % (engine,))
-    out = _PARSERS[engine](list(_rows(lines)))
-    out["tool_calls"] = _um("tool-call event type untested per engine")
+    rows = list(_rows(lines))
+    out = _PARSERS[engine](rows)
+    event = _TOOL_EVENT.get(engine)
+    if event is None:
+        out["tool_calls"] = _um("tool-call event type untested per engine")
+    else:
+        out["tool_calls"] = {"value": sum(1 for r in rows if r.get("type") == event)}
     return out
 
 

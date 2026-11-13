@@ -12,9 +12,9 @@
       "label": "Claude Code CLI",
       "enabled": true,
       "binaryPath": "auto",
-      "headlessArgs": ["-p", "{{prompt}}", "--output-format", "text"],
-      "timeoutMs": 28000,
-      "description": "Anthropic Claude Code CLI in non-interactive print mode (-p)"
+      "headlessArgs": ["-p", "{{prompt}}", "--output-format", "stream-json", "--verbose"],
+      "timeoutMs": 45000,
+      "description": "Anthropic Claude Code CLI in non-interactive print mode (-p) with stream-json output"
     },
     "codex": {
       "engine": "codex",
@@ -22,7 +22,7 @@
       "enabled": true,
       "binaryPath": "auto",
       "headlessArgs": ["exec", "--skip-git-repo-check", "{{prompt}}"],
-      "timeoutMs": 28000,
+      "timeoutMs": 45000,
       "description": "OpenAI Codex CLI in headless exec mode (--skip-git-repo-check)"
     },
     "agy": {
@@ -37,11 +37,20 @@
     "opencode": {
       "engine": "opencode",
       "label": "OpenCode CLI",
-      "enabled": false,
+      "enabled": true,
       "binaryPath": "auto",
-      "headlessArgs": ["run", "--format", "json", "{{prompt}}"],
-      "timeoutMs": 28000,
-      "description": "Optional OpenCode CLI in headless JSON mode"
+      "headlessArgs": ["run", "--format", "json", "--auto", "{{prompt}}"],
+      "timeoutMs": 45000,
+      "description": "OpenCode CLI in headless run mode with NDJSON event output"
+    },
+    "dsh": {
+      "engine": "dsh",
+      "label": "DeepSeek Harness (dsh) CLI",
+      "enabled": true,
+      "binaryPath": "auto",
+      "headlessArgs": ["--profile", "headless", "--json", "{{prompt}}"],
+      "timeoutMs": 45000,
+      "description": "DeepSeek Harness CLI in one-task headless mode with NDJSON run events"
     }
   },
   "mcpServers": []

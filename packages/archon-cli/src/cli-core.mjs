@@ -188,7 +188,7 @@ export function runArchonHandPair({
   submittedCode,
   handId = 'local-hand-01',
   platform = 'darwin',
-  installedClis = ['agy', 'claude', 'codex', 'opencode'],
+  installedClis = ['agy', 'claude', 'codex', 'opencode', 'dsh'],
   now = Date.now(),
 } = {}) {
   if (!pairingRecord || pairingRecord.code !== submittedCode) {
