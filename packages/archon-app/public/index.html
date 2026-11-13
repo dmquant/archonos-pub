@@ -2893,7 +2893,7 @@
                 </div>
 
                 <div class="iframe-viewport">
-                  <iframe id="vortexa-artifact-iframe" src="about:blank" data-src="/vortexa-globe.html" title="Vortexa 3D Seaborne Crude Canvas Artifact"></iframe>
+                  <iframe id="vortexa-artifact-iframe" sandbox="allow-scripts" src="about:blank" data-src="/vortexa-globe.html" title="Vortexa 3D Seaborne Crude Canvas Artifact"></iframe>
                 </div>
 
                 <div class="parity-drawer collapsed" id="vortexa-parity-drawer">
@@ -2987,7 +2987,7 @@
                 </div>
 
                 <div class="iframe-viewport">
-                  <iframe id="polis-artifact-iframe" src="about:blank" data-src="/polis-studio.html" title="External Agora and ROS 3D Snapshot Artifact"></iframe>
+                  <iframe id="polis-artifact-iframe" sandbox="allow-scripts" src="about:blank" data-src="/polis-studio.html" title="External Agora and ROS 3D Snapshot Artifact"></iframe>
                 </div>
 
                 <div class="parity-drawer collapsed" id="polis-parity-drawer">
@@ -3044,7 +3044,7 @@
                   </div>
                 </div>
                 <div class="iframe-viewport">
-                  <iframe id="custom-artifact-iframe" src="about:blank" title="Chat-Created Interactive Archon Canvas Artifact"></iframe>
+                  <iframe id="custom-artifact-iframe" sandbox="allow-scripts" src="about:blank" title="Chat-Created Interactive Archon Canvas Artifact"></iframe>
                 </div>
               </div>
 
@@ -4215,6 +4215,8 @@
   </div>
 
   <script type="module">
+    import { escapeHtml, sanitizeMarkdownHtml } from './console-sanitize.mjs';
+
     // Initialize Mermaid.js in Dark Cybernetic Telemetry mode
     if (window.mermaid) {
       window.mermaid.initialize({
@@ -4830,12 +4832,10 @@
         '&lt;$1&gt;'
       );
       const rawHtml = window.marked.parse(safePlaceholderText, { gfm: true, breaks: true });
-      // Strip any raw <script> tags or inline on* handlers for safety
-      const safeHtml = rawHtml
-        .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-        .replace(/\son\w+="[^"]*"/gi, '');
-
-      containerEl.innerHTML = safeHtml;
+      // marked passes raw HTML through; sanitize it with the tested allowlist
+      // (event handlers in any quoting style, javascript:/vbscript: URLs,
+      // srcdoc and executable tags).
+      containerEl.innerHTML = sanitizeMarkdownHtml(rawHtml);
       // Ensure rendered markdown never hijacks global application DOM IDs or .view-container classes
       containerEl.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
       containerEl.querySelectorAll('.view-container').forEach((el) => el.classList.remove('view-container'));
@@ -5042,14 +5042,6 @@
     let selectedSeatId = 'chief-of-staff';
     let currentArtifactId = 'art-telemetry-matrix';
     let currentActivePreviewPath = '';
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
 
     window.setLanguage = function (lang) {
       currentLang = lang === 'zh' ? 'zh' : 'en';
