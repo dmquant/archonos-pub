@@ -50,7 +50,7 @@
     }
   ],
   "vars": {
-    "ARCHON_VERSION": "0.1.005",
+    "ARCHON_VERSION": "0.5.0",
     "ENCRYPTION_MODE": "e2ee-local-custodian",
     "PRICE_TABLE_VERSION": "2026-10-v1"
   }
