@@ -66,7 +66,11 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 const PUBLIC_DIR = join(__dirname, '../../archon-app/public');
-const STATE_DIR = join(__dirname, '../../../.archon');
+// Tests point this at a temporary directory so an in-process server never
+// mutates the operator's real .archon state.
+const STATE_DIR = process.env.ARCHON_STATE_DIR
+  ? resolve(process.env.ARCHON_STATE_DIR)
+  : join(__dirname, '../../../.archon');
 const STATE_FILE = join(STATE_DIR, 'workspace-state.json');
 const ARTIFACTS_DIR = join(STATE_DIR, 'artifacts');
 const SKILLS_DIR = join(STATE_DIR, 'skills');
@@ -6965,6 +6969,31 @@ function savePersistedWorkspaceState(runtime, workspaceState) {
   }
 }
 
+// The local API can spawn coding CLIs, so loopback binding is not enough: any
+// page the operator visits must not be able to POST to 127.0.0.1:8790. Browsers
+// attach Origin to cross-origin (and to all non-GET) requests; we accept a
+// request only when it has no Origin (CLI/curl/server-to-server) or when the
+// Origin host matches the Host header we are serving on.
+export function evaluateLocalRequestOrigin({ origin, host, secFetchSite, allowedOrigins = [] } = {}) {
+  if (String(secFetchSite || '').toLowerCase() === 'cross-site') {
+    return { allowed: false, corsOrigin: null };
+  }
+  if (!origin) return { allowed: true, corsOrigin: null };
+  let parsed;
+  try {
+    parsed = new URL(String(origin));
+  } catch {
+    return { allowed: false, corsOrigin: null };
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { allowed: false, corsOrigin: null };
+  }
+  const originHost = parsed.host.toLowerCase();
+  const allowed = originHost === String(host || '').toLowerCase()
+    || allowedOrigins.includes(String(origin));
+  return { allowed, corsOrigin: allowed ? String(origin) : null };
+}
+
 export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process.env.PORT ?? 8790) } = {}) {
   if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') {
     throw new Error('Refusing non-loopback bind: local server must bind only to 127.0.0.1');
@@ -7037,14 +7066,51 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
     res.statusCode = status;
     res.setHeader('content-type', 'application/json; charset=utf-8');
     res.setHeader('cache-control', 'no-store');
-    res.setHeader('access-control-allow-origin', '*');
+    // Access-Control-Allow-Origin is set per request by the origin guard below.
     res.end(JSON.stringify(obj));
   };
+
+  const allowedOrigins = String(process.env.ARCHON_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   const server = createServer(async (req, res) => {
     try {
       const fullUrl = `http://${host}:${port}${req.url}`;
       const parsedUrl = new URL(fullUrl);
+
+      const originVerdict = evaluateLocalRequestOrigin({
+        origin: req.headers.origin,
+        host: req.headers.host,
+        secFetchSite: req.headers['sec-fetch-site'],
+        allowedOrigins,
+      });
+      if (!originVerdict.allowed) {
+        res.statusCode = 403;
+        res.setHeader('content-type', 'application/json; charset=utf-8');
+        res.setHeader('cache-control', 'no-store');
+        res.setHeader('vary', 'origin');
+        res.end(JSON.stringify({ ok: false, error: 'origin_not_allowed' }));
+        return;
+      }
+      if (originVerdict.corsOrigin) {
+        res.setHeader('access-control-allow-origin', originVerdict.corsOrigin);
+        res.setHeader('vary', 'origin');
+      }
+      if (req.method === 'OPTIONS') {
+        // Never fall through to the permissive runtime.fetch preflight handler.
+        res.statusCode = 204;
+        res.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader(
+          'access-control-allow-headers',
+          'content-type, authorization, idempotency-key, x-archon-origin, x-archon-author, x-archon-admin-token, x-archon-lang'
+        );
+        res.setHeader('access-control-max-age', '600');
+        res.end();
+        return;
+      }
+
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const bodyBuf = Buffer.concat(chunks);
