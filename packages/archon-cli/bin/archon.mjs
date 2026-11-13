@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 // ArchonOS CLI Entry Point (`npx archon init` | `npx archon up` | `npx archon deploy` | `npx archon hand pair <CODE>`)
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { runArchonUp, runArchonHandPair, runArchonDeployTarget } from '../src/cli-core.mjs';
 import { runAutonomousInit } from '../../../scripts/archon-init.mjs';
+
+const PKG = JSON.parse(readFileSync(fileURLToPath(new URL('../../../package.json', import.meta.url)), 'utf8'));
 
 const args = process.argv.slice(2);
 const cmd = args[0] ?? 'help';
@@ -48,6 +52,6 @@ if (cmd === 'init' || cmd === 'setup') {
   console.log(JSON.stringify(res, null, 2));
 } else {
   console.log(
-    'ArchonOS CLI v0.1.005 — Commands:\n  archon init                      Auto-detect CLI hands, headless flags, MCP servers & skills\n  archon deploy [--local|--remote] Switch or provision Local Workstation vs Cloudflare Remote (Worker + Frontend Page)\n  archon up                        Provision Cloudflare Worker + D1/R2 stack\n  archon hand pair <CODE>          Pair a local CLI hand daemon'
+    `ArchonOS CLI v${PKG.version} — Commands:\n  archon init                      Auto-detect CLI hands, headless flags, MCP servers & skills\n  archon deploy [--local|--remote] Switch or provision Local Workstation vs Cloudflare Remote (Worker + Frontend Page)\n  archon up                        Provision Cloudflare Worker + D1/R2 stack\n  archon hand pair <CODE>          Pair a local CLI hand daemon`
   );
 }

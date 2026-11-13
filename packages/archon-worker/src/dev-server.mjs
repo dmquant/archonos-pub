@@ -62,6 +62,7 @@ import {
   querySeatMemoryIndex,
   formatSeatMemoryIndexEnvelopeForPrompt,
 } from './seat-memory-index.mjs';
+import { ARCHON_VERSION } from './version.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -6971,7 +6972,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
   }
 
   const runtime = createArchonEdgeRuntime({
-    ARCHON_VERSION: '0.1.005',
+    ARCHON_VERSION,
     ARCHON_DEPLOY_MODE: 'local',
     ENCRYPTION_MODE: 'e2ee-local-custodian',
     ASSETS: assetsBinding,

@@ -5,6 +5,7 @@
 // - Durable Object bindings: WorkspaceOrchestratorDO, HandLeaseDO, ArchonMailboxDO
 
 import { createHash } from 'node:crypto';
+import { ARCHON_VERSION } from './version.mjs';
 import { WorkspaceOrchestratorDO } from './workspace-orchestrator-do.mjs';
 import { HandLeaseDO } from './hand-lease-do.mjs';
 import { ArchonMailboxDO } from './archon-mailbox-do.mjs';
@@ -385,7 +386,7 @@ export function createArchonEdgeRuntime(env = {}) {
       <input type="password" name="token" placeholder="••••••••••••••••" autofocus required />
       <button type="submit">Unlock Sovereign Session</button>
     </form>
-    <div class="footer">ArchonOS v0.1.005 • Zero-Knowledge Edge Relay</div>
+    <div class="footer">ArchonOS v${ARCHON_VERSION} • Zero-Knowledge Edge Relay</div>
   </div>
 </body>
 </html>`;
@@ -405,7 +406,7 @@ export function createArchonEdgeRuntime(env = {}) {
       return json({
         ok: true,
         service: 'archon-os-worker',
-        version: env.ARCHON_VERSION ?? '0.1.0',
+        version: env.ARCHON_VERSION ?? ARCHON_VERSION,
         custody: mailbox.getCustodyMetadata(),
         seats: sharedStore.seats.size,
         artifacts: sharedStore.artifacts.size,
