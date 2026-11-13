@@ -24,6 +24,7 @@ import {
   compute3dViewportPolicy,
   validateEmbedPostMessage,
 } from '../src/app-core.mjs';
+import { escapeHtml, sanitizeMarkdownHtml } from '../public/console-sanitize.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -225,3 +226,49 @@ test('Desktop Split-View & Mobile PWA HTML shell embeds sandboxed 3D Polis/Studi
   }
 });
 
+
+test('Console escaping covers every quote style used by the shell', () => {
+  assert.equal(escapeHtml("a'b"), 'a&#39;b', "single quotes must not survive into single-quoted attributes");
+  assert.equal(escapeHtml('a"b<c>&d'), 'a&quot;b&lt;c&gt;&amp;d');
+  // Note: this is the HTML text/attribute context. Values interpolated into the
+  // JS argument of an inline on* handler need a JS-string encoder, which is a
+  // separate change (the HTML parser decodes &#39; back to ' before evaluating).
+});
+
+test('Markdown sanitiser removes every handler/URL variant, not just double-quoted ones', () => {
+  const vectors = [
+    '<img src=x onerror=alert(1)>',
+    "<img src=x onerror='alert(1)'>",
+    '<div onmouseover="alert(1)">x</div>',
+    '<svg onload=alert(1)></svg>',
+    '<a href="javascript:alert(1)">x</a>',
+    "<a href='vbscript:msgbox(1)'>x</a>",
+    '<a href="java&#115;cript:alert(1)">x</a>',
+    '<a href="JaVaScRiPt:alert(1)">x</a>',
+    '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
+    '<script>alert(1)</script>',
+    '<style>body{display:none}</style>',
+    '<!--<img src=x onerror=alert(1)>-->',
+  ];
+  for (const vector of vectors) {
+    const out = sanitizeMarkdownHtml(vector);
+    assert.doesNotMatch(out, /on[a-z]+\s*=/i, vector);
+    assert.doesNotMatch(out, /(?:javascript|vbscript)\s*:/i, vector);
+    assert.doesNotMatch(out, /<(?:script|iframe|style)\b/i, vector);
+  }
+  assert.equal(sanitizeMarkdownHtml('<img src=x onerror=alert(1)>'), '<img src=x>');
+});
+
+test('Markdown sanitiser preserves ordinary rendered markup', () => {
+  const benign = '<p>see <strong>this</strong> and <a href="https://example.com/a?b=1">link</a></p><pre><code>&lt;script&gt;</code></pre>';
+  assert.equal(sanitizeMarkdownHtml(benign), benign);
+});
+
+test('Model-authored artifact iframes are sandboxed without same-origin access', () => {
+  const html = readFileSync(join(__dirname, '../public/index.html'), 'utf8');
+  for (const id of ['vortexa-artifact-iframe', 'polis-artifact-iframe', 'custom-artifact-iframe']) {
+    const tag = html.split(`id="${id}"`)[1]?.split('>')[0] || '';
+    assert.match(tag, /sandbox="allow-scripts"/, `${id} must be sandboxed`);
+    assert.doesNotMatch(tag, /allow-same-origin/, `${id} must not share the console origin`);
+  }
+});
