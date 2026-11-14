@@ -4200,6 +4200,7 @@
               <button class="btn btn-primary" onclick="promptCreateTeamOrGroup('team')">+ 👥 Create Team</button>
               <button class="btn" onclick="window.latestCloudMeshState?.selectedRoomId ? openTeamTopicRoomUI(window.latestCloudMeshState.selectedRoomId) : promptCreateTeamOrGroup('team')">+ 💬 Open Topic Room</button>
               <button class="btn btn-emerald" onclick="promptJoinChannelOrTeamByToken()">🔑 Join via Token / Key</button>
+              <button class="btn" id="btn-join-remote-mesh" hidden onclick="promptJoinChannelOrTeamByToken(true)">Join Remote Team</button>
               <button class="btn" onclick="refreshCloudMeshStatus()">↻ Refresh Mesh</button>
               <button class="btn" onclick="switchView('workbench')">💬 Back to Chat &amp; Canvas</button>
             </div>
@@ -9512,6 +9513,28 @@
       };
     };
 
+    function loadRemoteMeshSession() {
+      try {
+        return JSON.parse(localStorage.getItem('archon_remote_mesh_session') || 'null');
+      } catch {
+        return null;
+      }
+    }
+
+    function remoteMeshHeaders(session) {
+      return {
+        'x-archon-mesh-remote': session.origin,
+        ...(session.token ? { 'x-archon-peer-session': session.token } : {}),
+      };
+    }
+
+    function meshRoomHeaders(roomId, extra = {}) {
+      const session = loadRemoteMeshSession();
+      return session?.roomId === roomId
+        ? { ...extra, ...remoteMeshHeaders(session) }
+        : window.getMeshRequestHeaders(extra);
+    }
+
     window.renderMeshSafeMarkdown = function (rawText) {
       const escaped = escapeHtml(String(rawText || ''));
       return escaped
@@ -9559,6 +9582,7 @@
 
     window.processSpecificMeshMessageUI = async function (teamId, roomId, messageId) {
       const activeTeamId = teamId || latestCloudMeshState.selectedRoomId;
+      if (loadRemoteMeshSession()?.roomId === activeTeamId) return;
       if (!activeTeamId) return;
       const res = await fetch('/api/mesh/teams/process-message', {
         method: 'POST',
@@ -9583,6 +9607,7 @@
 
     window.notifyColleaguesWithLatestBrief = async function (teamId, roomId) {
       const activeTeamId = teamId || latestCloudMeshState.selectedRoomId;
+      if (loadRemoteMeshSession()?.roomId === activeTeamId) return;
       if (!activeTeamId) return;
       const customNote = window.prompt(
         'Optional note to include when notifying @members in #general with your latest Executive Brief & Shared Artifact:',
@@ -9618,6 +9643,7 @@
     };
 
     window.mintTeamAccessKeyFromPortal = async function (teamId) {
+      if (loadRemoteMeshSession()?.roomId === teamId) return;
       const handleInput = document.getElementById('input-portal-colleague-handle');
       const roleSelect = document.getElementById('select-portal-colleague-role');
       const colleagueHandle = (handleInput?.value || '').trim() || 'peer:colleague';
@@ -9666,11 +9692,17 @@
         else if (channels[0]) latestCloudMeshState.selectedRoomId = channels[0].channelId;
       }
 
-      const activeTeam = teams.find((t) => t.teamId === latestCloudMeshState.selectedRoomId) || teams[0] || null;
+      if (!teams.some((team) => team.teamId === latestCloudMeshState.selectedRoomId)
+          && !channels.some((channel) => channel.channelId === latestCloudMeshState.selectedRoomId)) {
+        latestCloudMeshState.selectedRoomId = teams[0]?.teamId || channels[0]?.channelId || null;
+        latestCloudMeshState.selectedTopicRoomId = null;
+      }
+      const activeTeam = teams.find((t) => t.teamId === latestCloudMeshState.selectedRoomId) || null;
       const activeChan = !activeTeam
         ? channels.find((c) => c.channelId === latestCloudMeshState.selectedRoomId) || channels[0] || null
         : channels.find((c) => c.channelId === activeTeam.secureChannelId) || null;
       const activeRoom = activeTeam || activeChan;
+      const isRemoteRoom = loadRemoteMeshSession()?.roomId === latestCloudMeshState.selectedRoomId;
 
       const roomOptions = [
         ...teams.map(
@@ -9900,27 +9932,27 @@
                   <div style="padding:12px; border-radius:8px; background:var(--bg-panel); border:1px solid var(--border-strong);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:4px;">
                       <span class="mono" style="font-size:10.5px; color:var(--emerald); font-weight:700;">📦 SHARED WORKSPACE VAULT</span>
-                      <div style="display:flex; gap:4px;">
+                      ${!isRemoteRoom ? `<div style="display:flex; gap:4px;">
                         <button type="button" class="mini-btn" onclick="shareSkillToActiveTeam()">⚡ Share Skill</button>
                         <button type="button" class="mini-btn" onclick="shareCurrentArtifactToActiveTeam()">📤 Share Artifact</button>
-                      </div>
+                      </div>` : ''}
                     </div>
                     <div style="display:flex; flex-direction:column; gap:5px;">
                       ${teamSharedSkills
                         .map(
                           (sk) =>
-                            `<button type="button" class="mini-btn" style="display:flex; justify-content:space-between; width:100%; font-size:10.5px; padding:4px 8px; border-color:var(--cyan); color:var(--cyan);" onclick="importTeamResourceUI('${escapeHtml(activeTeam.teamId)}', 'skill', '${escapeHtml(sk.skillId || sk.name)}')" title="Click to import shared skill into local Archon instance"><span>⚡ ${escapeHtml(sk.name)}</span><span>⬇ Import</span></button>`
+                            `<button type="button" class="mini-btn" style="display:flex; justify-content:space-between; width:100%; font-size:10.5px; padding:4px 8px; border-color:var(--cyan); color:var(--cyan);" ${isRemoteRoom ? 'disabled' : ''} onclick="importTeamResourceUI('${escapeHtml(activeTeam.teamId)}', 'skill', '${escapeHtml(sk.skillId || sk.name)}')" title="Click to import shared skill into local Archon instance"><span>⚡ ${escapeHtml(sk.name)}</span>${isRemoteRoom ? '' : '<span>⬇ Import</span>'}</button>`
                         )
                         .join('')}
                       ${teamSharedArtifacts
                         .map(
                           (ar) =>
-                            `<button type="button" class="mini-btn" style="display:flex; justify-content:space-between; width:100%; font-size:10.5px; padding:4px 8px; border-color:var(--emerald); color:var(--emerald);" onclick="importTeamResourceUI('${escapeHtml(activeTeam.teamId)}', 'artifact', '${escapeHtml(ar.artifactId)}')" title="Click to import shared artifact into local Archon instance"><span>🎨 ${escapeHtml(ar.title || ar.artifactId)}</span><span>⬇ Import</span></button>`
+                            `<button type="button" class="mini-btn" style="display:flex; justify-content:space-between; width:100%; font-size:10.5px; padding:4px 8px; border-color:var(--emerald); color:var(--emerald);" ${isRemoteRoom ? 'disabled' : ''} onclick="importTeamResourceUI('${escapeHtml(activeTeam.teamId)}', 'artifact', '${escapeHtml(ar.artifactId)}')" title="Click to import shared artifact into local Archon instance"><span>🎨 ${escapeHtml(ar.title || ar.artifactId)}</span>${isRemoteRoom ? '' : '<span>⬇ Import</span>'}</button>`
                         )
                         .join('')}
                       ${
                         teamSharedSkills.length === 0 && teamSharedArtifacts.length === 0
-                          ? '<div class="mono" style="font-size:10px; color:var(--text-secondary);">No shared Skills or Artifacts yet. Use ⚡ Share Skill or 📤 Share Artifact above so all Topic Rooms can access them.</div>'
+                          ? '<div class="mono" style="font-size:10px; color:var(--text-secondary);">No shared Skills or Artifacts yet.</div>'
                           : ''
                       }
                     </div>
@@ -9944,7 +9976,7 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   ${
-                    activeTeam
+                    activeTeam && !isRemoteRoom
                       ? `
                         <button type="button" class="mini-btn" style="font-size:10px; padding:2px 8px; border-color:var(--emerald); color:var(--emerald); font-weight:700;" onclick="notifyColleaguesWithLatestBrief('${escapeHtml(activeTeam.teamId)}', '${escapeHtml(activeTopicRoom?.roomId || '')}')" title="Share latest Executive Brief & Artifact to this room and notify all @members">📤 Notify @Members of Latest Brief</button>
                         <button type="button" class="mini-btn" style="font-size:10px; padding:2px 8px; border-color:var(--cyan); color:var(--cyan); font-weight:600;" onclick="processSpecificMeshMessageUI('${escapeHtml(activeTeam.teamId)}', '${escapeHtml(activeTopicRoom?.roomId || '')}')" title="Trigger local Chief of Staff to process the latest message in this room and post a reply">🤖 Process Latest Msg</button>
@@ -10012,7 +10044,7 @@
             </div>
 
             ${
-              activeTeam
+              activeTeam && !isRemoteRoom
                 ? `
                   <div style="padding:12px 14px; border-radius:8px; background:var(--bg-panel); border:1px solid var(--border-strong);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
@@ -10256,10 +10288,10 @@
 
     window.refreshCloudMeshStatus = async function () {
       try {
-        window.renderMeshPortalFullView();
-        const [depRes, teamRes] = await Promise.all([
+        const [depRes, teamRes, remoteServerRes] = await Promise.all([
           fetch('/api/deploy/status'),
           fetch('/api/mesh/teams', { headers: window.getMeshRequestHeaders() }),
+          fetch('/api/mesh/remote-server').then((response) => response.json()).catch(() => null),
         ]);
         const depData = await depRes.json().catch(() => ({}));
         const teamData = await teamRes.json().catch(() => ({}));
@@ -10270,6 +10302,35 @@
           latestCloudMeshState.teams = Array.isArray(teamData.teams) ? teamData.teams : [];
           latestCloudMeshState.channels = Array.isArray(teamData.channels) ? teamData.channels : [];
           latestCloudMeshState.hostStatus = teamData.hostStatus || { online: true };
+        }
+        latestCloudMeshState.remoteTeamOrigin = remoteServerRes?.origin || null;
+        const remoteJoinButton = document.getElementById('btn-join-remote-mesh');
+        if (remoteJoinButton) {
+          remoteJoinButton.hidden = !latestCloudMeshState.remoteTeamOrigin;
+          remoteJoinButton.textContent = currentLang === 'zh' ? '加入远程团队' : 'Join Remote Team';
+        }
+        const remoteSession = loadRemoteMeshSession();
+        latestCloudMeshState.remoteTeamError = '';
+        if (remoteSession && latestCloudMeshState.remoteTeamOrigin === remoteSession.origin) {
+          const remote = await fetch('/api/mesh/teams', { headers: remoteMeshHeaders(remoteSession) })
+            .then((response) => response.json()).catch(() => null);
+          if (remote?.ok) {
+            latestCloudMeshState.teams = [
+              ...latestCloudMeshState.teams.filter((team) => team.teamId !== remoteSession.roomId),
+              ...(remote.teams || []).filter((team) => team.teamId === remoteSession.roomId),
+            ];
+            latestCloudMeshState.channels = [
+              ...latestCloudMeshState.channels.filter((channel) => channel.channelId !== remoteSession.roomId),
+              ...(remote.channels || []).filter((channel) => channel.channelId === remoteSession.roomId),
+            ];
+          }
+          const joinedRoomVisible = remote?.teams?.some((team) => team.teamId === remoteSession.roomId)
+            || remote?.channels?.some((channel) => channel.channelId === remoteSession.roomId);
+          if (!joinedRoomVisible) {
+            latestCloudMeshState.remoteTeamError = currentLang === 'zh'
+              ? '无法读取已加入的远程团队。请检查连接，或重新加入。'
+              : 'Could not load the remote team. Check the connection or join again.';
+          }
         }
         window.renderMeshPortalFullView();
         if (typeof window.renderSettingsCloudflareAndMcpCards === 'function') {
@@ -10298,6 +10359,7 @@
     };
 
     window.mintTeamAccessKeyUI = async function (teamId) {
+      if (loadRemoteMeshSession()?.roomId === teamId) return;
       const colleagueHandle = window.prompt(
         'Enter colleague handle to mint a scoped @mcp:archon-mesh Access Key (e.g. peer:alice):',
         'peer:colleague'
@@ -10326,10 +10388,11 @@
     window.openTeamTopicRoomUI = async function (teamId) {
       const topic = window.prompt('Enter topic name for the new Room under this Team (e.g. vlcc-freight-arb):', 'research-sync');
       if (!topic) return;
-      const userId = window.getPeerOperatorIdentity ? window.getPeerOperatorIdentity() : 'operator:local';
+      const remoteSession = loadRemoteMeshSession();
+      const userId = remoteSession?.roomId === teamId ? remoteSession.userId : window.getPeerOperatorIdentity();
       const res = await fetch('/api/mesh/teams/rooms', {
         method: 'POST',
-        headers: window.getMeshRequestHeaders({ 'content-type': 'application/json' }),
+        headers: meshRoomHeaders(teamId, { 'content-type': 'application/json' }),
         body: JSON.stringify({
           teamId,
           topic: topic.trim(),
@@ -10342,11 +10405,13 @@
       if (data.ok && data.room) {
         latestCloudMeshState.selectedTopicRoomId = data.room.roomId;
       }
+      if (!res.ok || !data.ok) window.alert(data.error || data.reason || 'Unable to create room.');
       await window.refreshCloudMeshStatus();
     };
 
     window.shareSkillToActiveTeam = async function () {
       const teamId = latestCloudMeshState.selectedRoomId;
+      if (loadRemoteMeshSession()?.roomId === teamId) return;
       if (!teamId) return;
       const defaultSkill = (skillsCache && skillsCache[0]?.name) || 'workspace-orchestrator-sop';
       const skillName = window.prompt('Enter local Skill name to share to this Team Workspace (visible to all Topic Rooms):', defaultSkill);
@@ -10367,6 +10432,7 @@
     };
 
     window.importTeamResourceUI = async function (teamId, resourceType, resourceId) {
+      if (loadRemoteMeshSession()?.roomId === teamId) return;
       const res = await fetch('/api/mesh/teams/import', {
         method: 'POST',
         headers: window.getMeshRequestHeaders({ 'content-type': 'application/json' }),
@@ -10452,12 +10518,16 @@
       return saved || 'operator:local';
     };
 
-    window.promptJoinChannelOrTeamByToken = async function () {
-      const token = window.prompt('Paste the Minted Access Key (ARCHON-KEY-...) or Invite Token (ARC-CHAN-...) shared by your peer or team:');
+    window.promptJoinChannelOrTeamByToken = async function (joinRemote = false) {
+      const origin = joinRemote ? latestCloudMeshState.remoteTeamOrigin : null;
+      if (joinRemote && !origin) return;
+      const token = window.prompt(origin
+        ? (currentLang === 'zh' ? `输入 ${origin} 的团队邀请码或访问密钥` : `Enter the team invitation or access key for ${origin}`)
+        : 'Paste the Minted Access Key (ARCHON-KEY-...) or Invite Token (ARC-CHAN-...) shared by your peer or team:');
       if (!token) return;
       const cleanToken = token.trim();
       if (!cleanToken) return;
-      const currentId = localStorage.getItem('archon_mesh_user_id') || '';
+      const currentId = (joinRemote ? loadRemoteMeshSession()?.userId : null) || localStorage.getItem('archon_mesh_user_id') || '';
       const customId = window.prompt('Set your self-declared display identity (name or handle, 1-80 chars, required). Other members will see this identity on your messages:', currentId);
       if (customId === null) return;
       const userId = customId.trim();
@@ -10467,9 +10537,28 @@
       }
 
       const isAccessKey = cleanToken.startsWith('ARCHON-KEY-');
+      const headers = {
+        'content-type': 'application/json',
+        ...(origin ? remoteMeshHeaders({ origin }) : {}),
+      };
+      function rememberMembership(data, roomId) {
+        if (origin) {
+          if (!data.peerSessionToken) {
+            window.alert(currentLang === 'zh' ? '远程团队服务器未返回成员会话。' : 'The remote team server did not return a member session.');
+            return;
+          }
+          localStorage.setItem('archon_remote_mesh_session', JSON.stringify({
+            origin, roomId, userId, token: data.peerSessionToken,
+          }));
+        } else {
+          localStorage.setItem('archon_mesh_user_id', userId);
+          if (data.peerSessionToken) localStorage.setItem('archon_mesh_peer_session', data.peerSessionToken);
+        }
+        latestCloudMeshState.selectedRoomId = roomId;
+      }
       const teamRes = await fetch('/api/mesh/teams/join', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers,
         body: JSON.stringify({
           ...(isAccessKey ? { accessKey: cleanToken } : { inviteToken: cleanToken }),
           userId,
@@ -10477,18 +10566,24 @@
         }),
       });
       const teamData = await teamRes.json().catch(() => ({}));
+      if (teamData.reason === 'remote_basic_auth_required') {
+        window.alert(currentLang === 'zh'
+          ? '远程站点要求 HTTP Basic 登录。请打开远程站点登录后加入，或向管理员索取支持团队邀请码的 Mesh API 地址。'
+          : teamData.error);
+        return;
+      }
       if (teamData.ok && teamData.team) {
-        localStorage.setItem('archon_mesh_user_id', userId);
-        if (teamData.peerSessionToken) {
-          localStorage.setItem('archon_mesh_peer_session', teamData.peerSessionToken);
-        }
-        latestCloudMeshState.selectedRoomId = teamData.team.teamId;
+        rememberMembership(teamData, teamData.team.teamId);
         await window.refreshCloudMeshStatus();
+        return;
+      }
+      if (isAccessKey || teamRes.status >= 500 || teamRes.status === 401) {
+        window.alert(teamData.error || teamData.reason || 'Unable to join this team.');
         return;
       }
       const chanRes = await fetch('/api/mesh/channels/join', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers,
         body: JSON.stringify({
           inviteToken: cleanToken,
           userId,
@@ -10497,11 +10592,7 @@
       });
       const chanData = await chanRes.json().catch(() => ({}));
       if (chanData.ok && chanData.channel) {
-        localStorage.setItem('archon_mesh_user_id', userId);
-        if (chanData.peerSessionToken) {
-          localStorage.setItem('archon_mesh_peer_session', chanData.peerSessionToken);
-        }
-        latestCloudMeshState.selectedRoomId = chanData.channel.channelId;
+        rememberMembership(chanData, chanData.channel.channelId);
       } else {
         window.alert(chanData.error || teamData.error || chanData.reason || teamData.reason || 'Unable to join with this invite token.');
       }
@@ -10527,7 +10618,8 @@
       } else if (rawSelectVal.startsWith('seat:')) {
         targetSeat = rawSelectVal;
       }
-      const userId = window.getPeerOperatorIdentity ? window.getPeerOperatorIdentity() : 'operator:local';
+      const remoteSession = loadRemoteMeshSession();
+      const userId = remoteSession?.roomId === roomId ? remoteSession.userId : window.getPeerOperatorIdentity();
       const activeTeam = (latestCloudMeshState.teams || []).find((t) => t.teamId === roomId);
       const isTeam = Boolean(activeTeam);
       const topicRoomId = isTeam ? latestCloudMeshState.selectedTopicRoomId : null;
@@ -10548,7 +10640,7 @@
         : { channelId: roomId, senderId: userId, senderSeat: 'seat:chief-of-staff', content, ...(targetSeat ? { targetSeat } : {}) };
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: window.getMeshRequestHeaders({ 'content-type': 'application/json' }),
+        headers: meshRoomHeaders(roomId, { 'content-type': 'application/json' }),
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
@@ -10569,6 +10661,7 @@
 
     window.shareCurrentArtifactToActiveTeam = async function () {
       const roomId = latestCloudMeshState.selectedRoomId;
+      if (loadRemoteMeshSession()?.roomId === roomId) return;
       if (!roomId) return;
       const artId = typeof currentArtifactId === 'string' && currentArtifactId ? currentArtifactId : 'art-telemetry-matrix';
       const userId = window.getPeerOperatorIdentity ? window.getPeerOperatorIdentity() : 'operator:local';

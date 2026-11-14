@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFi
 import { dirname, join, extname, resolve, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { createArchonEdgeRuntime } from './index.mjs';
+import { createArchonEdgeRuntime, redactMeshInvitations } from './index.mjs';
 import {
   MANIFEST_VERSION,
   sha256 as meshSha256,
@@ -6969,6 +6969,21 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
   if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') {
     throw new Error('Refusing non-loopback bind: local server must bind only to 127.0.0.1');
   }
+  const meshServerUrl = process.env.ARCHON_MESH_TEAM_SERVER_URL?.trim();
+  const meshServer = meshServerUrl ? new URL(meshServerUrl) : null;
+  if (meshServer && (meshServer.protocol !== 'https:' || meshServer.username || meshServer.password ||
+    meshServer.pathname !== '/' || meshServer.search || meshServer.hash)) {
+    throw new Error('ARCHON_MESH_TEAM_SERVER_URL must be an HTTPS origin without credentials or a path.');
+  }
+  const remoteMeshMethods = new Map([
+    ['/api/mesh/teams', 'GET'],
+    ['/api/mesh/teams/join', 'POST'],
+    ['/api/mesh/channels/join', 'POST'],
+    ['/api/mesh/teams/messages', 'POST'],
+    ['/api/mesh/channels/messages', 'POST'],
+    ['/api/mesh/teams/rooms', 'POST'],
+    ['/api/mesh/teams/rooms/messages', 'POST'],
+  ]);
 
   const runtime = createArchonEdgeRuntime({
     ARCHON_VERSION: '0.1.005',
@@ -7048,6 +7063,55 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const bodyBuf = Buffer.concat(chunks);
+
+      if (req.headers['x-archon-mesh-remote']) {
+        if (req.headers['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin') {
+          return sendJson(res, 403, { ok: false, error: 'Use the Mesh workspace on this site.' });
+        }
+        if (!meshServer || meshServer.origin !== req.headers['x-archon-mesh-remote']) {
+          return sendJson(res, 400, { ok: false, error: 'Remote team server is unavailable or has changed.' });
+        }
+        if (remoteMeshMethods.get(parsedUrl.pathname) !== req.method) {
+          return sendJson(res, 405, { ok: false, error: 'This action is unavailable for remote teams.' });
+        }
+        const headers = { 'content-type': 'application/json' };
+        const peer = req.headers['x-archon-peer-session'];
+        const joining = parsedUrl.pathname.endsWith('/join');
+        if (!joining && (typeof peer !== 'string' || !peer.startsWith('peer:'))) {
+          return sendJson(res, 401, { ok: false, error: 'Join the remote team first.' });
+        }
+        if (!joining) headers['x-archon-peer-session'] = peer;
+        try {
+          const upstream = await fetch(new URL(parsedUrl.pathname, meshServer), {
+            method: req.method,
+            headers,
+            body: ['GET', 'HEAD'].includes(req.method) ? undefined : bodyBuf,
+            redirect: 'error',
+            signal: AbortSignal.timeout(15000),
+          });
+          if (upstream.status === 401 && /^Basic\b/i.test(upstream.headers.get('www-authenticate') || '')) {
+            return sendJson(res, 401, {
+              ok: false,
+              reason: 'remote_basic_auth_required',
+              error: 'The remote site requires HTTP Basic login. Open the remote site and sign in before joining there, or ask the administrator for a Mesh endpoint that accepts team invitations.',
+            });
+          }
+          const data = await upstream.json().catch(() => null);
+          if (!data) {
+            return sendJson(res, upstream.ok ? 502 : upstream.status, {
+              ok: false,
+              error: `The remote site returned HTTP ${upstream.status} without a Mesh API response.`,
+            });
+          }
+          return sendJson(res, upstream.status, redactMeshInvitations(data));
+        } catch {
+          return sendJson(res, 502, { ok: false, error: 'Could not reach the configured Mesh Worker.' });
+        }
+      }
+
+      if (req.method === 'GET' && parsedUrl.pathname === '/api/mesh/remote-server') {
+        return sendJson(res, 200, { ok: true, origin: meshServer?.origin || null });
+      }
 
       // 1-Click Autonomous Initialization & Environment Re-Scan (`POST /api/system/init`)
       if (req.method === 'POST' && parsedUrl.pathname === '/api/system/init') {

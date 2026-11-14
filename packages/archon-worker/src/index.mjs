@@ -124,6 +124,14 @@ export function hydrateStoreFromInitialState(store, mailbox = null) {
   }
 }
 
+export function redactMeshInvitations(value) {
+  if (Array.isArray(value)) return value.map(redactMeshInvitations);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key]) => !['inviteToken', 'accessKeys', 'accessKey'].includes(key))
+    .map(([key, item]) => [key, redactMeshInvitations(item)]));
+}
+
 export function createArchonEdgeRuntime(env = {}) {
   const sharedStore = WorkspaceOrchestratorDO.createEmptyStore();
   const orchestrator = new WorkspaceOrchestratorDO(null, env, sharedStore);
@@ -1126,12 +1134,13 @@ export function createArchonEdgeRuntime(env = {}) {
               (ch.members || []).some((m) => m.userId === peerSession.userId)
           )
         : allChannels;
-      return json({
+      const result = {
         ok: true,
         channels,
         hostStatus: mailbox.hostStatus,
         custody: mailbox.getCustodyMetadata(),
-      });
+      };
+      return json(isPeerScoped ? redactMeshInvitations(result) : result);
     }
 
     if (method === 'POST' && (url.pathname === '/api/mesh/channels' || url.pathname === '/mesh/channels')) {
@@ -1149,6 +1158,9 @@ export function createArchonEdgeRuntime(env = {}) {
 
     if (method === 'POST' && (url.pathname === '/api/mesh/channels/join' || url.pathname === '/mesh/channels/join')) {
       const body = await request.json();
+      if (!isAdminAuthenticated && (typeof body.inviteToken !== 'string' || !body.inviteToken.trim())) {
+        return json({ ok: false, reason: 'invite_required', error: 'An invitation is required.' }, 403);
+      }
       const res = mailbox.joinSecureChannel(body);
       if (!res.ok) return json(res, res.status);
       const cleanUserId = String(body.userId || '').trim();
@@ -1162,7 +1174,7 @@ export function createArchonEdgeRuntime(env = {}) {
       const cookieVal = `archon_mesh_peer_session=${encodeURIComponent(peerSessionToken)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`;
       return json(
         {
-          ...res,
+          ...redactMeshInvitations(res),
           peerSessionToken,
           peerIdentity: {
             userId: cleanUserId,
@@ -1239,12 +1251,13 @@ export function createArchonEdgeRuntime(env = {}) {
               (ch.members || []).some((m) => m.userId === peerSession.userId)
           )
         : allChannels;
-      return json({
+      const result = {
         ok: true,
         teams,
         channels,
         hostStatus: mailbox.hostStatus,
-      });
+      };
+      return json(isPeerScoped ? redactMeshInvitations(result) : result);
     }
 
     if (method === 'POST' && (url.pathname === '/api/mesh/teams' || url.pathname === '/mesh/teams')) {
@@ -1262,6 +1275,11 @@ export function createArchonEdgeRuntime(env = {}) {
 
     if (method === 'POST' && (url.pathname === '/api/mesh/teams/join' || url.pathname === '/mesh/teams/join')) {
       const body = await request.json();
+      if (!isAdminAuthenticated && ![body.accessKey, body.inviteToken].some(
+        (invite) => typeof invite === 'string' && invite.trim()
+      )) {
+        return json({ ok: false, reason: 'invite_required', error: 'An invitation is required.' }, 403);
+      }
       const res = mailbox.joinTeamGroup(body);
       if (!res.ok) return json(res, res.status);
       const cleanUserId = String(body.userId || '').trim();
@@ -1275,7 +1293,7 @@ export function createArchonEdgeRuntime(env = {}) {
       const cookieVal = `archon_mesh_peer_session=${encodeURIComponent(peerSessionToken)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`;
       return json(
         {
-          ...res,
+          ...redactMeshInvitations(res),
           peerSessionToken,
           peerIdentity: {
             userId: cleanUserId,
