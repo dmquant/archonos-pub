@@ -12,6 +12,13 @@ test("hand alias normalised and accepted", () => {
   assert.ok(R.validateSeat(seat).ok);
   assert.ok(!R.validateSeat({ ...seat, hand: "grok" }).ok);
 });
+test("opencode and dsh are native hands, not aliases of codex", () => {
+  assert.equal(R.normalizeHand("opencode"), "opencode");
+  assert.equal(R.normalizeHand("dsh"), "dsh");
+  assert.equal(R.normalizeHand("agy"), "agy", "agy is a native hand, not a claude alias");
+  assert.ok(R.validateSeat({ ...seat, hand: "opencode" }).ok);
+  assert.ok(R.validateSeat({ ...seat, hand: "dsh" }).ok);
+});
 test("seat capability claim without hand-operator is rejected", () => {
   assert.ok(!R.validateSeat({ ...seat, capabilities: { fetch: true } }).ok);
   assert.ok(R.validateSeat({ ...seat, capabilities: { fetch: true }, capabilities_set_by: "hand-operator" }).ok);

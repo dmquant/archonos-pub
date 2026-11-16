@@ -14,7 +14,7 @@ sequenceDiagram
   participant Op as Operator (Web UI / CLI)
   participant DO as WorkspaceOrchestratorDO
   participant Gate as Registry & Policy Gate
-  participant Hand as Local CLI Hand (claude/codex/agy)
+  participant Hand as Local CLI Hand (claude/codex/agy/opencode/dsh)
   participant Canvas as 5-Stage R2-First Revision Gate
 
   Op->>DO: Dispatch Prompt to Seat (e.g. seat:maritime-quant)
@@ -59,5 +59,5 @@ sequenceDiagram
   5. **Stage 5 (Broadcast)**: Emit `ARCHON_ARTIFACT_UPDATED` to hot-reload connected Canvas frames.
 
 ### Invariant 5: Portable Headless CLI Isolation (`local-hands-runner.mjs`)
-- Local CLI binaries (`claude`, `codex`, `agy`, `opencode`) are spawned in an isolated neutral working directory (`/tmp`) with `stdin: 'ignore'` so stale `.claude` / `.gemini` workspace locks or interactive Y/N prompts never hang headless execution.
+- Local CLI binaries (`claude`, `codex`, `agy`, `opencode`, `dsh`) are spawned in an isolated neutral working directory (`/tmp`) with `stdin: 'ignore'` so stale `.claude` / `.gemini` workspace locks or interactive Y/N prompts never hang headless execution.
 - Rolling telemetry tracks per-engine runs, average latency, timeouts, and circuit-breaker state (`CLOSED (HEALTHY)` vs `HALF-OPEN (DEGRADED)`).

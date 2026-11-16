@@ -81,6 +81,24 @@ test('archon hand pair exchanges one-time code, enforces Unix-user split, and pa
   assert.match(paired.serviceUnit, /com\.archonos\.hands/);
   assert.equal(paired.probeReceipt.capabilities_set_by, 'hand-operator');
 
+  // Default discovery list must include every first-class engine, dsh included.
+  const defaultPair = runArchonHandPair({
+    pairingRecord: {
+      code: 'ARC-1111-1111-1111',
+      expiresAt: 9000,
+      used: false,
+      handId: 'default-list',
+    },
+    submittedCode: 'ARC-1111-1111-1111',
+    handId: 'default-list',
+    platform: 'linux',
+    now: 1500,
+  });
+  assert.equal(defaultPair.ok, true);
+  for (const engine of ['agy', 'claude', 'codex', 'opencode', 'dsh']) {
+    assert.equal(defaultPair.probeReceipt.capabilities[`engine:${engine}`], true, engine);
+  }
+
   // Reusing the same one-time code is rejected
   const replay = runArchonHandPair({
     pairingRecord,
