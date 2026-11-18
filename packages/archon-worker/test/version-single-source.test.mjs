@@ -17,6 +17,11 @@ const wrangler = read('packages/archon-worker/wrangler.jsonc');
 test('release version has exactly one source of truth', () => {
   assert.equal(ARCHON_VERSION, pkg.version);
   assert.equal(lock.version, pkg.version, 'package-lock must track package.json');
+  assert.equal(
+    lock.packages?.['']?.version,
+    pkg.version,
+    'package-lock root entry must track package.json too'
+  );
   assert.match(
     wrangler,
     new RegExp(`"ARCHON_VERSION":\\s*"${pkg.version.replace(/\./g, '\\.')}"`),

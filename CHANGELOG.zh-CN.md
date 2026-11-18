@@ -7,18 +7,28 @@
 ## [未发布 (Unreleased)]
 
 ### 新增 (Added)
+- **控制台移动端导航（≤960px）**：过去侧边栏在手机上被隐藏且无替代，导致 9 个视图中有 8 个无法访问。现在底部标签栏（工作台、席位、工件、技能）+「更多」抽屉可到达全部视图，并由单一 `APP_VIEWS` 注册表（`packages/archon-app/public/nav-model.mjs`）驱动 `switchView` 与图标映射。标签栏是常规流内 flex 子元素，永远不会遮挡对话输入区，并适配 `env(safe-area-inset-bottom)`；抽屉是真正的对话框，带 `aria-current`、点击遮罩/Esc 关闭与焦点回归。在手机上打通其余视图后又暴露并修复了两处布局缺陷：画布列改为内部滚动，不再把最后一张卡片压到标签栏下方；数据表在手机上保持 680px 最小宽度并在自身容器内横向滚动，而不是把表头与标识符挤成逐字换行。960px 以上桌面布局不变。
+- **本机安装预检（`archon doctor`、`npm run doctor`）**：只读复核文档中承诺的各项不变量，而不是默认相信它们。11 项检查覆盖 Node 主版本、工作区目录、`workspace-state.json` 结构（席位可解析、强制幕僚长席位存在、无重复 ID）、配置仅回环地址与合法端口、`.archon/*.json` 中的明文凭据（仅定位并脱敏，绝不打印原值）、`.archon/` 与 `.env` 的 Git 忽略覆盖、席位执行手合法性、本地控制台 `/api/health` 实时探测、CLI 执行手可解析性、不可变安全模式状态，以及 `.archon` 目录权限。`--json` 输出稳定的 `archon.doctor.v1` 报告，`--strict` 将警告也视为失败；任一不变量被破坏时退出码非零，可直接作为脚本与 CI 的闸门。
+- **`archon status`、`archon hands probe`、`archon --version`**：README 与快速上手早已声明、但 CLI 从未实现的命令，现已共用同一套诊断内核；`archon help` 列出全部命令，`archon status --json` 返回完整报告。
+- **文档契约测试**（`packages/archon-cli/test/docs-contract.test.mjs`）：当指南提到不存在的 CLI 命令、`npm run` 脚本、指向不存在的子包目录，或宣称已不存在的视图数量时，测试直接失败。
 - **OpenCode CLI 模型手成为一等公民**：`opencode`（v2 `run --format json`）可被探测、可选择，并正式加入注册表 hand 集合（不再被当作 `codex` 别名）；新增其 NDJSON 事件流解析（`step_start` / `text` / `tool_use` / `step_finish` / `error`），支持按步 Token 统计与 `--session <id>` 会话续接。
 - **DeepSeek Harness CLI 模型手（`dsh`）**：新增本地模型手，调用 `dsh --profile headless --json "<task>"`；解析 NDJSON 运行事件（`session` / `status` / `text` / `tool_call` / `final`，并把回合级 error 事件判定为失败），支持 `--session-id <id>` 续接，并以步级 usage 聚合，任何一步缺少用量时绝不输出部分合计。
 - Worker、注册表、CLI、默认/示例配置、Python `archon-hands` 适配器与用量解析器、能力探测，以及 Web 控制台的模型手选择器，均已支持本地模型手（`claude`、`codex`、`agy`、`opencode`、`dsh`；`gemini` 仍为仅解析引擎）。
 
 ### 修复 (Fixed)
+- **「本地执行手」面板不再把「从未运行」当作错误**：遥测呈现改为纯函数 `deriveHandTelemetryView()`（`packages/archon-app/public/hands-view.mjs`）。刚安装、从未运行过的执行手显示灰色 `IDLE` 徽标与「尚未执行 · —」，而不是深红判定与「0ms avg」；`OFFLINE` 仍明确表示不可用，`HEALTHY` 与 `HALF-OPEN (FALLBACK GUARD)` 保持绿/琥珀语义。
+- **执行手遥测不再凭空捏造运行记录**：`HAND_METRICS` 曾内置 `claude`（4 次）、`codex`（2 次）、`agy`（3 次）的虚假计数与 20–28 秒的虚构均值，并被 `/api/hands/status` 与「本地执行手」面板当作实测数据展示。现在计数从零开始、`circuitState` 为 `'IDLE'`，滚动均值只除以真正产生时长的运行次数，零耗时失败不再稀释均值。
+- **文档与实现对齐**：子包表格改为指向真实存在的 `archon-skills-rsi`（Bun），`archon-canvas` 按其真实职责描述为版本信封校验器（5 阶段发布流水线位于 `archon-worker`），移除未交付的「Three.js / 3D 地球」与「密钥脱敏器」表述，把 Bun 列为 `npm test` 的前置依赖，按实际发布的 9 个视图描述控制台，并删除并不存在的 `npm run init:force`。
 - **失败的模型手不再被当作成功答复**：opencode/dsh 现在要求退出码为 0 且没有引擎错误事件；中途失败但已输出部分文本的运行会判定失败，而不会成为助手答复。
 - **旧的模型手配置可自愈**：历史版本写入的无头参数组合（opencode 缺 `--format json`/`--auto`、claude 使用 `--output-format text`）在加载时自动迁移，不再被 `npm run init` 反复写回。
 - **macOS 专属副作用在 Linux 上被隔离**：异步任务完成通知不再因 `osascript` 异步 spawn 错误导致服务崩溃；「在文件管理器中显示」在非 macOS 上变为空操作。
 - **会话与路由信息如实呈现**：降级不再把其它引擎的原生会话绑定到主模型手；执行手说明改为每次尝试重建；降级只选择已安装且启用的模型手，并受总时限约束。
 
+- **Lockfile 根版本条目跟随发布版本**：`package-lock.json` 的 `packages[""]` 仍写着 `0.1.004`，而顶层版本已是 `0.5.0`；单一版本源测试现在同时校验两处。
+
 ### 测试 (Tests)
-- 新增 opencode/dsh 调用与 NDJSON 投影的 Worker 测试、原生 `opencode`/`dsh` 注册表测试，以及 `dsh` 的 Python 适配器/用量/fixture 测试（合计 151 项）。
+- `archon-cli` 测试从 4 项增至 23 项：19 项诊断测试覆盖全部检查、JSON 契约、退出码与密钥脱敏路径，另有 4 项文档契约测试。`archon-worker` 新增 6 项遥测测试（零基线、真实运行累加、采样均值、熔断守卫）。`archon-app` 增至 20 项，新增 9 视图注册表契约、移动端导航的放置/媒体查询/可访问性检查、IDLE 与 OFFLINE 的执行手渲染检查、数据表可读性、手机画布滚动与悬停/`aria-current` 门控规则。全套件：9 个子包共 196 项测试。
+- 新增 opencode/dsh 调用与 NDJSON 投影的 Worker 测试、原生 `opencode`/`dsh` 注册表测试，以及 `dsh` 的 Python 适配器/用量/fixture 测试。
 
 ---
 

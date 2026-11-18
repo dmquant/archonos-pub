@@ -20,6 +20,11 @@
 
 import { advanceCanvas } from '../../archon-canvas/revision-gate.mjs';
 
+// The console's view registry lives in the public shell so the browser and the
+// tests can share it. Re-exported here so app tests import a single module.
+export { APP_VIEWS, APP_VIEW_IDS, mobileNavGroups, mobileNavActiveTab } from '../public/nav-model.mjs';
+export { deriveHandTelemetryView } from '../public/hands-view.mjs';
+
 export const EXPLICIT_RUN_STATES = new Set([
   'queued',
   'running',

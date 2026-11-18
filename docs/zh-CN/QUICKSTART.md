@@ -8,6 +8,7 @@
 
 - **Node.js** `>= 20.0.0`
 - **Python 3** `>= 3.10`（用于运行 `archon-ledger` 与 `archon-hands` 形式化验证套件）
+- **Bun**（仅用于 `npm test` 中的 `archon-skills-rsi` 套件）
 - *（可选）* 本机安装任意一个或多个 AI CLI 命令行工具：
   - **Claude Code CLI** (`claude`)
   - **OpenAI Codex CLI** (`codex`)
@@ -16,7 +17,7 @@
   - **DeepSeek Harness CLI** (`dsh`)
     - 无头模式使用 `dsh --profile headless --json "<task>"`，需要提供模型凭据：在启动环境中提供 `DEEPSEEK_API_KEY`，或在 `$DSH_HOME/profiles/headless/cordis.patch.yml` 中声明一条路由（例如通过 `@deepseek-ai/dsh-llm-pi-ai` 接入 OpenAI 兼容网关）。ArchonOS 会继承启动环境（仅过滤自身的 `ARCHON_*` 密钥并重建 `PATH`）。
 
-> **提示**：即便本机尚未安装任何 CLI 工具，ArchonOS 依然可以正常启动并提供确定性的受控回退合成响应，方便您立即体验全部 6 大工作台视图、MCP 权限演练场、Harness2 RSI 技能门控以及 3D/2D 交互式画布工件。
+> **提示**：即便本机尚未安装任何 CLI 工具，ArchonOS 依然可以正常启动并提供确定性的受控回退合成响应，方便您立即体验全部 9 大工作台视图、MCP 权限演练场、Harness2 RSI 技能门控以及 3D/2D 交互式画布工件。
 
 ---
 
@@ -62,19 +63,22 @@ npm start
 # 随时重新运行主机扫描与配置初始化（保留已有自定义配置）
 npm run init
 
-# 强制重置 .archon/config.json 为最新自动探测默认配置
-npm run init:force
-
 # 或直接使用 archon CLI 命令：
 npx archon init
-npx archon hands probe
-npx archon status
+npx archon doctor      # 安装预检：状态、配置、执行手、明文密钥、回环绑定
+npx archon status      # 一行式运行快照（工作区 / 控制台 / 执行手）
+npx archon hands probe # 查看本机可解析的 CLI 执行手
 ```
 
-启动后在浏览器访问 **`http://127.0.0.1:8790`**，即可使用六大核心视图：
+`archon doctor` 在任一不变量被破坏时会以非零码退出（非回环绑定、`.archon/*.json` 中的明文凭据、无法解析的工作区状态），因此可直接作为脚本的预检闸门；`--json` 输出机器可读报告，`--strict` 会同时把警告视为失败。
+
+启动后在浏览器访问 **`http://127.0.0.1:8790`**，即可使用九大核心视图：
 1. **💬 对话与画布**：左屏多席位流式对话（支持 Markdown 表格与 Mermaid 流程图渲染），右屏 3D/2D 交互式画布。
 2. **🪑 席位配置**：新增、编辑、启用/禁用或删除专职席位，并配置默认 CLI 执行手。
-3. **🔌 外部 MCP**：一键自动发现本地 MCP、添加自定义 MCP 服务、按席位授权/撤销工具权限，并在演练场实测 `ALLOW` 与 `403 DEFAULT-DENY`。
-4. **⚙️ 本地执行手**：网页端一键重新初始化、查看滚动延迟与熔断器状态、可视化配置各 CLI 的无头参数与超时。
-5. **🧬 RSI 与技能**：一键运行 10 轮 RSI 自改进循环（`R1 → R10`）、通过本地 CLI 蒸馏技能，或使用操作员模式一键创建并激活技能。
-6. **📦 画布工件**：查看可移植工作区文件路径、在线编辑 JSON 数据集并原子发布新版本、查看 SHA-256 版本差分对比。
+3. **📦 画布工件**：查看可移植工作区文件路径、在线编辑 JSON 数据集并原子发布新版本、查看 SHA-256 版本差分对比。
+4. **🧬 RSI 与技能**：一键运行 10 轮 RSI 自改进循环（`R1 → R10`）、通过本地 CLI 蒸馏技能，或使用操作员模式一键创建并激活技能。
+5. **🗓 计划任务**：按 Cron 规则定时触发指定席位的任务，支持启停与立即执行。
+6. **🔗 架构闭环**：可选的 Antigravity 代码库会话桥接及其 RSI 周期。
+7. **🔌 外部 MCP**：一键自动发现本地 MCP、添加自定义 MCP 服务、按席位授权/撤销工具权限，并在演练场实测 `ALLOW` 与 `403 DEFAULT-DENY`。
+8. **⚙️ 本地执行手**：网页端一键重新初始化、查看滚动延迟与熔断器状态、可视化配置各 CLI 的无头参数与超时。
+9. **🌐 团队与网格**：团队/群组共享工作区、主题房间、访问密钥与远程部署状态。

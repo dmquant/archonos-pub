@@ -3,6 +3,9 @@
   "version": "0.5.0",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "description": "ArchonOS — Open-Source Sovereign Personal & Small-Team Intelligent Operating System (Headless Local CLI Federation + R2-First Archon Canvas + Harness2 RSI Skills + Default-Deny MCP Gate)",
   "bin": {
     "archon": "./packages/archon-cli/bin/archon.mjs"
@@ -21,7 +24,8 @@
     "test:skills-rsi": "bun test packages/archon-skills-rsi/skill-eligibility.test.ts",
     "test:worker": "node --test packages/archon-worker/test/*.test.mjs",
     "test:app": "node --test packages/archon-app/test/app.test.mjs",
-    "test:cli": "node --test packages/archon-cli/test/cli.test.mjs",
+    "test:cli": "node --test packages/archon-cli/test/*.test.mjs",
+    "doctor": "node packages/archon-cli/bin/archon.mjs doctor",
     "safe:status": "node scripts/archon-safe-recover.mjs status",
     "safe:lock": "node scripts/archon-safe-recover.mjs lock",
     "safe:unlock": "node scripts/archon-safe-recover.mjs unlock",

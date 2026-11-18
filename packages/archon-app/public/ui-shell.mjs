@@ -1,5 +1,6 @@
 import { clean, translate, overrides } from './ui-copy.mjs';
 import { createSelectEnhancer } from './ui-select.mjs';
+import { APP_VIEWS } from './nav-model.mjs';
 
 // Enhance the application chrome only. Never rewrite authored messages, file
 // contents, editable values, identifiers or embedded artifact documents.
@@ -19,7 +20,7 @@ const icons = {
   '📁':'folder','📚':'book-open','💡':'lightbulb','✅':'circle-check','❌':'circle-x','🔧':'settings','🖥':'monitor',
 };
 const glyphs = /\p{Extended_Pictographic}(?:[\uFE0F\uFE0E])?(?:\u200D\p{Extended_Pictographic}(?:[\uFE0F\uFE0E])?)*|[✓✗↻↗↩◂▸▶🗖🗗🗜]/gu;
-const navIcons = {workbench:'message-square',seats:'armchair',artifacts:'package',skills:'dna',schedules:'clock',architect:'git-branch',mcps:'plug',hands:'settings',mesh:'users'};
+const navIcons = Object.fromEntries(APP_VIEWS.map((view) => [view.id, view.icon]));
 const textState = new WeakMap();
 const attributeState = new WeakMap();
 let language = document.documentElement.lang === 'zh' ? 'zh' : 'en';
@@ -236,7 +237,13 @@ function update() {
   root.querySelectorAll('.nav-btn').forEach((button) => {
     const target = button.querySelector('.nav-icon'); const name = navIcons[button.id.replace('nav-','')];
     if (target && name && !target.querySelector('svg')) target.replaceChildren(icon(name));
-    button.setAttribute('aria-current', button.classList.contains('active') ? 'page' : 'false');
+    if (button.classList.contains('active')) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+  // The mobile tab bar is a second navigation surface for the same views.
+  root.querySelectorAll('.mobile-tab[data-nav-view]').forEach((button) => {
+    if (button.classList.contains('active')) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
   });
   syncSidebar();
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);

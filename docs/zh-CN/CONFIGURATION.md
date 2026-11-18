@@ -12,7 +12,7 @@ ArchonOS 将所有与本机环境相关的运行时配置保存在 `.archon/conf
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "archon.config.v1",
   "workspaceName": "archon-os",
   "defaultLanguage": "en",
   "server": {
@@ -91,3 +91,24 @@ ArchonOS 将所有与本机环境相关的运行时配置保存在 `.archon/conf
 在 **🪑 席位配置** 视图中：
 - 点击任意席位卡片即可加载至右侧表单，自由修改**席位显示名称**、**默认绑定的本地 CLI 执行手**（`claude`、`codex`、`agy`、`opencode`、`dsh`）以及**系统角色提示词（System Prompt）**。
 - 支持随时新增专职席位、一键切换启用/禁用或删除自定义席位。
+
+---
+
+## 6. 安装自检（`archon doctor`）
+
+`npm run doctor`（或 `npx archon doctor`）是只读预检：它不会写入工作区，而是逐项复核本项目承诺的不变量，而不是默认相信它们。
+
+| 检查项 | 触发失败的条件 |
+| :--- | :--- |
+| `node-runtime` | Node 主版本低于 20 |
+| `workspace-dir` / `state-permissions` | 缺少 `.archon/`，或目录对其他用户可读 |
+| `workspace-state` | JSON 无法解析，或缺少 `seats` 数组 |
+| `seat-integrity` | 缺少 `chief-of-staff` 席位、席位 ID 重复、执行手未知 |
+| `workspace-config` | `server.host` 非回环地址，或端口越界 |
+| `plaintext-secrets` | `.archon/*.json` 中存在明文凭据（仅定位并脱敏；只有 `secret://` 句柄可通过） |
+| `gitignore-coverage` | `.archon/` 或 `.env` 未被 Git 忽略 |
+| `server` | 端口有响应但并非 ArchonOS 健康载荷时告警 |
+| `hands` | 没有任何已启用的 CLI 执行手可从 `PATH` 解析 |
+| `safe-mode` | 不可变安全模式处于启用状态（告警；写入会被拒绝） |
+
+退出码：无失败为 `0`，存在失败为 `1`。`--strict` 将警告也视为失败，`--json` 输出原始 `archon.doctor.v1` 报告，`archon status` 输出同一数据的一行式运行摘要。

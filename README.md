@@ -147,10 +147,13 @@ npm install
 # 2. Run autonomous host discovery (mandates Chief of Staff & probes CLI hands)
 npm run init
 
-# 3. Execute monorepo test suite (151/151 tests across 9 packages)
+# 3. Preflight the local install (state, config, hands, secrets, loopback bind)
+npm run doctor
+
+# 4. Run the full monorepo suite (Python, Node and Bun across 9 packages)
 npm test
 
-# 4. Start ArchonOS Web Console on http://127.0.0.1:8790
+# 5. Start ArchonOS Web Console on http://127.0.0.1:8790
 npm start
 ```
 
@@ -162,15 +165,15 @@ Open **`http://127.0.0.1:8790`** in your browser. Switch language between **Engl
 
 | Package | Runtime | Description |
 | :--- | :--- | :--- |
-| [`packages/archon-app`](./packages/archon-app) | HTML5 / ES2022 / Three.js | Bilingual Personal Workbench PWA, 3D Globe, Subgraph Explorer, Multi-Line Chat, and Artifact Quote-to-Modify UI |
-| [`packages/archon-worker`](./packages/archon-worker) | Node.js / Cloudflare DO | `WorkspaceOrchestratorDO`, Local Hands Runner, Chief of Staff Router, and HTTP/SSE API Gateway |
+| [`packages/archon-app`](./packages/archon-app) | HTML5 / ES2022 / Vanilla PWA | Bilingual Personal Workbench PWA, Artifact Canvas, Subgraph Explorer, Multi-Line Chat, and Artifact Quote-to-Modify UI |
+| [`packages/archon-worker`](./packages/archon-worker) | Node.js / Cloudflare DO | `WorkspaceOrchestratorDO`, 5-stage artifact publish pipeline, Local Hands Runner, Chief of Staff Router, and HTTP/SSE API Gateway |
 | [`packages/archon-registry`](./packages/archon-registry) | Node.js ESM | Strict schema validator for Seats, MCP Servers (`secret://` handles), Grants, and Human-Ack gates |
-| [`packages/archon-skills`](./packages/archon-skills) | TypeScript / Node.js | Harness2 3-valued epistemic skill eligibility verifier (`pass \| fail \| insufficient`, $n \ge 2, k = 3$) |
-| [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 5-Stage R2-First atomic artifact revision gate & HTML accessibility parity verifier |
+| [`packages/archon-skills-rsi`](./packages/archon-skills-rsi) | TypeScript / Bun | Harness2 3-valued epistemic skill eligibility verifier (`pass \| fail \| insufficient`, $n \ge 2, k = 3$) |
+| [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | Canvas revision envelope validator: immutable revision, sequence and scope-conflict gate |
 | [`packages/archon-ledger`](./packages/archon-ledger) | Python 3 | Default-deny policy gate & SHA-256 hash-chained audit ledger (`policy_ledger.py`) |
-| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | Local CLI stream normalizer (`claude`, `codex`, `agy`, `opencode`, `dsh`), credential scrubber & lease manager |
+| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | Local CLI stream normalizer (`claude`, `codex`, `agy`, `opencode`, `dsh`), usage meter & execution lease manager |
 | [`packages/archon-mesh`](./packages/archon-mesh) | Node.js ESM | Ed25519-signed `.archon-bundle` export/import with mandatory secret & raw trajectory stripping |
-| [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` CLI (`archon init`, `archon up`, `archon status`, `archon hands probe`) |
+| [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` CLI (`archon init`, `archon doctor`, `archon status`, `archon hands probe`, `archon up`, `archon hand pair`) |
 
 ---
 

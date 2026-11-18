@@ -2540,47 +2540,47 @@
           <span class="nav-section-label" style="padding:0;" data-i18n="nav_workbenches">Workbenches</span>
           <button type="button" class="btn" style="padding:2px 7px; font-size:11px;" onclick="toggleLeftSidebarRail()" id="rail-toggle-btn" title="Expand or collapse sidebar labels">»</button>
         </div>
-        <button class="nav-btn active" id="nav-workbench" onclick="switchView('workbench')" title="Chat &amp; Canvas Split Workbench">
+        <button class="nav-btn active" id="nav-workbench" data-nav-view="workbench" onclick="switchView('workbench')" title="Chat &amp; Canvas Split Workbench">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#message-square"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_chat_canvas">Chat &amp; Canvas</span>
           <span class="nav-badge">Split</span>
         </button>
-        <button class="nav-btn" id="nav-seats" onclick="switchView('seats')" title="Seat Management (CRUD)">
+        <button class="nav-btn" id="nav-seats" data-nav-view="seats" onclick="switchView('seats')" title="Seat Management (CRUD)">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#armchair"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_seats_crud">Seat Management</span>
           <span class="nav-badge" id="nav-seat-badge">1</span>
         </button>
-        <button class="nav-btn" id="nav-artifacts" onclick="switchView('artifacts')" title="Artifacts &amp; Data Registry">
+        <button class="nav-btn" id="nav-artifacts" data-nav-view="artifacts" onclick="switchView('artifacts')" title="Artifacts &amp; Data Registry">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#package"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_artifacts_mgr">Artifacts &amp; Data</span>
           <span class="nav-badge" id="nav-artifact-badge" style="color:var(--emerald);">1</span>
         </button>
-        <button class="nav-btn" id="nav-skills" onclick="switchView('skills')" title="Canonical Skills &amp; Harness2 RSI">
+        <button class="nav-btn" id="nav-skills" data-nav-view="skills" onclick="switchView('skills')" title="Canonical Skills &amp; Harness2 RSI">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#dna"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_skills_rsi">Skills &amp; RSI</span>
           <span class="nav-badge" id="nav-skill-badge" style="color:var(--cyan);">1</span>
         </button>
-        <button class="nav-btn" id="nav-schedules" onclick="switchView('schedules')" title="Scheduled Work &amp; Daily Summaries Portal">
+        <button class="nav-btn" id="nav-schedules" data-nav-view="schedules" onclick="switchView('schedules')" title="Scheduled Work &amp; Daily Summaries Portal">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#clock"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_schedules_mgr">Scheduled Work</span>
           <span class="nav-badge" id="nav-schedule-badge" style="color:var(--amber);">1</span>
         </button>
-        <button class="nav-btn" id="nav-architect" onclick="switchView('architect')" title="Antigravity (Codebase Session) ⇄ ArchonOS Seats Closed-Loop Bridge">
+        <button class="nav-btn" id="nav-architect" data-nav-view="architect" onclick="switchView('architect')" title="Antigravity (Codebase Session) ⇄ ArchonOS Seats Closed-Loop Bridge">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#git-branch"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_architect_loop">Architect Loop</span>
           <span class="nav-badge" id="nav-architect-badge" style="color:#6EE7B7;">Loop</span>
         </button>
-        <button class="nav-btn" id="nav-mcps" onclick="switchView('mcps')" title="External MCP Servers &amp; Grants">
+        <button class="nav-btn" id="nav-mcps" data-nav-view="mcps" onclick="switchView('mcps')" title="External MCP Servers &amp; Grants">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#plug"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_mcp_hub">External MCPs</span>
           <span class="nav-badge">0</span>
         </button>
-        <button class="nav-btn" id="nav-hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy, opencode, dsh)">
+        <button class="nav-btn" id="nav-hands" data-nav-view="hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy, opencode, dsh)">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#settings"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_local_hands">Local Hands &amp; Settings</span>
           <span class="nav-badge">local</span>
         </button>
-        <button class="nav-btn" id="nav-mesh" onclick="switchView('mesh')" title="Agora-Style Team Shared Workspaces, Topic Rooms, Colleague Access Keys &amp; Cloudflare Remote Deployment">
+        <button class="nav-btn" id="nav-mesh" data-nav-view="mesh" onclick="switchView('mesh')" title="Agora-Style Team Shared Workspaces, Topic Rooms, Colleague Access Keys &amp; Cloudflare Remote Deployment">
           <span class="nav-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#users"></use></svg></span>
           <span class="nav-label-text" data-i18n="nav_team_mesh">Team &amp; Mesh</span>
           <span class="nav-badge" id="nav-mesh-badge" style="color:var(--cyan);">1</span>
@@ -4221,8 +4221,72 @@
     </main>
   </div>
 
+  <!-- Mobile PWA navigation (<=960px). Deliberately outside .nav-spine, which the
+       stylesheet hides at this width. Bottom tab bar + overflow "More" sheet. -->
+  <div class="mobile-nav" id="mobile-nav">
+    <nav class="mobile-tabbar" id="mobile-tabbar" aria-label="Main navigation">
+      <button type="button" class="mobile-tab active" data-nav-view="workbench" aria-current="page" onclick="switchView('workbench')" title="Chat &amp; Canvas Split Workbench">
+        <span class="mobile-tab-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#message-square"></use></svg></span>
+        <span class="mobile-tab-label" data-i18n="mobile_nav_workbench">Workbench</span>
+      </button>
+      <button type="button" class="mobile-tab" data-nav-view="seats" onclick="switchView('seats')" title="Seat Management (CRUD)">
+        <span class="mobile-tab-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#armchair"></use></svg></span>
+        <span class="mobile-tab-label" data-i18n="mobile_nav_seats">Seats</span>
+      </button>
+      <button type="button" class="mobile-tab" data-nav-view="artifacts" onclick="switchView('artifacts')" title="Artifacts &amp; Data Registry">
+        <span class="mobile-tab-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#package"></use></svg></span>
+        <span class="mobile-tab-label" data-i18n="mobile_nav_artifacts">Artifacts</span>
+      </button>
+      <button type="button" class="mobile-tab" data-nav-view="skills" onclick="switchView('skills')" title="Canonical Skills &amp; Harness2 RSI">
+        <span class="mobile-tab-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#dna"></use></svg></span>
+        <span class="mobile-tab-label" data-i18n="mobile_nav_skills">Skills</span>
+      </button>
+      <button type="button" class="mobile-tab" id="mobile-more-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="mobile-nav-sheet" onclick="toggleMobileNavSheet()" title="More views">
+        <span class="mobile-tab-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#chevron-down"></use></svg></span>
+        <span class="mobile-tab-label" data-i18n="mobile_nav_more">More</span>
+      </button>
+    </nav>
+
+    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" hidden onclick="closeMobileNav()"></div>
+
+    <div class="mobile-nav-sheet" id="mobile-nav-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-sheet-title" hidden>
+      <div class="mobile-nav-grabber" aria-hidden="true"></div>
+      <div class="mobile-nav-sheet-head">
+        <h2 class="mobile-nav-sheet-title" id="mobile-nav-sheet-title" data-i18n="mobile_nav_all_views">All views</h2>
+        <button type="button" class="mobile-nav-sheet-close" onclick="closeMobileNav(true)" aria-label="Close navigation" title="Close navigation">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#x"></use></svg>
+        </button>
+      </div>
+      <nav class="mobile-nav-sheet-list" aria-label="All views">
+        <button type="button" class="mobile-nav-item" data-nav-view="schedules" onclick="switchView('schedules')" title="Scheduled Work &amp; Daily Summaries Portal">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#clock"></use></svg>
+          <span data-i18n="nav_schedules_mgr">Scheduled Work</span>
+        </button>
+        <button type="button" class="mobile-nav-item" data-nav-view="architect" onclick="switchView('architect')" title="Antigravity (Codebase Session) ⇄ ArchonOS Seats Closed-Loop Bridge">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#git-branch"></use></svg>
+          <span data-i18n="nav_architect_loop">Architect Loop</span>
+        </button>
+        <button type="button" class="mobile-nav-item" data-nav-view="mcps" onclick="switchView('mcps')" title="External MCP Servers &amp; Grants">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#plug"></use></svg>
+          <span data-i18n="nav_mcp_hub">External MCPs</span>
+        </button>
+        <button type="button" class="mobile-nav-item" data-nav-view="hands" onclick="switchView('hands')" title="Local CLI Hands &amp; Settings (claude, codex, agy, opencode, dsh)">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#settings"></use></svg>
+          <span data-i18n="nav_local_hands">Local Hands &amp; Settings</span>
+        </button>
+        <button type="button" class="mobile-nav-item" data-nav-view="mesh" onclick="switchView('mesh')" title="Agora-Style Team Shared Workspaces, Topic Rooms, Colleague Access Keys &amp; Cloudflare Remote Deployment">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/assets/lucide.svg#users"></use></svg>
+          <span data-i18n="nav_team_mesh">Team &amp; Mesh</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+  <!-- /mobile navigation -->
+
   <script type="module">
     import { escapeHtml, sanitizeMarkdownHtml } from './console-sanitize.mjs';
+    import { APP_VIEWS, mobileNavActiveTab } from './nav-model.mjs';
+    import { deriveHandTelemetryView } from './hands-view.mjs';
 
     // Initialize Mermaid.js in Dark Cybernetic Telemetry mode
     if (window.mermaid) {
@@ -4894,6 +4958,14 @@
         nav_schedules_mgr: 'Scheduled Work',
         nav_mcp_hub: 'External MCPs',
         nav_local_hands: 'Local Hands CLI',
+        nav_architect_loop: 'Architect Loop',
+        nav_team_mesh: 'Team & Mesh',
+        mobile_nav_workbench: 'Workbench',
+        mobile_nav_seats: 'Seats',
+        mobile_nav_artifacts: 'Artifacts',
+        mobile_nav_skills: 'Skills',
+        mobile_nav_more: 'More',
+        mobile_nav_all_views: 'All views',
         nav_archon_seats: 'ArchonOS Seats (Click to Route)',
         arch_indep_title: 'Sovereign Architecture',
         arch_indep_desc: 'Seats belong to your ArchonOS workspace. Vortexa, Agora, and ROS are connected as external default-deny MCP servers.',
@@ -4974,6 +5046,14 @@
         nav_schedules_mgr: '定时任务与简报',
         nav_mcp_hub: '外部 MCP 连接器',
         nav_local_hands: '本机 CLI 执行手',
+        nav_architect_loop: '架构闭环',
+        nav_team_mesh: '团队与 Mesh',
+        mobile_nav_workbench: '工作台',
+        mobile_nav_seats: '席位',
+        mobile_nav_artifacts: '工件',
+        mobile_nav_skills: '技能',
+        mobile_nav_more: '更多',
+        mobile_nav_all_views: '全部页面',
         nav_archon_seats: 'ArchonOS 专属席位 (点击切换)',
         arch_indep_title: '独立主权架构',
         arch_indep_desc: '所有席位均归属于您的 ArchonOS 系统；Vortexa、Agora 与 ROS 均作为默认拒绝（Default-Deny）的外部 MCP 服务受控接入。',
@@ -5076,11 +5156,93 @@
       if (document.getElementById('view-skills')?.classList.contains('active')) window.loadRsiRounds?.();
     };
 
-    window.switchView = function (viewName) {
-      ['workbench', 'seats', 'artifacts', 'skills', 'schedules', 'architect', 'mcps', 'hands', 'mesh'].forEach((v) => {
-        document.querySelectorAll(`#os-shell-grid > main#view-${v}, #view-${v}`).forEach((el) => el.classList.toggle('active', v === viewName));
-        document.querySelectorAll(`.nav-spine #nav-${v}, #nav-${v}`).forEach((el) => el.classList.toggle('active', v === viewName));
+    // ---------------------------------------------------------------------
+    // Mobile PWA navigation (bottom tab bar + overflow "More" sheet)
+    // ---------------------------------------------------------------------
+    const mobileNavQuery = window.matchMedia('(max-width: 960px)');
+    const mobileNavSheet = document.getElementById('mobile-nav-sheet');
+    const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+    const mobileNavMoreBtn = document.getElementById('mobile-more-btn');
+    const mobileNavFocusable = () =>
+      [...(mobileNavSheet?.querySelectorAll('button:not([disabled])') || [])].filter((el) => el.offsetParent !== null);
+
+    window.isMobileNavOpen = function () {
+      return Boolean(mobileNavSheet && !mobileNavSheet.hidden);
+    };
+
+    // Keep both navigations in sync with switchView: one active class, one
+    // aria-current="page". The "More" tab represents the overflow group.
+    function syncNavState(viewName) {
+      document.querySelectorAll('[data-nav-view]').forEach((el) => {
+        const isActive = el.dataset.navView === viewName;
+        el.classList.toggle('active', isActive);
+        if (isActive) el.setAttribute('aria-current', 'page');
+        else el.removeAttribute('aria-current');
       });
+      if (mobileNavMoreBtn) {
+        const inOverflow = mobileNavActiveTab(viewName) === 'more';
+        mobileNavMoreBtn.classList.toggle('is-group-active', inOverflow);
+        if (inOverflow) mobileNavMoreBtn.setAttribute('aria-current', 'page');
+        else mobileNavMoreBtn.removeAttribute('aria-current');
+      }
+    }
+
+    window.openMobileNav = function () {
+      if (!mobileNavSheet || !mobileNavBackdrop || !mobileNavQuery.matches) return;
+      mobileNavSheet.hidden = false;
+      mobileNavBackdrop.hidden = false;
+      mobileNavMoreBtn?.setAttribute('aria-expanded', 'true');
+      const target = mobileNavSheet.querySelector('[data-nav-view][aria-current="page"]') || mobileNavSheet.querySelector('.mobile-nav-item') || mobileNavSheet.querySelector('button');
+      target?.focus({ preventScroll: true });
+    };
+
+    window.closeMobileNav = function (restoreFocus = false) {
+      if (!mobileNavSheet || mobileNavSheet.hidden) return;
+      const focusWasInSheet = mobileNavSheet.contains(document.activeElement);
+      mobileNavSheet.hidden = true;
+      if (mobileNavBackdrop) mobileNavBackdrop.hidden = true;
+      mobileNavMoreBtn?.setAttribute('aria-expanded', 'false');
+      if ((restoreFocus || focusWasInSheet) && mobileNavMoreBtn?.offsetParent !== null) {
+        mobileNavMoreBtn.focus({ preventScroll: true });
+      }
+    };
+
+    window.toggleMobileNavSheet = function () {
+      if (window.isMobileNavOpen()) window.closeMobileNav(true);
+      else window.openMobileNav();
+    };
+
+    document.addEventListener('keydown', (event) => {
+      if (!window.isMobileNavOpen()) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        window.closeMobileNav(true);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      // Simple focus loop while the sheet is modal.
+      const focusable = mobileNavFocusable();
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    });
+
+    mobileNavQuery.addEventListener?.('change', (event) => {
+      if (!event.matches) window.closeMobileNav(false);
+    });
+
+    window.switchView = function (viewName) {
+      APP_VIEWS.forEach(({ id: v }) => {
+        document.querySelectorAll(`#os-shell-grid > main#view-${v}, #view-${v}`).forEach((el) => el.classList.toggle('active', v === viewName));
+      });
+      syncNavState(viewName);
+      // Choosing a destination dismisses the sheet, however switchView was reached.
+      window.closeMobileNav();
       if (viewName === 'hands') window.loadHandsStatus();
       if (viewName === 'mcps') window.loadMcpServers();
       if (viewName === 'skills') window.loadSkillsRegistry();
@@ -5093,6 +5255,9 @@
         if (typeof window.refreshCloudMeshStatus === 'function') window.refreshCloudMeshStatus();
       }
     };
+
+    // Paint the initial active destination (the workbench is active in markup).
+    syncNavState(document.querySelector('#os-shell-grid > .view-container.active')?.id.replace('view-', '') || 'workbench');
 
     let currentPreviewPairedArtifactId = '';
 
@@ -6525,12 +6690,13 @@
               successes: 0,
               timeouts: 0,
               avgLatencyMs: 0,
-              circuitState: h.installed ? 'CLOSED (HEALTHY)' : 'OFFLINE',
+              circuitState: h.installed ? 'IDLE' : 'OFFLINE',
             };
-            const isHealthy = String(m.circuitState).includes('HEALTHY');
-            const cColor = isHealthy ? 'var(--emerald)' : String(m.circuitState).includes('DEGRADED') ? 'var(--amber)' : 'var(--crimson)';
+            // IDLE (never run) is neutral, OFFLINE is unavailable, and only
+            // HEALTHY / HALF-OPEN carry a measured verdict colour.
+            const handView = deriveHandTelemetryView(m, h.installed);
             return `
-            <tr>
+            <tr data-hand-state="${handView.state}">
               <td class="mono"><strong>${escapeHtml(h.engine)}</strong></td>
               <td style="color:${h.installed ? 'var(--emerald)' : 'var(--crimson)'}; font-weight:700;">
                 ${h.installed ? '✓ INSTALLED' : '✗ MISSING'}
@@ -6538,13 +6704,13 @@
               <td class="mono" style="color:#A5F3FC;">${escapeHtml(h.binaryPath || 'not found')}</td>
               <td class="mono" style="font-size:10.5px; color:var(--text-secondary);">${escapeHtml(h.invocation)}</td>
               <td class="mono" style="font-size:10.5px;">
-                <span style="color:var(--cyan); font-weight:700;">${Number(m.runs || 0)} runs</span> •
-                <span style="color:var(--emerald);">${Number(m.avgLatencyMs || 0)}ms avg</span>
+                <span style="color:${handView.hasRuns ? 'var(--cyan)' : 'var(--text-muted)'}; font-weight:${handView.hasRuns ? 700 : 500};">${escapeHtml(handView.runsLabel)}</span> •
+                <span style="color:${handView.hasRuns ? 'var(--emerald)' : 'var(--text-muted)'};">${escapeHtml(handView.latencyLabel)}</span>
                 ${m.timeouts > 0 ? ` • <span style="color:var(--amber);">${Number(m.timeouts)} timeout</span>` : ''}
               </td>
               <td class="mono">
-                <span style="padding:2px 6px; border-radius:4px; border:1px solid ${cColor}; color:${cColor}; font-size:10px; font-weight:700;">
-                  ${escapeHtml(m.circuitState)}
+                <span data-hand-state="${handView.state}" style="padding:2px 6px; border-radius:4px; border:1px solid ${handView.color}; color:${handView.color}; font-size:10px; font-weight:700; white-space:nowrap;">
+                  ${escapeHtml(handView.label)}
                 </span>
               </td>
               <td>

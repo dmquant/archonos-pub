@@ -315,6 +315,14 @@ export const overrides = {
   schedules_page_sub: ['Bind a Seat and skill to a five-field Cron schedule. The local server must stay running. Automatic dispatch pauses from 02:00 to 04:00.', '通过五字段 Cron 绑定 Seat 与技能。本地服务需保持运行；02:00–04:00 暂停自动调度。'],
   artifacts_page_sub: ['Manage persisted JSON data, rendered files and revision history. Save edits as a new version or quote an artifact into chat to modify it.', '管理工件的 JSON 数据、展示文件和版本记录。可保存新版本，或引用到对话中修改。'],
   hands_page_sub: ['Detect local CLI programs and configure invocation arguments and timeouts. Installed means the executable was found; sign-in and model access still depend on the CLI.', '检测本机 CLI，配置调用参数与超时。已安装表示找到程序；登录状态和模型权限仍取决于该 CLI。'],
+  // Mobile navigation. Short labels for the bottom tab bar; the overflow sheet
+  // reuses the full view labels above.
+  mobile_nav_workbench: ['Workbench', '工作台'], mobile_nav_seats: ['Seats', '席位'],
+  mobile_nav_artifacts: ['Artifacts', '工件'], mobile_nav_skills: ['Skills', '技能'],
+  mobile_nav_more: ['More', '更多'], mobile_nav_all_views: ['All views', '全部页面'],
+  mobile_nav_primary: ['Main navigation', '主导航'], mobile_nav_more_views: ['More views', '更多页面'],
+  mobile_nav_close: ['Close navigation', '关闭导航'],
+  hand_no_runs: ['no runs yet', '尚未执行'],
 };
 
 const byEnglish = new Map();
@@ -346,6 +354,7 @@ export function translate(value, lang) {
     [/^(\d+)ms avg$/, (_, n) => `平均 ${n} 毫秒`],
     [/^(\d+) timeout$/, (_, n) => `${n} 次超时`],
     [/^(\d+) runs$/, (_, n) => `${n} 次执行`],
+    [/^(\d+) run$/, (_, n) => `${n} 次执行`],
     [/^(\d+) tools(?: cataloged)?$/, (_, n) => `${n} 个工具`],
     [/^(\d+) Fire\(s\) Recorded$/, (_, n) => `${n} 次触发`],
     [/^Verified Binary Path \((.+)\)$/, (_, host) => `程序路径 (${host})`],

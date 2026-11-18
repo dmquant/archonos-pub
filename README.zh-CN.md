@@ -145,10 +145,13 @@ npm install
 # 2. 运行自主环境发现（强制初始化幕僚长席位，探测本地 CLI 执行手）
 npm run init
 
-# 3. 运行跨语言全量测试套件（9 个子包共 151/151 测试全部通过）
+# 3. 本地安装预检（工作区状态、配置、执行手、明文密钥、回环绑定）
+npm run doctor
+
+# 4. 运行跨语言全量测试套件（9 个子包，Python / Node / Bun）
 npm test
 
-# 4. 启动 ArchonOS 控制台服务 (默认端口 8790)
+# 5. 启动 ArchonOS 控制台服务 (默认端口 8790)
 npm start
 ```
 
@@ -160,15 +163,15 @@ npm start
 
 | 子包名称 | 运行环境 | 功能与职责说明 |
 | :--- | :--- | :--- |
-| [`packages/archon-app`](./packages/archon-app) | HTML5 / ES2022 / Three.js | 双语智能控制台 PWA、3D 动态地球、ROS 子图网络探索器、多行输入与工件引用修改组件 |
-| [`packages/archon-worker`](./packages/archon-worker) | Node.js / Cloudflare DO | 核心编排器 `WorkspaceOrchestratorDO`、幕僚长路由系统及 HTTP/SSE 网关 |
+| [`packages/archon-app`](./packages/archon-app) | HTML5 / ES2022 / 原生 PWA | 双语智能控制台 PWA、工件画布、ROS 子图网络探索器、多行输入与工件引用修改组件 |
+| [`packages/archon-worker`](./packages/archon-worker) | Node.js / Cloudflare DO | 核心编排器 `WorkspaceOrchestratorDO`、5 阶段工件发布流水线、幕僚长路由系统及 HTTP/SSE 网关 |
 | [`packages/archon-registry`](./packages/archon-registry) | Node.js ESM | 席位、MCP 密钥句柄、授权策略及交互式审批关卡的高完整性校验器 |
-| [`packages/archon-skills`](./packages/archon-skills) | TypeScript / Node.js | Harness2 三值认知技能验证器（`pass \| fail \| insufficient`, $n \ge 2, k = 3$） |
-| [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 5 阶段 R2-First 原子化工件版本推进引擎与 HTML 可访问性平权审计器 |
+| [`packages/archon-skills-rsi`](./packages/archon-skills-rsi) | TypeScript / Bun | Harness2 三值认知技能验证器（`pass \| fail \| insufficient`, $n \ge 2, k = 3$） |
+| [`packages/archon-canvas`](./packages/archon-canvas) | Node.js ESM | 画布版本信封校验器：不可变版本、序列号与作用域冲突闸门 |
 | [`packages/archon-ledger`](./packages/archon-ledger) | Python 3 | 默认拒绝策略拦截器与基于 SHA-256 哈希链的防篡改审计账本 |
-| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化（`claude`、`codex`、`agy`、`opencode`、`dsh`）、密钥敏感信息脱敏与执行租约管理 |
+| [`packages/archon-hands`](./packages/archon-hands) | Python 3 | 本地 CLI 执行手流归一化（`claude`、`codex`、`agy`、`opencode`、`dsh`）、用量计量与执行租约管理 |
 | [`packages/archon-mesh`](./packages/archon-mesh) | Node.js ESM | 基于 Ed25519 签名的 `.archon-bundle` 导出与导入，强制剔除敏感密钥与轨迹 |
-| [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` 命令行工具（`archon init`、`archon up`、`archon status`） |
+| [`packages/archon-cli`](./packages/archon-cli) | Node.js CLI | `archon` 命令行工具（`archon init`、`archon doctor`、`archon status`、`archon hands probe`、`archon up`、`archon hand pair`） |
 
 ---
 
