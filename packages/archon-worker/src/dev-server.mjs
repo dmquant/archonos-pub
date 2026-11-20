@@ -67,7 +67,11 @@ import { ARCHON_VERSION } from './version.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 const PUBLIC_DIR = join(__dirname, '../../archon-app/public');
-const STATE_DIR = join(__dirname, '../../../.archon');
+// Tests point this at a temporary directory so an in-process server never
+// mutates the operator's real .archon state.
+const STATE_DIR = process.env.ARCHON_STATE_DIR
+  ? resolve(process.env.ARCHON_STATE_DIR)
+  : join(__dirname, '../../../.archon');
 const STATE_FILE = join(STATE_DIR, 'workspace-state.json');
 const ARTIFACTS_DIR = join(STATE_DIR, 'artifacts');
 const SKILLS_DIR = join(STATE_DIR, 'skills');
@@ -6985,6 +6989,38 @@ function savePersistedWorkspaceState(runtime, workspaceState) {
   }
 }
 
+const LOOPBACK_HTTP_HOST = /^(?:127\.0\.0\.1|localhost|\[::1\])(?::\d+)?$/;
+
+function parseHttpOrigin(value) {
+  try {
+    const url = new URL(value);
+    if (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash
+    ) return url;
+  } catch {}
+  return null;
+}
+
+// Check the listener authority as well as Origin: matching two untrusted
+// headers would allow a non-loopback hostname to reach the local API.
+export function evaluateLocalRequestOrigin({ origin, host, secFetchSite, allowedOrigins = [] } = {}) {
+  const denied = { allowed: false, corsOrigin: null };
+  const requestHost = String(host || '').toLowerCase();
+  const localOrigin = LOOPBACK_HTTP_HOST.test(requestHost)
+    ? parseHttpOrigin(`http://${requestHost}`)?.origin
+    : undefined;
+  const trustedOrigins = allowedOrigins.map(parseHttpOrigin).filter(Boolean);
+  if (!localOrigin && !trustedOrigins.some((url) => url.host === requestHost)) return denied;
+
+  // A configured frontend may intentionally be cross-site.
+  if (trustedOrigins.some((url) => url.origin === origin)) return { allowed: true, corsOrigin: origin };
+  const fetchSite = String(secFetchSite || '').toLowerCase();
+  if (fetchSite === 'cross-site' || fetchSite === 'same-site') return denied;
+  if (!origin) return { allowed: true, corsOrigin: null };
+  return origin === localOrigin ? { allowed: true, corsOrigin: origin } : denied;
+}
+
 export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process.env.PORT ?? 8790) } = {}) {
   if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') {
     throw new Error('Refusing non-loopback bind: local server must bind only to 127.0.0.1');
@@ -7072,13 +7108,49 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
     res.statusCode = status;
     res.setHeader('content-type', 'application/json; charset=utf-8');
     res.setHeader('cache-control', 'no-store');
-    res.setHeader('access-control-allow-origin', '*');
+    // Access-Control-Allow-Origin is set per request by the origin guard below.
     res.end(JSON.stringify(obj));
   };
 
+  const allowedOrigins = String(process.env.ARCHON_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   const server = createServer(async (req, res) => {
     try {
-      const fullUrl = `http://${host}:${port}${req.url}`;
+      res.setHeader('vary', 'Origin, Sec-Fetch-Site');
+      const originVerdict = evaluateLocalRequestOrigin({
+        origin: req.headers.origin,
+        host: req.headers.host,
+        secFetchSite: req.headers['sec-fetch-site'],
+        allowedOrigins,
+      });
+      if (!originVerdict.allowed) {
+        res.statusCode = 403;
+        res.setHeader('content-type', 'application/json; charset=utf-8');
+        res.setHeader('cache-control', 'no-store');
+        res.end(JSON.stringify({ ok: false, error: 'origin_not_allowed' }));
+        return;
+      }
+      if (originVerdict.corsOrigin) {
+        res.setHeader('access-control-allow-origin', originVerdict.corsOrigin);
+      }
+      if (req.method === 'OPTIONS') {
+        // Never fall through to the permissive runtime.fetch preflight handler.
+        res.statusCode = 204;
+        res.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader(
+          'access-control-allow-headers',
+          'content-type, authorization, idempotency-key, x-archon-origin, x-archon-author, x-archon-admin-token, x-archon-lang'
+        );
+        res.setHeader('access-control-max-age', '600');
+        res.end();
+        return;
+      }
+
+      const localHostname = host === '::1' ? '[::1]' : host;
+      const fullUrl = `http://${localHostname}:${port}${req.url}`;
       const parsedUrl = new URL(fullUrl);
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
@@ -11881,7 +11953,9 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       }
 
       res.statusCode = webRes.status;
-      webRes.headers.forEach((v, k) => res.setHeader(k, v));
+      webRes.headers.forEach((value, key) => {
+        if (key !== 'access-control-allow-origin') res.setHeader(key, value);
+      });
       const arrayBuf = await webRes.arrayBuffer();
       res.end(Buffer.from(arrayBuf));
     } catch (err) {
