@@ -9,7 +9,7 @@
 import { createServer } from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync, renameSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join, extname, resolve, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -6919,9 +6919,15 @@ function loadPersistedWorkspaceState(runtime) {
 // file (the loader would then silently fall back to seed defaults and lose the
 // workspace). Exported for the atomic-write test.
 export function writeJsonAtomic(file, value) {
-  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
-  writeFileSync(tmp, JSON.stringify(value, null, 2), 'utf8');
-  renameSync(tmp, file);
+  const json = JSON.stringify(value, null, 2);
+  const directory = mkdtempSync(`${file}.`);
+  const temporaryFile = join(directory, 'state.json');
+  try {
+    writeFileSync(temporaryFile, json, { encoding: 'utf8', mode: 0o600 });
+    renameSync(temporaryFile, file);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 }
 
 function savePersistedWorkspaceState(runtime, workspaceState) {
@@ -6983,29 +6989,36 @@ function savePersistedWorkspaceState(runtime, workspaceState) {
   }
 }
 
-// The local API can spawn coding CLIs, so loopback binding is not enough: any
-// page the operator visits must not be able to POST to 127.0.0.1:8790. Browsers
-// attach Origin to cross-origin (and to all non-GET) requests; we accept a
-// request only when it has no Origin (CLI/curl/server-to-server) or when the
-// Origin host matches the Host header we are serving on.
-export function evaluateLocalRequestOrigin({ origin, host, secFetchSite, allowedOrigins = [] } = {}) {
-  if (String(secFetchSite || '').toLowerCase() === 'cross-site') {
-    return { allowed: false, corsOrigin: null };
-  }
-  if (!origin) return { allowed: true, corsOrigin: null };
-  let parsed;
+const LOOPBACK_HTTP_HOST = /^(?:127\.0\.0\.1|localhost|\[::1\])(?::\d+)?$/;
+
+function parseHttpOrigin(value) {
   try {
-    parsed = new URL(String(origin));
-  } catch {
-    return { allowed: false, corsOrigin: null };
-  }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    return { allowed: false, corsOrigin: null };
-  }
-  const originHost = parsed.host.toLowerCase();
-  const allowed = originHost === String(host || '').toLowerCase()
-    || allowedOrigins.includes(String(origin));
-  return { allowed, corsOrigin: allowed ? String(origin) : null };
+    const url = new URL(value);
+    if (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash
+    ) return url;
+  } catch {}
+  return null;
+}
+
+// Check the listener authority as well as Origin: matching two untrusted
+// headers would allow a non-loopback hostname to reach the local API.
+export function evaluateLocalRequestOrigin({ origin, host, secFetchSite, allowedOrigins = [] } = {}) {
+  const denied = { allowed: false, corsOrigin: null };
+  const requestHost = String(host || '').toLowerCase();
+  const localOrigin = LOOPBACK_HTTP_HOST.test(requestHost)
+    ? parseHttpOrigin(`http://${requestHost}`)?.origin
+    : undefined;
+  const trustedOrigins = allowedOrigins.map(parseHttpOrigin).filter(Boolean);
+  if (!localOrigin && !trustedOrigins.some((url) => url.host === requestHost)) return denied;
+
+  // A configured frontend may intentionally be cross-site.
+  if (trustedOrigins.some((url) => url.origin === origin)) return { allowed: true, corsOrigin: origin };
+  const fetchSite = String(secFetchSite || '').toLowerCase();
+  if (fetchSite === 'cross-site' || fetchSite === 'same-site') return denied;
+  if (!origin) return { allowed: true, corsOrigin: null };
+  return origin === localOrigin ? { allowed: true, corsOrigin: origin } : denied;
 }
 
 export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process.env.PORT ?? 8790) } = {}) {
@@ -7106,9 +7119,7 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
 
   const server = createServer(async (req, res) => {
     try {
-      const fullUrl = `http://${host}:${port}${req.url}`;
-      const parsedUrl = new URL(fullUrl);
-
+      res.setHeader('vary', 'Origin, Sec-Fetch-Site');
       const originVerdict = evaluateLocalRequestOrigin({
         origin: req.headers.origin,
         host: req.headers.host,
@@ -7119,13 +7130,11 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         res.statusCode = 403;
         res.setHeader('content-type', 'application/json; charset=utf-8');
         res.setHeader('cache-control', 'no-store');
-        res.setHeader('vary', 'origin');
         res.end(JSON.stringify({ ok: false, error: 'origin_not_allowed' }));
         return;
       }
       if (originVerdict.corsOrigin) {
         res.setHeader('access-control-allow-origin', originVerdict.corsOrigin);
-        res.setHeader('vary', 'origin');
       }
       if (req.method === 'OPTIONS') {
         // Never fall through to the permissive runtime.fetch preflight handler.
@@ -7140,6 +7149,9 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
         return;
       }
 
+      const localHostname = host === '::1' ? '[::1]' : host;
+      const fullUrl = `http://${localHostname}:${port}${req.url}`;
+      const parsedUrl = new URL(fullUrl);
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const bodyBuf = Buffer.concat(chunks);
@@ -11941,7 +11953,9 @@ export function startLocalEdgeServer({ host = '127.0.0.1', port = Number(process
       }
 
       res.statusCode = webRes.status;
-      webRes.headers.forEach((v, k) => res.setHeader(k, v));
+      webRes.headers.forEach((value, key) => {
+        if (key !== 'access-control-allow-origin') res.setHeader(key, value);
+      });
       const arrayBuf = await webRes.arrayBuffer();
       res.end(Buffer.from(arrayBuf));
     } catch (err) {

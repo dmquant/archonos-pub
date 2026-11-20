@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 // Set before importing dev-server: STATE_DIR is resolved at module load.
+const approvedFrontend = 'https://console.example';
 const stateDir = mkdtempSync(join(tmpdir(), 'archon-origin-'));
 process.env.ARCHON_STATE_DIR = stateDir;
 const { evaluateLocalRequestOrigin, startLocalEdgeServer } = await import('../src/dev-server.mjs');
@@ -44,16 +45,29 @@ test('origin policy allows CLI clients and same-origin browsers only', () => {
   );
   assert.deepEqual(
     evaluateLocalRequestOrigin({
-      origin: 'http://localhost:5173',
+      origin: approvedFrontend,
       host: '127.0.0.1:8790',
-      allowedOrigins: ['http://localhost:5173'],
+      secFetchSite: 'cross-site',
+      allowedOrigins: [approvedFrontend],
     }),
-    { allowed: true, corsOrigin: 'http://localhost:5173' },
+    { allowed: true, corsOrigin: approvedFrontend },
     'an explicit operator allowlist is honoured'
+  );
+  assert.equal(evaluateLocalRequestOrigin({ host: 'untrusted.example' }).allowed, false);
+  assert.equal(
+    evaluateLocalRequestOrigin({ origin: 'https://localhost:8790', host: 'localhost:8790' }).allowed,
+    false,
+    'the request and origin schemes must match'
+  );
+  assert.equal(
+    evaluateLocalRequestOrigin({ host: 'localhost:8790', secFetchSite: 'same-site' }).allowed,
+    false,
+    'a same-site header alone does not identify a trusted origin'
   );
 });
 
 test('cross-origin requests are refused before any route runs', async () => {
+  process.env.ARCHON_ALLOWED_ORIGINS = approvedFrontend;
   const server = startLocalEdgeServer({ port: 0, host: '127.0.0.1' });
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -101,6 +115,17 @@ test('cross-origin requests are refused before any route runs', async () => {
     const cli = await fetch(`${base}/api/hands/status`);
     assert.equal(cli.status, 200);
     assert.equal(cli.headers.get('access-control-allow-origin'), null);
+
+    // Forwarded Worker responses must keep the local server's CORS policy.
+    const health = await fetch(`${base}/api/health`, {
+      headers: { origin: approvedFrontend, 'sec-fetch-site': 'cross-site' },
+    });
+    assert.equal(health.status, 200);
+    assert.equal(health.headers.get('access-control-allow-origin'), approvedFrontend);
+    assert.equal(health.headers.get('vary'), 'Origin, Sec-Fetch-Site');
+    const cliHealth = await fetch(`${base}/api/health`);
+    assert.equal(cliHealth.status, 200);
+    assert.equal(cliHealth.headers.get('access-control-allow-origin'), null);
   } finally {
     server.close();
     rmSync(stateDir, { recursive: true, force: true });
