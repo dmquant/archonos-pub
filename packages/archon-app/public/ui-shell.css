@@ -375,3 +375,183 @@ body[data-ui-style] .topbar-left .ui-select-trigger { height:var(--toolbar-contr
   .card-header .ui-select { width:100%; min-width:0; }
   .ui-select-option { min-height:38px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Mobile PWA navigation (<= 960px)
+   The desktop spine does not fit a phone, so a bottom tab bar exposes the four
+   most-used views and a "More" sheet holds the rest. The bar is an in-flow flex
+   child of <body> (like the desktop spine), so it takes its own space instead
+   of covering the chat composer, and its padding includes the iOS home-indicator
+   safe-area inset.
+--------------------------------------------------------------------------- */
+/* The wrapper has no box of its own: the tab bar is a normal flex child of
+   <body>, so it can never cover the chat composer, and the sheet/backdrop are
+   fixed overlays on top of everything. */
+.mobile-nav { display:contents; }
+.mobile-tabbar,
+.mobile-nav-sheet,
+.mobile-nav-backdrop { display:none; }
+
+@media (max-width:960px) {
+  body[data-ui-style] { --mobile-nav-height:58px; }
+
+  /* Replace the desktop spine with the tab bar. */
+  .nav-spine { display:none!important; }
+  .os-shell, .os-shell.rail-collapsed { grid-template-columns:minmax(0,1fr)!important; }
+  .os-shell > .view-container { grid-column:1/-1!important; }
+
+  .mobile-tabbar {
+    position:relative; z-index:900; flex:none;
+    display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); align-items:stretch;
+    min-height:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+    padding:4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+    background:var(--bg-panel);
+    background:color-mix(in srgb, var(--bg-panel) 94%, transparent);
+    -webkit-backdrop-filter:blur(16px) saturate(1.4);
+    backdrop-filter:blur(16px) saturate(1.4);
+    border-top:1px solid var(--border-strong);
+    box-shadow:0 -10px 30px rgb(0 0 0 / .28);
+  }
+  .mobile-tab {
+    display:flex!important; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; min-height:0; height:auto; padding:4px 2px!important; margin:0;
+    border:0!important; border-radius:10px!important; background:transparent!important;
+    color:var(--text-muted)!important; font-family:var(--font-sans)!important;
+    font-size:10px!important; font-weight:500!important; line-height:1.15; white-space:nowrap;
+    position:relative; text-align:center;
+    transition:color .14s ease, background .14s ease;
+  }
+  .mobile-tab .ui-icon { width:21px; height:21px; }
+  .mobile-tab-icon { display:inline-flex; align-items:center; justify-content:center; color:inherit; transition:transform .18s ease; }
+  .mobile-tab-label { max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+  @media (hover:hover) and (pointer:fine) {
+    .mobile-tab:hover { background:var(--bg-elevated)!important; color:var(--text-primary)!important; }
+  }
+  .mobile-tab:active { transform:scale(.96); }
+  .mobile-tab:focus-visible { outline-offset:-2px; }
+  .mobile-tab[aria-expanded="true"] .mobile-tab-icon { transform:rotate(180deg); }
+  .mobile-tab[aria-current="page"],
+  .mobile-tab.is-group-active { color:var(--cyan)!important; }
+  .mobile-tab[aria-current="page"]::before {
+    content:""; position:absolute; top:0; left:50%; width:22px; height:2px;
+    transform:translateX(-50%); border-radius:2px; background:var(--cyan);
+  }
+
+  .mobile-nav-backdrop {
+    display:block; position:fixed; inset:0; z-index:940;
+    background:rgb(0 0 0 / .52); animation:mobile-nav-fade .16s ease-out;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav-sheet {
+    position:fixed; left:0; right:0; bottom:0; z-index:950;
+    display:block; max-height:calc(100dvh - 80px); overflow-y:auto; overscroll-behavior:contain;
+    padding:8px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+    background:var(--bg-panel); color:var(--text-primary);
+    border:1px solid var(--border-strong); border-bottom:0;
+    border-radius:12px 12px 0 0;
+    box-shadow:0 -18px 44px rgb(0 0 0 / .45);
+    animation:mobile-sheet-in .22s cubic-bezier(.16,1,.3,1);
+  }
+  .mobile-nav-sheet[hidden],
+  .mobile-nav-backdrop[hidden] { display:none!important; }
+  .mobile-nav-grabber { width:38px; height:4px; margin:2px auto 10px; border-radius:99px; background:var(--border-strong); }
+  .mobile-nav-sheet-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; padding:0 4px; }
+  .mobile-nav-sheet-title {
+    font-family:var(--font-sans); font-size:10.5px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--text-muted);
+  }
+  .mobile-nav-sheet-close {
+    width:32px!important; height:32px!important; min-height:32px!important; padding:0!important;
+    border-radius:99px!important; background:transparent!important;
+  }
+  .mobile-nav-sheet-list { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .mobile-nav-item {
+    display:flex!important; align-items:center; justify-content:flex-start; gap:10px;
+    min-height:52px; height:auto; padding:10px 12px!important; margin:0;
+    border:1px solid var(--border)!important; border-radius:12px!important;
+    background:var(--bg-elevated)!important; color:var(--text-secondary)!important;
+    font-size:12px!important; font-weight:500!important; line-height:1.35; text-align:left;
+    white-space:normal;
+  }
+  .mobile-nav-item .ui-icon { width:19px; height:19px; color:var(--text-muted); }
+  .mobile-nav-item > span { min-width:0; overflow-wrap:anywhere; }
+  .mobile-nav-item:active { transform:scale(.98); }
+  .mobile-nav-item[aria-current="page"] {
+    color:var(--cyan)!important;
+    border-color:color-mix(in srgb, var(--cyan) 45%, var(--border))!important;
+    background:var(--cyan-dim)!important;
+  }
+  .mobile-nav-item[aria-current="page"] .ui-icon { color:var(--cyan); }
+  @media (hover:hover) and (pointer:fine) {
+    .mobile-nav-item:hover { border-color:var(--border-strong)!important; color:var(--text-primary)!important; }
+  }
+}
+
+/* The tab bar occupies part of the viewport. On phones, let the message stream
+   yield that space so the composer card (and its border) stays fully visible
+   above the bar instead of being clipped at the bottom of the workbench. */
+@media (max-width:700px) {
+  .chat-column { min-height:0; }
+  .chat-stream { flex-basis:200px; }
+}
+
+@media (max-width:360px) {
+  .mobile-nav-sheet-list { grid-template-columns:minmax(0,1fr); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .mobile-nav-sheet, .mobile-nav-backdrop { animation:none!important; }
+  .mobile-tab, .mobile-tab-icon { transition:none!important; }
+}
+
+@keyframes mobile-sheet-in { from { transform:translateY(16px); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes mobile-nav-fade { from { opacity:0; } to { opacity:1; } }
+
+/* ---------------------------------------------------------------------------
+   Data-table legibility
+   Tables scroll inside .ui-table-scroll; they must never squeeze columns until
+   headers and identifiers break mid-word. The wrapper owns the horizontal
+   overflow, so <body> never scrolls sideways.
+--------------------------------------------------------------------------- */
+.ui-table-scroll th { white-space:nowrap; }
+.ui-table-scroll td { overflow-wrap:break-word; word-break:normal; }
+/* Identifiers, paths, cron strings and telemetry values stay on one line. Cells
+   with prose (personas, descriptions) still wrap at spaces. */
+.ui-table-scroll td.mono { overflow-wrap:normal; }
+.ui-table-scroll td:first-child { white-space:nowrap; }
+/* Row actions size to their label instead of stacking one character per line. */
+.ui-table-scroll td button,
+.ui-table-scroll td .btn,
+.ui-table-scroll td .mini-btn { white-space:nowrap; overflow-wrap:normal; }
+
+@media (max-width:960px) {
+  /* A phone needs more room than the desktop minimum before scrolling. */
+  .ui-table-scroll table { min-width:680px; }
+}
+
+/* Chat-message tables are not wrapped (see structure() in ui-shell.mjs); they
+   already own their overflow via display:block + overflow-x:auto. Keep words
+   whole inside those tables while message prose outside them still wraps. */
+.msg-body table th,
+.msg-body table td { white-space:nowrap; }
+
+/* ---------------------------------------------------------------------------
+   Phone canvas column
+   The canvas body used to clip its content (overflow:hidden), which hid the
+   bottom of long cards such as the Execution audit behind the tab bar. On
+   phones the canvas body owns the scroll instead, and the telemetry card's
+   fixed-layout table (which overlapped nowrap headers at 390px) becomes a
+   normal auto-layout table inside the horizontal scroll wrapper.
+--------------------------------------------------------------------------- */
+@media (max-width:960px) {
+  .canvas-body {
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-bottom:14px;   /* keeps the last card clear of the tab bar */
+  }
+  #stage-art-telemetry-matrix { overflow:visible; }
+  /* Extra tail space so the last card can scroll clear of the tab bar. The
+     flex gap adds 8px, giving ~22px of breathing room. */
+  #stage-art-telemetry-matrix::after { content:''; display:block; flex:none; height:14px; }
+  #stage-art-telemetry-matrix table { min-width:680px; table-layout:auto; }
+}

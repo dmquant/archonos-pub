@@ -12,7 +12,7 @@ ArchonOS stores all host-specific runtime configuration in `.archon/config.json`
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "archon.config.v1",
   "workspaceName": "archon-os",
   "defaultLanguage": "en",
   "server": {
@@ -97,5 +97,30 @@ In the **🧬 RSI & Skills** view:
 ## 5. Managing Archon Seats (`🪑 Archon Seats`)
 
 In the **🪑 Archon Seats** view:
-- Create new seats or click any existing seat card (`chief-of-staff`, `code-architect`, `maritime-quant`, `ops-guardian`) to edit its **Display Name**, **Default CLI Hand** (`claude`, `codex`, `agy`, `opencode`, `dsh`), and **System Prompt**.
+- Create new seats or click any existing seat card (`chief-of-staff`, plus any specialist seat you add) to edit its **Display Name**, **Default CLI Hand** (`claude`, `codex`, `agy`, `opencode`, `dsh`), and **System Prompt**.
 - Toggle seats enabled/disabled or delete custom seats at any time.
+
+---
+
+## 6. Verifying Your Install (`archon doctor`)
+
+`npm run doctor` (or `npx archon doctor`) is a read-only preflight. It never writes
+to the workspace; it re-checks the invariants this project promises instead of
+trusting them:
+
+| Check | What fails it |
+| :--- | :--- |
+| `node-runtime` | Node major below 20 |
+| `workspace-dir` / `state-permissions` | missing `.archon/`, or a directory readable by other users |
+| `workspace-state` | invalid JSON, or no `seats` array |
+| `seat-integrity` | missing `chief-of-staff`, duplicate seat ids, unknown hand |
+| `workspace-config` | `server.host` that is not loopback, or an out-of-range port |
+| `plaintext-secrets` | a literal credential in `.archon/*.json` (located and redacted; only `secret://` handles pass) |
+| `gitignore-coverage` | `.archon/` or `.env` not ignored by git |
+| `server` | warns when the port answers with a non-ArchonOS payload |
+| `hands` | no enabled CLI hand resolves on `PATH` |
+| `safe-mode` | immutable safe mode is active (warns; writes are refused) |
+
+Exit codes: `0` when no check fails, `1` when one does. `--strict` also fails on
+warnings, `--json` prints the raw `archon.doctor.v1` report, and `archon status`
+prints the one-line operational summary of the same data.

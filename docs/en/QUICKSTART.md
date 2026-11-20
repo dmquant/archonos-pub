@@ -8,6 +8,7 @@
 
 - **Node.js** `>= 20.0.0`
 - **Python 3** `>= 3.10` (used by `archon-ledger` and `archon-hands` verification suites)
+- **Bun** (only for the `archon-skills-rsi` suite run by `npm test`)
 - *(Optional)* One or more local AI CLI engines installed on your machine:
   - **Claude Code CLI** (`claude`)
   - **OpenAI Codex CLI** (`codex`)
@@ -63,19 +64,25 @@ npm start
 # Re-run autonomous initialization at any time (keep existing custom overrides)
 npm run init
 
-# Force reset .archon/config.json to fresh auto-discovered defaults
-npm run init:force
-
 # Or use the archon CLI directly:
 npx archon init
-npx archon hands probe
-npx archon status
+npx archon doctor      # preflight: state, config, hands, plaintext secrets, loopback bind
+npx archon status      # one-line snapshot of workspace, console & hands
+npx archon hands probe # which local CLI hands resolve on this host
 ```
 
-Open **`http://127.0.0.1:8790`** in your browser to access the 6-view workbench:
+`archon doctor` exits non-zero when an invariant is broken (a non-loopback bind, a
+literal credential in `.archon/*.json`, unreadable workspace state), so it can be
+used as a pre-flight gate in scripts. `--json` prints the machine-readable report
+and `--strict` also fails on warnings.
+
+Open **`http://127.0.0.1:8790`** in your browser to access the 9-view workbench:
 1. **💬 Chat & Canvas**: Split-screen multi-seat chat with live Markdown/Mermaid rendering and interactive 3D/2D Canvas Artifacts.
-2. **🪑 Archon Seats**: Add, edit, enable/disable, or delete seats and assign their default CLI hand.
-3. **🔌 External MCPs**: Auto-discover local MCPs, add custom MCP servers, manage per-seat tool grants, and test `ALLOW` vs `403 DEFAULT-DENY`.
-4. **⚙️ Local Hands**: Trigger 1-click Web Autonomous Init, inspect rolling latency & circuit-breaker state, and customize headless CLI flags.
-5. **🧬 RSI & Skills**: Run the 10-Round RSI Loop (`R1 → R10`), synthesize skills via CLI hands, or quick-create & activate operator skills.
-6. **📦 Artifacts**: Inspect portable workspace paths, edit artifact JSON datasets live, and view SHA-256 revision diffs.
+2. **🪑 Seat Management**: Add, edit, enable/disable, or delete seats and assign their default CLI hand.
+3. **📦 Artifacts & Data**: Inspect portable workspace paths, edit artifact JSON datasets live, and view SHA-256 revision diffs.
+4. **🧬 Skills & RSI**: Run the 10-Round RSI Loop (`R1 → R10`), synthesize skills via CLI hands, or quick-create & activate operator skills.
+5. **🗓 Scheduled Work**: Cron-style scheduled turns with per-seat targets, toggle, and run-now.
+6. **🔗 Architect Loop**: The optional Antigravity codebase-session bridge and its RSI ticks.
+7. **🔌 External MCPs**: Auto-discover local MCPs, add custom MCP servers, manage per-seat tool grants, and test `ALLOW` vs `403 DEFAULT-DENY`.
+8. **⚙️ Local Hands & Settings**: Trigger 1-click Web Autonomous Init, inspect rolling latency & circuit-breaker state, and customize headless CLI flags.
+9. **🌐 Team & Mesh**: Shared team/group workspaces, topic rooms, access keys, and remote deployment status.

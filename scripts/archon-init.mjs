@@ -2,7 +2,7 @@
 // ArchonOS Autonomous Initializer & Environment Bootstrapper
 // Usage:
 //   npm run init
-//   node scripts/archon-init.mjs [--force] [--quiet]
+//   node scripts/archon-init.mjs [--quiet]
 //
 // Actions performed autonomously:
 // 1. Verifies Node.js & Python 3 runtimes and initializes .archon/ workspace directories.

@@ -234,27 +234,29 @@ export function resolveHandBinary(engine) {
   return null;
 }
 
-export const HAND_METRICS = {
-  claude: { runs: 4, successes: 4, failures: 0, timeouts: 0, lastLatencyMs: 19791, avgLatencyMs: 20120, lastStatus: 'ok', circuitState: 'CLOSED (HEALTHY)' },
-  codex: { runs: 2, successes: 2, failures: 0, timeouts: 0, lastLatencyMs: 28970, avgLatencyMs: 26450, lastStatus: 'ok', circuitState: 'CLOSED (HEALTHY)' },
-  agy: { runs: 3, successes: 2, failures: 1, timeouts: 0, lastLatencyMs: 20735, avgLatencyMs: 25782, lastStatus: 'ok', circuitState: 'CLOSED (HEALTHY)' },
-  opencode: { runs: 0, successes: 0, failures: 0, timeouts: 0, lastLatencyMs: 0, avgLatencyMs: 0, lastStatus: 'idle', circuitState: 'CLOSED (HEALTHY)' },
-  dsh: { runs: 0, successes: 0, failures: 0, timeouts: 0, lastLatencyMs: 0, avgLatencyMs: 0, lastStatus: 'idle', circuitState: 'CLOSED (HEALTHY)' },
-};
+// Operational telemetry starts empty. Anything shown before a real run would be
+// an invented measurement, so a fresh process reports zero runs and no verdict.
+export function createIdleHandMetrics() {
+  return {
+    runs: 0,
+    successes: 0,
+    failures: 0,
+    timeouts: 0,
+    lastLatencyMs: 0,
+    avgLatencyMs: 0,
+    latencySamples: 0,
+    totalLatencyMs: 0,
+    lastStatus: 'idle',
+    circuitState: 'IDLE',
+  };
+}
+
+export const HAND_METRICS = Object.fromEntries(
+  ['claude', 'codex', 'agy', 'opencode', 'dsh'].map((engine) => [engine, createIdleHandMetrics()]),
+);
 
 export function recordHandTelemetry(engine, ok, latencyMs, timedOut = false) {
-  const m =
-    HAND_METRICS[engine] ||
-    (HAND_METRICS[engine] = {
-      runs: 0,
-      successes: 0,
-      failures: 0,
-      timeouts: 0,
-      lastLatencyMs: 0,
-      avgLatencyMs: 0,
-      lastStatus: 'idle',
-      circuitState: 'CLOSED (HEALTHY)',
-    });
+  const m = HAND_METRICS[engine] || (HAND_METRICS[engine] = createIdleHandMetrics());
   m.runs += 1;
   if (ok) {
     m.successes += 1;
@@ -266,9 +268,13 @@ export function recordHandTelemetry(engine, ok, latencyMs, timedOut = false) {
     m.lastStatus = timedOut ? 'timeout_fallback' : 'degraded';
     m.circuitState = m.failures >= 3 ? 'HALF-OPEN (FALLBACK GUARD)' : 'CLOSED (HEALTHY)';
   }
-  if (latencyMs > 0) {
+  if (Number.isFinite(latencyMs) && latencyMs > 0) {
+    // Average over runs that actually produced a duration, so fast failures do
+    // not dilute the measured latency.
+    m.latencySamples += 1;
+    m.totalLatencyMs += latencyMs;
     m.lastLatencyMs = latencyMs;
-    m.avgLatencyMs = m.avgLatencyMs > 0 ? Math.round((m.avgLatencyMs * (m.runs - 1) + latencyMs) / m.runs) : latencyMs;
+    m.avgLatencyMs = Math.round(m.totalLatencyMs / m.latencySamples);
   }
 }
 
@@ -281,13 +287,8 @@ export function probeAllHands() {
     const bin = resolveHandBinary(engine);
     const maskedBin = maskHomePath(bin);
     const metrics = HAND_METRICS[engine] || {
-      runs: 0,
-      successes: 0,
-      failures: 0,
-      timeouts: 0,
-      lastLatencyMs: 0,
-      avgLatencyMs: 0,
-      circuitState: bin ? 'CLOSED (HEALTHY)' : 'OFFLINE',
+      ...createIdleHandMetrics(),
+      circuitState: bin ? 'IDLE' : 'OFFLINE',
     };
     const inv = getInvocationSpec(engine, maskedBin ?? engine, '<prompt>');
     out[engine] = {
