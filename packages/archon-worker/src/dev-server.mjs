@@ -9,7 +9,7 @@
 import { createServer } from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync, renameSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join, extname, resolve, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -6910,9 +6910,15 @@ function loadPersistedWorkspaceState(runtime) {
 // file (the loader would then silently fall back to seed defaults and lose the
 // workspace). Exported for the atomic-write test.
 export function writeJsonAtomic(file, value) {
-  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
-  writeFileSync(tmp, JSON.stringify(value, null, 2), 'utf8');
-  renameSync(tmp, file);
+  const json = JSON.stringify(value, null, 2);
+  const directory = mkdtempSync(`${file}.`);
+  const temporaryFile = join(directory, 'state.json');
+  try {
+    writeFileSync(temporaryFile, json, { encoding: 'utf8', mode: 0o600 });
+    renameSync(temporaryFile, file);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 }
 
 function savePersistedWorkspaceState(runtime, workspaceState) {
