@@ -9,7 +9,7 @@
 import { createServer } from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, generateKeyPairSync, randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, statSync, renameSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join, extname, resolve, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -6911,6 +6911,21 @@ function loadPersistedWorkspaceState(runtime) {
   }
 }
 
+// Rename-over-target so a crash mid-write cannot leave a truncated JSON state
+// file (the loader would then silently fall back to seed defaults and lose the
+// workspace). Exported for the atomic-write test.
+export function writeJsonAtomic(file, value) {
+  const json = JSON.stringify(value, null, 2);
+  const directory = mkdtempSync(`${file}.`);
+  const temporaryFile = join(directory, 'state.json');
+  try {
+    writeFileSync(temporaryFile, json, { encoding: 'utf8', mode: 0o600 });
+    renameSync(temporaryFile, file);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
 function savePersistedWorkspaceState(runtime, workspaceState) {
   try {
     mkdirSync(STATE_DIR, { recursive: true });
@@ -6962,7 +6977,7 @@ function savePersistedWorkspaceState(runtime, workspaceState) {
       seatMemory: isLegacyArray ? DEFAULT_SEAT_MEMORY : workspaceState.seatMemory || DEFAULT_SEAT_MEMORY,
       chatHistory: (activeSession.messages || []).slice(-500),
     };
-    writeFileSync(STATE_FILE, JSON.stringify(snapshot, null, 2), 'utf8');
+    writeJsonAtomic(STATE_FILE, snapshot);
     runChatHistoryEdgeSync(snapshot).catch(() => {});
     runMeshEdgeSync(runtime).catch(() => {});
   } catch (err) {
