@@ -33,6 +33,7 @@ test('a fresh process reports zero runs and no invented latency', () => {
     lastLatencyMs: 0,
     avgLatencyMs: 0,
     latencySamples: 0,
+    totalLatencyMs: 0,
     lastStatus: 'idle',
     circuitState: 'IDLE',
   });
@@ -71,6 +72,12 @@ test('latency averages only the runs that actually produced a duration', () => {
   assert.equal(m.latencySamples, 2);
   assert.equal(m.lastLatencyMs, 3000);
   assert.equal(m.avgLatencyMs, 2000);
+});
+
+test('rounding the displayed latency does not affect future averages', () => {
+  HAND_METRICS.codex = createIdleHandMetrics();
+  for (const duration of [1000, 1001, 1000]) recordHandTelemetry('codex', true, duration);
+  assert.equal(HAND_METRICS.codex.avgLatencyMs, 1000);
 });
 
 test('repeated failures open the fallback guard and flag timeouts honestly', () => {

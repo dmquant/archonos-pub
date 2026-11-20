@@ -245,6 +245,7 @@ export function createIdleHandMetrics() {
     lastLatencyMs: 0,
     avgLatencyMs: 0,
     latencySamples: 0,
+    totalLatencyMs: 0,
     lastStatus: 'idle',
     circuitState: 'IDLE',
   };
@@ -267,12 +268,13 @@ export function recordHandTelemetry(engine, ok, latencyMs, timedOut = false) {
     m.lastStatus = timedOut ? 'timeout_fallback' : 'degraded';
     m.circuitState = m.failures >= 3 ? 'HALF-OPEN (FALLBACK GUARD)' : 'CLOSED (HEALTHY)';
   }
-  if (latencyMs > 0) {
+  if (Number.isFinite(latencyMs) && latencyMs > 0) {
     // Average over runs that actually produced a duration, so fast failures do
     // not dilute the measured latency.
-    m.latencySamples = (m.latencySamples || 0) + 1;
+    m.latencySamples += 1;
+    m.totalLatencyMs += latencyMs;
     m.lastLatencyMs = latencyMs;
-    m.avgLatencyMs = Math.round(((m.avgLatencyMs * (m.latencySamples - 1)) + latencyMs) / m.latencySamples);
+    m.avgLatencyMs = Math.round(m.totalLatencyMs / m.latencySamples);
   }
 }
 

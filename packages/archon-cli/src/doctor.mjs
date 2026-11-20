@@ -59,12 +59,6 @@ export function maskPath(p) {
   return p;
 }
 
-// Never echo a suspected credential, only enough to locate it.
-function redact(value) {
-  const text = String(value);
-  return text.length <= 3 ? '***' : `${text.slice(0, 3)}***(${text.length} chars)`;
-}
-
 function isOpaqueSecretReference(value) {
   return (
     typeof value !== 'string' ||
@@ -81,7 +75,8 @@ function readJsonFile(file) {
   try {
     return { ok: true, value: JSON.parse(readFileSync(file, 'utf8')) };
   } catch (error) {
-    return { ok: false, error: error.message };
+    const reason = error instanceof SyntaxError ? 'malformed document' : error.code || 'could not read the file';
+    return { ok: false, error: reason };
   }
 }
 
@@ -91,7 +86,7 @@ export function scanPlaintextSecrets(value, file, path = '$', findings = [], dep
   for (const [key, child] of Object.entries(value)) {
     const at = `${path}.${key}`;
     if (typeof child === 'string' && (SECRET_KEY.test(key) || BARE_SECRET_KEY.test(key)) && !isOpaqueSecretReference(child)) {
-      findings.push({ file, path: at, key, preview: redact(child) });
+      findings.push({ file, path: at, key, preview: '***' });
     } else if (child && typeof child === 'object') {
       scanPlaintextSecrets(child, file, at, findings, depth + 1);
     }
@@ -129,17 +124,29 @@ export function findExecutableOnPath(engine, pathValue) {
   return null;
 }
 
+function localConsoleUrl(host, port) {
+  const hostname = host === '::1' ? '[::1]' : host;
+  return `http://${hostname}:${port}`;
+}
+
+const isLocalPort = (port) => Number.isInteger(port) && port >= 1 && port <= 65535;
+
 // Default probe: ask the local edge server for its health payload. A closed
 // port is a normal state (console not started), not an error.
 export async function probeLocalServer({ host = '127.0.0.1', port = 8790 } = {}) {
-  const url = `http://${host}:${port}/api/health`;
+  if (!LOOPBACK_HOSTS.has(host) || !isLocalPort(port)) {
+    return { state: 'unknown', detail: 'invalid local console address' };
+  }
+  const url = `${localConsoleUrl(host, port)}/api/health`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(1200) });
+    const res = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(1200) });
     let body = null;
     try {
       body = await res.json();
     } catch {}
-    if (res.ok && body && body.ok !== false) return { state: 'running', url, status: res.status };
+    if (res.ok && body?.ok === true && body.service === 'archon-os-worker') {
+      return { state: 'running', url, status: res.status };
+    }
     return { state: 'foreign', url, status: res.status };
   } catch (error) {
     const code = error?.cause?.code || error?.code || '';
@@ -212,16 +219,21 @@ function readWorkspaceState(stateDir) {
   };
 }
 
+const isJsonObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
 function readWorkspaceConfig(repoRoot, stateDir) {
   const defaultsPath = join(repoRoot, 'config', 'archon.defaults.json');
   const userPath = join(stateDir, 'config.json');
   const defaults = existsSync(defaultsPath) ? readJsonFile(defaultsPath) : { ok: true, value: null };
   if (existsSync(userPath)) {
     const user = readJsonFile(userPath);
-    if (!user.ok) {
+    const validShape = isJsonObject(user.value) &&
+      (user.value.server === undefined || isJsonObject(user.value.server));
+    if (!user.ok || !validShape) {
+      const reason = user.ok ? 'expected a JSON object with optional server settings' : user.error;
       return {
         config: defaults.value,
-        check: makeCheck('workspace-config', 'fail', `${maskPath(userPath)} is invalid JSON: ${user.error}`, {
+        check: makeCheck('workspace-config', 'fail', `${maskPath(userPath)}: ${reason}`, {
           fix: 'fix or delete .archon/config.json, then run `npm run init`',
         }),
       };
@@ -245,16 +257,16 @@ function readWorkspaceConfig(repoRoot, stateDir) {
 
 function validateConfig(config, file) {
   const problems = [];
-  if (!config || typeof config !== 'object') {
-    return makeCheck('workspace-config', 'fail', 'config is not an object');
+  if (!isJsonObject(config) || (config.server !== undefined && !isJsonObject(config.server))) {
+    return makeCheck('workspace-config', 'fail', 'expected a JSON object with optional server settings');
   }
   const host = config.server?.host;
-  if (typeof host === 'string' && !LOOPBACK_HOSTS.has(host)) {
-    problems.push(`server.host is ${host} — the console must bind loopback only`);
+  if (host !== undefined && !LOOPBACK_HOSTS.has(host)) {
+    problems.push('server.host must be a loopback address');
   }
   const port = config.server?.port;
-  if (port !== undefined && (!Number.isInteger(port) || port < 1 || port > 65535)) {
-    problems.push(`server.port is ${JSON.stringify(port)} — expected 1..65535`);
+  if (port !== undefined && !isLocalPort(port)) {
+    problems.push('server.port must be an integer from 1..65535');
   }
   if (problems.length) {
     return makeCheck('workspace-config', 'fail', problems.join('; '), {
@@ -346,7 +358,7 @@ async function checkServer(config, probeServer) {
   } catch (error) {
     result = { state: 'unknown', detail: error?.message || String(error) };
   }
-  const url = `http://${host}:${port}`;
+  const url = localConsoleUrl(host, port);
   if (result?.state === 'running') {
     return makeCheck('server', 'pass', `running at ${url}`);
   }
@@ -439,7 +451,10 @@ export async function collectDiagnostics({
   checks.push(checkPlaintextSecrets(stateDir));
   checks.push(checkGitignoreCoverage(repoRoot));
   checks.push(checkSeatIntegrity(state));
-  checks.push(await checkServer(config, probeServer));
+  const serverCheck = configCheck.status === 'pass'
+    ? await checkServer(config, probeServer)
+    : makeCheck('server', 'info', 'skipped because the workspace config is invalid');
+  checks.push(serverCheck);
   checks.push(checkHands(config, env));
   checks.push(checkSafeMode(stateDir));
   checks.push(checkStatePermissions(stateDir, platformName));
@@ -494,13 +509,10 @@ export function formatStatus(report, { version = '' } = {}) {
   const server = report.checks.find((c) => c.id === 'server');
   const hands = report.checks.find((c) => c.id === 'hands');
   const safeMode = report.checks.find((c) => c.id === 'safe-mode');
-  const url = `http://${report.server.host}:${report.server.port}`;
-  const consoleState =
-    server?.status === 'pass' ? `running at ${url}` : `not running at ${url} (npm start)`;
   return [
     `ArchonOS${version ? ` v${version}` : ''} — ${report.workspace.name || 'uninitialized workspace'}`,
     `  workspace   ${report.workspace.seats} seats · ${report.workspace.stateDir}`,
-    `  console     ${consoleState}`,
+    `  console     ${server?.summary ?? 'unknown'}`,
     `  hands       ${hands ? hands.summary : 'unknown'}`,
     `  safe mode   ${safeMode ? safeMode.summary : 'unknown'}`,
     `  doctor      ${report.counts.fail} fail · ${report.counts.warn} warn — run \`archon doctor\``,

@@ -5,6 +5,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { once } from 'node:events';
+import { createServer } from 'node:http';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,6 +18,7 @@ import {
   formatDiagnostics,
   formatHandsProbe,
   formatStatus,
+  probeLocalServer,
   scanPlaintextSecrets,
   DOCTOR_SCHEMA,
 } from '../src/doctor.mjs';
@@ -150,6 +153,33 @@ test('a stopped console is informational, not a failure; a foreign listener warn
   }
 });
 
+test('the live probe identifies the local service without following redirects', async () => {
+  let body = { ok: true, service: 'archon-os-worker' };
+  let redirect = false;
+  let redirectsFollowed = 0;
+  const server = createServer((req, res) => {
+    if (req.url === '/redirected') {
+      redirectsFollowed += 1;
+    } else if (redirect) {
+      res.writeHead(302, { location: '/redirected' });
+    }
+    res.end(JSON.stringify(body));
+  });
+  server.listen(0, '127.0.0.1');
+  try {
+    await once(server, 'listening');
+    const { port } = server.address();
+    assert.equal((await probeLocalServer({ port })).state, 'running');
+    body = { ok: true };
+    assert.equal((await probeLocalServer({ port })).state, 'foreign');
+    redirect = true;
+    assert.equal((await probeLocalServer({ port })).state, 'foreign');
+    assert.equal(redirectsFollowed, 0);
+  } finally {
+    server.close();
+  }
+});
+
 test('literal credentials fail the security gate while secret:// handles pass', async () => {
   const leaky = fixture({
     userConfig: {
@@ -167,7 +197,7 @@ test('literal credentials fail the security gate while secret:// handles pass', 
     assert.equal(check.findings[0].path, '$.hands.claude.apiKey');
     // The report must locate the secret without disclosing it.
     assert.doesNotMatch(JSON.stringify(report), /supersecret/);
-    assert.match(check.findings[0].preview, /^sk-.*\(\d+ chars\)$/);
+    assert.equal(check.findings[0].preview, '***');
     assert.match(check.fix, /secret:\/\//);
   } finally {
     rmSync(leaky.root, { recursive: true, force: true });
@@ -200,7 +230,7 @@ test('scanner is key-based and depth-bounded, so prose is never mistaken for a s
   );
   assert.equal(findings.length, 1);
   assert.equal(findings[0].path, '$.nested.deep.authorization');
-  assert.match(findings[0].preview, /^Bea/);
+  assert.equal(findings[0].preview, '***');
 });
 
 test('config must stay loopback-only with a valid port', async () => {
@@ -211,7 +241,14 @@ test('config must stay loopback-only with a valid port', async () => {
   ]) {
     const fx = fixture({ config: { ...HEALTHY_CONFIG, server } });
     try {
-      const report = await diagnose(fx);
+      let probes = 0;
+      const report = await diagnose(fx, {
+        probeServer: async () => {
+          probes += 1;
+          return runningProbe();
+        },
+      });
+      assert.equal(probes, 0);
       const check = byId(report, 'workspace-config');
       assert.equal(check.status, 'fail', JSON.stringify(server));
       assert.match(check.summary, pattern);
@@ -517,6 +554,27 @@ test('the CLI exits 0 on a clean install, 1 on a failure, and keeps --json pure'
     assert.equal(probe.status, probePayload.ok ? 0 : 1);
   } finally {
     rmSync(broken.root, { recursive: true, force: true });
+  }
+});
+
+test('invalid config still yields a structured report without printing its raw contents', () => {
+  const fx = fixture();
+  try {
+    for (const invalidConfig of ['null', '[]', '{"apiKey": unquoted-test-value}']) {
+      writeFileSync(join(fx.stateDir, 'config.json'), invalidConfig);
+      const res = spawnSync(process.execPath, [BIN, 'doctor', '--json'], {
+        encoding: 'utf8',
+        env: { ...process.env, PATH: fx.binDir, ARCHON_STATE_DIR: fx.stateDir },
+        timeout: 20000,
+      });
+      assert.equal(res.status, 1, res.stderr);
+      const report = JSON.parse(res.stdout);
+      assert.equal(byId(report, 'workspace-config').status, 'fail');
+      assert.equal(byId(report, 'server').status, 'info');
+      assert.doesNotMatch(res.stdout, /unquoted-test-value/);
+    }
+  } finally {
+    rmSync(fx.root, { recursive: true, force: true });
   }
 });
 

@@ -45,7 +45,7 @@ if (cmd === 'init' || cmd === 'setup') {
   }
   const strict = args.includes('--strict');
   const failed = report.counts.fail > 0 || (strict && report.counts.warn > 0);
-  process.exit(failed ? 1 : 0);
+  process.exitCode = failed ? 1 : 0;
 } else if (cmd === 'status') {
   const report = await diagnostics();
   if (wantsJson) {
@@ -53,7 +53,7 @@ if (cmd === 'init' || cmd === 'setup') {
   } else {
     console.log(formatStatus(report, { version: PKG.version }));
   }
-  process.exit(report.counts.fail > 0 ? 1 : 0);
+  process.exitCode = report.counts.fail > 0 ? 1 : 0;
 } else if (cmd === 'hands' && args[1] === 'probe') {
   const report = await diagnostics();
   if (wantsJson) {
@@ -62,7 +62,7 @@ if (cmd === 'init' || cmd === 'setup') {
   } else {
     console.log(formatHandsProbe(report));
   }
-  process.exit(report.checks.find((c) => c.id === 'hands')?.status === 'fail' ? 1 : 0);
+  process.exitCode = report.checks.find((c) => c.id === 'hands')?.status === 'fail' ? 1 : 0;
 } else if (cmd === 'deploy') {
   const isRemote = args.includes('--remote') || args.includes('--cloudflare') || args[1] === 'remote';
   const workerIdx = args.indexOf('--worker-url');
